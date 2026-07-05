@@ -950,11 +950,13 @@
 (function(){
   const subUrl = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
 
-  // Store links: Android always points to Google Play, iPhone always
-  // points to the App Store. The button the user sees is chosen purely by
-  // which device they picked above — there is no attempt to guess or to
-  // launch the app directly, so an iPhone user can never end up on an
-  // Android link (or vice versa).
+  // Deep-link URIs that let Happ / INCY import the subscription directly,
+  // without the user having to copy-paste the link manually.
+  const happDeepLink = 'happ://add/' + subUrl;
+  const incyDeepLink = 'incy://add/' + subUrl;
+
+  // Store links used when the app isn't installed, or when the visitor's
+  // actual device doesn't match what they picked in the device switch.
   const storeLinks = {
     happ: {
       android: 'https://play.google.com/store/apps/details?id=com.happproxy',
@@ -986,9 +988,10 @@
     el.deviceBtnIos.classList.toggle('active', selectedDevice === 'ios');
   }
 
-  // Point each "open app" button straight at the correct store page for
-  // the currently selected device, and label it clearly (Google Play /
-  // App Store) so it's obvious where the tap leads.
+  // Point each "open app" button at the correct store page for the
+  // currently selected device, and label it clearly (Google Play /
+  // App Store) so it's obvious where the tap leads if the app isn't
+  // already installed.
   function renderStoreButtons(){
     const d = dict[lang];
     const storeName = selectedDevice === 'ios' ? 'App Store' : 'Google Play';
@@ -1033,7 +1036,7 @@
         'Выберите сервер и подключитесь'
       ],
       openHapp: 'Открыть в Happ', openIncy: 'Открыть в INCY',
-      storeSmallAndroid: 'Скачать в', storeSmallIOS: 'Скачать в',
+      storeSmallAndroid: 'Открыть / установить', storeSmallIOS: 'Открыть / установить',
       devicePickerLabel: 'Какой у вас телефон?',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Канал', tipBot: 'Бот', tipForum: 'Форум',
@@ -1084,7 +1087,7 @@
         'Ընտրիր սերվեր և միացիր'
       ],
       openHapp: 'Բացել Happ-ում', openIncy: 'Բացել INCY-ում',
-      storeSmallAndroid: 'Ներբեռնիր', storeSmallIOS: 'Ներբեռնիր',
+      storeSmallAndroid: 'Բացել / տեղադրել', storeSmallIOS: 'Բացել / տեղադրել',
       devicePickerLabel: 'Ի՞նչ հեռախոս ունես',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Ալիք', tipBot: 'Բոտ', tipForum: 'Ֆորում',
@@ -1135,7 +1138,7 @@
         'Pick a server and connect'
       ],
       openHapp: 'Open in Happ', openIncy: 'Open in INCY',
-      storeSmallAndroid: 'Get it on', storeSmallIOS: 'Download on the',
+      storeSmallAndroid: 'Open or install via', storeSmallIOS: 'Open or install via',
       devicePickerLabel: 'What phone do you have?',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Channel', tipBot: 'Bot', tipForum: 'Forum',
@@ -1354,21 +1357,56 @@
     }
   });
 
-  // Also copy the subscription link to the clipboard when an "Open in X"
-  // button is tapped, so the user can paste it inside the app via
-  // "+" -> "From Clipboard" right after installing/opening it from the
-  // store, per each app's own instructions above.
+  // Also copy the subscription link to the clipboard when an "Open" button
+  // is tapped, so it's ready to paste via "+" -> "From Clipboard" inside
+  // the app either way.
   function copyToClipboardSilently(text){
     try{
       navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
     }catch(e){ /* ignore */ }
   }
-  // Tapping "Open in Happ / INCY": copy the link to clipboard as a
-  // convenience, then let the link's normal href take the user straight
-  // to the correct store page (Google Play for Android, App Store for
-  // iPhone) based on the device selected above.
-  el.openHappBtn.addEventListener('click', ()=>{ copyToClipboardSilently(subUrl); });
-  el.openIncyBtn.addEventListener('click', ()=>{ copyToClipboardSilently(subUrl); });
+
+  // Tries to open the app via its deep link and import the subscription
+  // automatically. If the page is still visible after a short delay
+  // (meaning the OS never switched away to open the app), we assume it
+  // isn't installed and send the user to the matching store page instead.
+  function openAppOrGoToStore(deepLink, storeUrl){
+    let didHide = false;
+    function onVisibilityChange(){ if(document.hidden) didHide = true; }
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    window.location.href = deepLink;
+
+    setTimeout(()=>{
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      if(!didHide && storeUrl){
+        window.location.href = storeUrl;
+      }
+    }, 1500);
+  }
+
+  // Tapping "Open in Happ / INCY": copy the link to clipboard, then decide
+  // what to do based on whether the phone the visitor picked above
+  // actually matches the phone they're browsing on right now (detected
+  // from the browser itself, not just their tap):
+  //  - Matches (e.g. picked Android, really is on Android) -> try to
+  //    launch the app directly and auto-import the link; fall back to
+  //    that device's store only if the app isn't installed.
+  //  - Doesn't match (e.g. picked iPhone while browsing on Android) ->
+  //    never attempt to launch anything on this device, just go straight
+  //    to the store page for the phone they picked.
+  function handleOpenAppClick(e, deepLink, storeUrlsByOs){
+    e.preventDefault();
+    copyToClipboardSilently(subUrl);
+    const storeUrl = storeUrlsByOs[selectedDevice];
+    if(detectOS() === selectedDevice){
+      openAppOrGoToStore(deepLink, storeUrl);
+    } else if(storeUrl){
+      window.location.href = storeUrl;
+    }
+  }
+  el.openHappBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, happDeepLink, storeLinks.happ); });
+  el.openIncyBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, incyDeepLink, storeLinks.incy); });
 
   el.deviceBtnAndroid.addEventListener('click', ()=>{
     selectedDevice = 'android';
