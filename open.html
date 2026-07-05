@@ -112,7 +112,12 @@
   }
   if(subUrl){ copyToClipboardSilently(subUrl); }
 
-  var deepLink = deepLinkPrefixes[app] + subUrl;
+  // happ:// and incy:// deep links (like happ's own routing/crypto links)
+  // expect the payload as base64, not a raw/plain URL. Concatenating the
+  // raw subscription URL after "add/" produces a string with two URLs
+  // glued together (e.g. "happ://add/https://gist..."), which the app's
+  // URI parser rejects as "URL подписки не валидна".
+  var deepLink = deepLinkPrefixes[app] + btoa(subUrl);
   var didHide = false;
   function onVisibilityChange(){ if(document.hidden) didHide = true; }
   document.addEventListener('visibilitychange', onVisibilityChange);
