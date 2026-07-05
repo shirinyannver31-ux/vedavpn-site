@@ -394,11 +394,18 @@
     font-size:14px;
     margin:0 0 14px;
   }
-  .app-block{ margin-bottom:16px; }
+  .app-block{
+    margin-bottom:14px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    background:var(--panel-2);
+  }
   .app-block:last-child{ margin-bottom:0; }
   .app-name{
     font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
+    font-size:12.5px;
+    font-weight:600;
     color:var(--accent);
     margin:0 0 8px;
   }
@@ -421,26 +428,51 @@
     color:var(--signal-dim);
     flex-shrink:0;
   }
+  /* Store badge button: shows which store (Google Play / App Store) the
+     link points to for the currently selected device, so there's no
+     ambiguity about where the tap will take the user. */
   .open-app-btn{
-    display:inline-flex;
+    display:flex;
     align-items:center;
     justify-content:center;
-    gap:6px;
-    margin-top:10px;
-    padding:9px 16px;
-    border-radius:10px;
+    gap:10px;
+    margin-top:12px;
+    padding:11px 14px;
+    border-radius:12px;
     border:1px solid var(--signal-dim);
     background:rgba(57,255,158,0.08);
-    color:var(--signal);
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:600;
-    font-size:12.5px;
+    color:var(--text);
     text-decoration:none;
     cursor:pointer;
-    transition:transform .12s ease, background-color .15s ease;
+    transition:transform .12s ease, background-color .15s ease, border-color .15s ease;
   }
   .open-app-btn:active{ transform:scale(0.96); }
-  .open-app-btn:hover{ background:rgba(57,255,158,0.14); }
+  .open-app-btn:hover{ background:rgba(57,255,158,0.14); border-color:var(--signal); }
+  .open-app-btn .store-ico{
+    font-size:20px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .open-app-btn .store-text{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    line-height:1.25;
+  }
+  .open-app-btn .store-text small{
+    font-family:'Inter', sans-serif;
+    font-size:10px;
+    font-weight:500;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  .open-app-btn .store-text strong{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--signal);
+  }
   .step-1{
     font-size:13px;
     color:var(--text);
@@ -455,38 +487,64 @@
   }
 
   /* ---------- Device type picker ---------- */
-  .device-picker{ margin-bottom:18px; }
+  .device-picker{ margin-bottom:20px; }
   .device-picker-label{
-    font-size:12.5px;
-    color:var(--muted);
-    margin:0 0 8px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--text);
+    margin:0 0 10px;
   }
   .device-switch{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:8px;
+    gap:10px;
   }
   .device-btn{
+    position:relative;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    padding:11px 10px;
-    border-radius:12px;
-    border:1px solid var(--line);
+    gap:4px;
+    padding:16px 10px;
+    border-radius:14px;
+    border:1.5px solid var(--line);
     background:var(--panel-2);
     color:var(--muted);
     font-family:'Inter', sans-serif;
-    font-weight:500;
-    font-size:13.5px;
     cursor:pointer;
-    transition:border-color .15s ease, color .15s ease, transform .1s ease;
+    transition:border-color .15s ease, color .15s ease, transform .1s ease, background-color .15s ease;
+  }
+  .device-btn .device-ico{ font-size:26px; line-height:1; }
+  .device-btn .device-label{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--text);
+  }
+  .device-btn .device-sub{
+    font-size:11px;
+    color:var(--muted);
+  }
+  .device-btn .device-check{
+    position:absolute;
+    top:8px; right:8px;
+    width:16px; height:16px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    background:transparent;
+    transition:border-color .15s ease, background-color .15s ease;
   }
   .device-btn:active{ transform:scale(0.97); }
   .device-btn.active{
-    color:var(--signal);
-    border-color:var(--signal-dim);
-    background:rgba(57,255,158,0.08);
+    border-color:var(--signal);
+    background:rgba(57,255,158,0.1);
+  }
+  .device-btn.active .device-label{ color:var(--signal); }
+  .device-btn.active .device-check{
+    border-color:var(--signal);
+    background:var(--signal);
+    box-shadow:inset 0 0 0 3px var(--panel-2);
   }
 
   /* ---------- FAQ ---------- */
@@ -812,10 +870,16 @@
           <p class="device-picker-label" id="devicePickerLabel"></p>
           <div class="device-switch">
             <button type="button" class="device-btn" id="deviceBtnAndroid" data-device="android">
-              <span>🤖</span><span id="deviceBtnAndroidText"></span>
+              <span class="device-check"></span>
+              <span class="device-ico">🤖</span>
+              <span class="device-label" id="deviceBtnAndroidText"></span>
+              <span class="device-sub">Google Play</span>
             </button>
             <button type="button" class="device-btn" id="deviceBtnIos" data-device="ios">
-              <span>🍏</span><span id="deviceBtnIosText"></span>
+              <span class="device-check"></span>
+              <span class="device-ico">🍏</span>
+              <span class="device-label" id="deviceBtnIosText"></span>
+              <span class="device-sub">App Store</span>
             </button>
           </div>
         </div>
@@ -823,15 +887,17 @@
         <div class="app-block">
           <p class="app-name">📱 Happ</p>
           <ul class="app-steps" id="happSteps"></ul>
-          <a href="#" class="open-app-btn" id="openHappBtn">
-            <span>🚀</span><span id="openHappBtnText"></span>
+          <a href="#" class="open-app-btn" id="openHappBtn" target="_blank" rel="noopener">
+            <span class="store-ico" id="openHappBtnIco"></span>
+            <span class="store-text"><small id="openHappBtnSmall"></small><strong id="openHappBtnText"></strong></span>
           </a>
         </div>
         <div class="app-block">
           <p class="app-name">📱 INCY</p>
           <ul class="app-steps" id="incySteps"></ul>
-          <a href="#" class="open-app-btn" id="openIncyBtn">
-            <span>🚀</span><span id="openIncyBtnText"></span>
+          <a href="#" class="open-app-btn" id="openIncyBtn" target="_blank" rel="noopener">
+            <span class="store-ico" id="openIncyBtnIco"></span>
+            <span class="store-text"><small id="openIncyBtnSmall"></small><strong id="openIncyBtnText"></strong></span>
           </a>
         </div>
       </div>
@@ -883,12 +949,12 @@
 <script>
 (function(){
   const subUrl = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
-  // Deep-link URIs that let Happ / INCY import the subscription directly,
-  // without the user having to copy-paste the link manually.
-  const happDeepLink = 'happ://add/' + subUrl;
-  const incyDeepLink = 'incy://add/' + subUrl;
 
-  // Store links used as a fallback when the app isn't installed.
+  // Store links: Android always points to Google Play, iPhone always
+  // points to the App Store. The button the user sees is chosen purely by
+  // which device they picked above — there is no attempt to guess or to
+  // launch the app directly, so an iPhone user can never end up on an
+  // Android link (or vice versa).
   const storeLinks = {
     happ: {
       android: 'https://play.google.com/store/apps/details?id=com.happproxy',
@@ -899,6 +965,7 @@
       ios: 'https://apps.apple.com/ru/app/incy/id6756943388'
     }
   };
+  const storeIcons = { android: '▶️', ios: '🍎' };
 
   function detectOS(){
     const ua = navigator.userAgent || '';
@@ -907,7 +974,7 @@
     return 'other';
   }
 
-  // The device type used for store fallback links. We start from an
+  // The device type used to pick the correct store link. We start from an
   // auto-detected guess (based on the browser's user agent), but the user
   // can explicitly pick Android or iPhone via the device-picker buttons —
   // that explicit choice always wins and is remembered for next time.
@@ -919,33 +986,24 @@
     el.deviceBtnIos.classList.toggle('active', selectedDevice === 'ios');
   }
 
-  // Tries to open the app via its deep link. If the page is still visible
-  // after a short delay (meaning the OS never switched away to open the
-  // app), we assume it isn't installed and send the user to the matching
-  // store page instead. The store link is chosen from the device type the
-  // user explicitly selected in the device picker, not auto-detection —
-  // that keeps Android/iPhone users each on their own correct App Store
-  // link even if the browser's user agent is ambiguous or unreliable.
-  function openAppOrRedirectToStore(deepLink, storeUrlsByOs){
-    const storeUrl = storeUrlsByOs[selectedDevice];
-    let didHide = false;
+  // Point each "open app" button straight at the correct store page for
+  // the currently selected device, and label it clearly (Google Play /
+  // App Store) so it's obvious where the tap leads.
+  function renderStoreButtons(){
+    const d = dict[lang];
+    const storeName = selectedDevice === 'ios' ? 'App Store' : 'Google Play';
+    const smallLabel = selectedDevice === 'ios' ? d.storeSmallIOS : d.storeSmallAndroid;
+    const icon = storeIcons[selectedDevice];
 
-    function onVisibilityChange(){
-      if(document.hidden) didHide = true;
-    }
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    el.openHappBtn.href = storeLinks.happ[selectedDevice];
+    el.openHappBtnText.textContent = storeName;
+    el.openHappBtnSmall.textContent = smallLabel;
+    el.openHappBtnIco.textContent = icon;
 
-    window.location.href = deepLink;
-
-    setTimeout(()=>{
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      if(!didHide && storeUrl){
-        window.location.href = storeUrl;
-      }
-      // If there's no store URL for this device (e.g. iOS link not added
-      // yet) and the app didn't open, we simply do nothing further — the
-      // subscription link is already in the clipboard as a fallback.
-    }, 1500);
+    el.openIncyBtn.href = storeLinks.incy[selectedDevice];
+    el.openIncyBtnText.textContent = storeName;
+    el.openIncyBtnSmall.textContent = smallLabel;
+    el.openIncyBtnIco.textContent = icon;
   }
 
   const dict = {
@@ -975,6 +1033,7 @@
         'Выберите сервер и подключитесь'
       ],
       openHapp: 'Открыть в Happ', openIncy: 'Открыть в INCY',
+      storeSmallAndroid: 'Скачать в', storeSmallIOS: 'Скачать в',
       devicePickerLabel: 'Какой у вас телефон?',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Канал', tipBot: 'Бот', tipForum: 'Форум',
@@ -1025,6 +1084,7 @@
         'Ընտրիր սերվեր և միացիր'
       ],
       openHapp: 'Բացել Happ-ում', openIncy: 'Բացել INCY-ում',
+      storeSmallAndroid: 'Ներբեռնիր', storeSmallIOS: 'Ներբեռնիր',
       devicePickerLabel: 'Ի՞նչ հեռախոս ունես',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Ալիք', tipBot: 'Բոտ', tipForum: 'Ֆորում',
@@ -1075,6 +1135,7 @@
         'Pick a server and connect'
       ],
       openHapp: 'Open in Happ', openIncy: 'Open in INCY',
+      storeSmallAndroid: 'Get it on', storeSmallIOS: 'Download on the',
       devicePickerLabel: 'What phone do you have?',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Channel', tipBot: 'Bot', tipForum: 'Forum',
@@ -1131,6 +1192,10 @@
     openIncyBtn: document.getElementById('openIncyBtn'),
     openHappBtnText: document.getElementById('openHappBtnText'),
     openIncyBtnText: document.getElementById('openIncyBtnText'),
+    openHappBtnSmall: document.getElementById('openHappBtnSmall'),
+    openIncyBtnSmall: document.getElementById('openIncyBtnSmall'),
+    openHappBtnIco: document.getElementById('openHappBtnIco'),
+    openIncyBtnIco: document.getElementById('openIncyBtnIco'),
     devicePickerLabel: document.getElementById('devicePickerLabel'),
     deviceBtnAndroid: document.getElementById('deviceBtnAndroid'),
     deviceBtnIos: document.getElementById('deviceBtnIos'),
@@ -1244,10 +1309,7 @@
     el.step1Text.textContent = d.step1;
     el.happSteps.innerHTML = d.happ.map(s=>`<li>${s}</li>`).join('');
     el.incySteps.innerHTML = d.incy.map(s=>`<li>${s}</li>`).join('');
-    el.openHappBtnText.textContent = d.openHapp;
-    el.openIncyBtnText.textContent = d.openIncy;
-    el.openHappBtn.href = happDeepLink;
-    el.openIncyBtn.href = incyDeepLink;
+    renderStoreButtons();
     el.devicePickerLabel.textContent = d.devicePickerLabel;
     el.deviceBtnAndroidText.textContent = d.deviceAndroid;
     el.deviceBtnIosText.textContent = d.deviceIOS;
@@ -1293,35 +1355,32 @@
   });
 
   // Also copy the subscription link to the clipboard when an "Open in X"
-  // button is tapped. If the deep link fails to launch the app (not
-  // installed, or the URI scheme is blocked in some in-app browser), the
-  // link is still in the clipboard so the user can fall back to
-  // "+" -> "From Clipboard" inside the app, per each app's own instructions.
+  // button is tapped, so the user can paste it inside the app via
+  // "+" -> "From Clipboard" right after installing/opening it from the
+  // store, per each app's own instructions above.
   function copyToClipboardSilently(text){
     try{
       navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
     }catch(e){ /* ignore */ }
   }
-  // Tapping "Open in Happ / INCY": copy the link to clipboard as a safety
-  // net, try to launch the app via deep link, and fall back to the store
-  // page if the app doesn't open.
-  function handleOpenAppClick(e, deepLink, storeUrlsByOs){
-    e.preventDefault();
-    copyToClipboardSilently(subUrl);
-    openAppOrRedirectToStore(deepLink, storeUrlsByOs);
-  }
-  el.openHappBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, happDeepLink, storeLinks.happ); });
-  el.openIncyBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, incyDeepLink, storeLinks.incy); });
+  // Tapping "Open in Happ / INCY": copy the link to clipboard as a
+  // convenience, then let the link's normal href take the user straight
+  // to the correct store page (Google Play for Android, App Store for
+  // iPhone) based on the device selected above.
+  el.openHappBtn.addEventListener('click', ()=>{ copyToClipboardSilently(subUrl); });
+  el.openIncyBtn.addEventListener('click', ()=>{ copyToClipboardSilently(subUrl); });
 
   el.deviceBtnAndroid.addEventListener('click', ()=>{
     selectedDevice = 'android';
     localStorage.setItem('vedavpn_device', selectedDevice);
     renderDevicePicker();
+    renderStoreButtons();
   });
   el.deviceBtnIos.addEventListener('click', ()=>{
     selectedDevice = 'ios';
     localStorage.setItem('vedavpn_device', selectedDevice);
     renderDevicePicker();
+    renderStoreButtons();
   });
 
   el.copyBtn.addEventListener('click', async ()=>{
