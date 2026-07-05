@@ -162,6 +162,19 @@
     margin-bottom:26px;
   }
   .top-row .brand{ font-size:20px; }
+  .top-row-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .logo-mark-sm{
+    width:34px; height:34px;
+    border-radius:9px;
+    overflow:hidden;
+    flex-shrink:0;
+    border:1px solid var(--line);
+  }
+  .logo-mark-sm img{ width:100%; height:100%; object-fit:cover; display:block; }
   .lang-switch{
     display:flex; gap:4px;
     font-family:'IBM Plex Mono', monospace;
@@ -544,7 +557,12 @@
   <!-- ===== Main screen ===== -->
   <div id="mainScreen">
     <div class="top-row">
-      <h1 class="brand">Veda<span>VPN</span></h1>
+      <div class="top-row-left">
+        <div class="logo-mark-sm">
+          <img src="veda-logo.png" alt="VedaVPN">
+        </div>
+        <h1 class="brand">Veda<span>VPN</span></h1>
+      </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <div class="lang-switch">
           <button data-lang="ru">RU</button>
