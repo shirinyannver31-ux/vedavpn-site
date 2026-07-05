@@ -485,6 +485,147 @@
     line-height:1.55;
   }
 
+  /* ---------- Reviews ---------- */
+  .reviews-section{ margin-top:30px; }
+  .reviews-heading{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .reviews-summary{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .reviews-summary .avg-stars{ color:#F5B93D; letter-spacing:1px; }
+  .reviews-summary .avg-num{ color:var(--text); font-weight:600; }
+
+  .review-form{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin:14px 0 18px;
+  }
+  .review-form textarea{
+    width:100%;
+    min-height:70px;
+    resize:vertical;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    padding:10px 12px;
+    box-sizing:border-box;
+  }
+  .review-form textarea:focus{ outline:none; border-color:var(--signal-dim); }
+  .review-stars-picker{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:12px;
+  }
+  .review-stars-picker .stars{
+    display:flex;
+    gap:4px;
+  }
+  .review-stars-picker .star-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:22px;
+    line-height:1;
+    color:var(--line);
+    padding:0;
+    transition:transform .1s ease, color .15s ease;
+  }
+  .review-stars-picker .star-btn:active{ transform:scale(0.85); }
+  .review-stars-picker .star-btn.active{ color:#F5B93D; }
+  .review-stars-label{
+    font-size:12px;
+    color:var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .review-submit-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:14px;
+  }
+  .review-submit-btn{
+    background:var(--signal);
+    border:none;
+    color:#062012;
+    border-radius:10px;
+    padding:9px 20px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:transform .12s ease, opacity .15s ease;
+  }
+  .review-submit-btn:active{ transform:scale(0.95); }
+  .review-submit-btn:disabled{ opacity:0.45; cursor:not-allowed; }
+  .review-status{
+    font-size:12px;
+    color:var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .review-status.ok{ color:var(--signal); }
+  .review-status.err{ color:#FF6B6B; }
+
+  .review-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .review-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .review-card .review-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .review-card .review-stars{
+    color:#F5B93D;
+    font-size:14px;
+    letter-spacing:1px;
+  }
+  .review-card .review-date{
+    font-size:11px;
+    color:var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .review-card .review-text{
+    font-size:13px;
+    color:var(--text);
+    line-height:1.5;
+    margin:0;
+    word-wrap:break-word;
+  }
+  .review-empty, .review-loading{
+    font-size:13px;
+    color:var(--muted);
+    padding:6px 2px;
+  }
+
   /* ---------- Floating footer links ---------- */
   .float-links{
     position:fixed;
@@ -627,6 +768,35 @@
       <p class="faq-heading" id="faqHeading"></p>
       <div id="faqList"></div>
     </div>
+
+    <div class="reviews-section">
+      <p class="reviews-heading">
+        <span id="reviewsHeading"></span>
+        <span class="reviews-summary" id="reviewsSummary"></span>
+      </p>
+
+      <div class="review-form">
+        <textarea id="reviewText" maxlength="500"></textarea>
+        <div class="review-stars-picker">
+          <div class="stars" id="reviewStarsPicker">
+            <button type="button" class="star-btn" data-star="1">★</button>
+            <button type="button" class="star-btn" data-star="2">★</button>
+            <button type="button" class="star-btn" data-star="3">★</button>
+            <button type="button" class="star-btn" data-star="4">★</button>
+            <button type="button" class="star-btn" data-star="5">★</button>
+          </div>
+          <span class="review-stars-label" id="reviewStarsLabel"></span>
+        </div>
+        <div class="review-submit-row">
+          <button type="button" class="review-submit-btn" id="reviewSubmitBtn"></button>
+          <span class="review-status" id="reviewStatus"></span>
+        </div>
+      </div>
+
+      <div class="review-list" id="reviewList">
+        <div class="review-loading" id="reviewLoading"></div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -675,7 +845,19 @@
         { q: 'Нужно ли платить?', a: 'На данный момент VPN бесплатный. Следите за новостями в канале — там появятся все обновления.' },
         { q: 'Ссылка перестала работать, что делать?', a: 'Проверьте актуальную ссылку в этом же боте или напишите в поддержку через бот @vedavpn_bot.' },
         { q: 'Какое приложение лучше использовать?', a: 'Мы рекомендуем Happ или INCY — оба поддерживают эту ссылку и просты в настройке.' }
-      ]
+      ],
+      reviewsHeading: '💬 Отзывы',
+      reviewsAvgUnit: 'из 5',
+      reviewsCountWord: (n)=> n===1 ? 'отзыв' : (n>=2 && n<=4 ? 'отзыва' : 'отзывов'),
+      reviewPlaceholder: 'Напишите, что думаете о VPN...',
+      reviewStarsHint: (n)=> n ? `Оценка: ${n} из 5` : 'Выберите оценку',
+      reviewSubmit: 'Опубликовать',
+      reviewSending: 'Отправка...',
+      reviewOk: 'Спасибо! Отзыв опубликован ✓',
+      reviewErrEmpty: 'Напишите отзыв и выберите оценку',
+      reviewErrFail: 'Не удалось отправить. Попробуйте ещё раз.',
+      reviewLoading: 'Загрузка отзывов...',
+      reviewEmpty: 'Пока нет отзывов. Будьте первым!'
     },
     hy: {
       eyebrow: 'Ցանց ակտիվ',
@@ -710,7 +892,19 @@
         { q: 'Պե՞տք է վճարել', a: 'Այս պահին VPN-ը անվճար է։ Հետևիր ալիքի նորություններին, այնտեղ կերևան բոլոր փոփոխությունները։' },
         { q: 'Հղումն այլևս չի աշխատում, ի՞նչ անել', a: 'Ստուգիր ընթացիկ հղումը հենց այս բոտում, կամ գրիր support-ին @vedavpn_bot-ի միջոցով։' },
         { q: 'Ո՞ր հավելվածն է ավելի լավ', a: 'Խորհուրդ ենք տալիս Happ կամ INCY — երկուսն էլ աջակցում են այս հղումին և հեշտ են կարգավորել։' }
-      ]
+      ],
+      reviewsHeading: '💬 Կարծիքներ',
+      reviewsAvgUnit: '5-ից',
+      reviewsCountWord: (n)=> n===1 ? 'կարծիք' : 'կարծիք',
+      reviewPlaceholder: 'Գրիր, թե ինչ ես մտածում VPN-ի մասին...',
+      reviewStarsHint: (n)=> n ? `Գնահատական՝ ${n} 5-ից` : 'Ընտրիր գնահատականը',
+      reviewSubmit: 'Հրապարակել',
+      reviewSending: 'Ուղարկվում է...',
+      reviewOk: 'Շնորհակալություն! Կարծիքը հրապարակվեց ✓',
+      reviewErrEmpty: 'Գրիր կարծիք և ընտրիր գնահատական',
+      reviewErrFail: 'Չհաջողվեց ուղարկել։ Փորձիր նորից։',
+      reviewLoading: 'Կարծիքները բեռնվում են...',
+      reviewEmpty: 'Դեռ կարծիքներ չկան։ Եղիր առաջինը!'
     },
     en: {
       eyebrow: 'Network active',
@@ -745,11 +939,25 @@
         { q: 'Do I need to pay?', a: 'The VPN is currently free. Follow the channel for any updates.' },
         { q: 'The link stopped working, what do I do?', a: 'Check the current link right here in this bot, or contact support via @vedavpn_bot.' },
         { q: 'Which app should I use?', a: 'We recommend Happ or INCY — both support this link and are easy to set up.' }
-      ]
+      ],
+      reviewsHeading: '💬 Reviews',
+      reviewsAvgUnit: 'out of 5',
+      reviewsCountWord: (n)=> n===1 ? 'review' : 'reviews',
+      reviewPlaceholder: 'Share your thoughts about the VPN...',
+      reviewStarsHint: (n)=> n ? `Rating: ${n} out of 5` : 'Choose a rating',
+      reviewSubmit: 'Publish',
+      reviewSending: 'Sending...',
+      reviewOk: 'Thanks! Your review is published ✓',
+      reviewErrEmpty: 'Write a review and choose a rating',
+      reviewErrFail: 'Failed to send. Please try again.',
+      reviewLoading: 'Loading reviews...',
+      reviewEmpty: 'No reviews yet. Be the first!'
     }
   };
 
   let lang = localStorage.getItem('vedavpn_lang') || null;
+  let selectedStars = 0;
+  let reviewsCache = null; // null = loading, [] = empty, [...] = loaded
 
   const el = {
     langScreen: document.getElementById('langScreen'),
@@ -778,6 +986,14 @@
     tipForum: document.getElementById('tipForum'),
     faqHeading: document.getElementById('faqHeading'),
     faqList: document.getElementById('faqList'),
+    reviewsHeading: document.getElementById('reviewsHeading'),
+    reviewsSummary: document.getElementById('reviewsSummary'),
+    reviewText: document.getElementById('reviewText'),
+    reviewStarsPicker: document.getElementById('reviewStarsPicker'),
+    reviewStarsLabel: document.getElementById('reviewStarsLabel'),
+    reviewSubmitBtn: document.getElementById('reviewSubmitBtn'),
+    reviewStatus: document.getElementById('reviewStatus'),
+    reviewList: document.getElementById('reviewList'),
   };
 
   function renderFaq(){
@@ -796,6 +1012,61 @@
       btn.addEventListener('click', ()=>{
         btn.closest('.faq-item').classList.toggle('open');
       });
+    });
+  }
+
+  function renderReviewStrings(){
+    const d = dict[lang];
+    el.reviewsHeading.textContent = d.reviewsHeading;
+    el.reviewText.placeholder = d.reviewPlaceholder;
+    el.reviewSubmitBtn.textContent = d.reviewSubmit;
+    el.reviewStarsLabel.textContent = d.reviewStarsHint(selectedStars);
+    renderReviewsSummary();
+    renderReviewsList();
+  }
+
+  function renderReviewsSummary(){
+    const d = dict[lang];
+    if(!reviewsCache || reviewsCache.length === 0){
+      el.reviewsSummary.innerHTML = '';
+      return;
+    }
+    const avg = reviewsCache.reduce((s, r)=> s + r.rating, 0) / reviewsCache.length;
+    const rounded = Math.round(avg * 10) / 10;
+    const fullStars = Math.round(avg);
+    const starsStr = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
+    el.reviewsSummary.innerHTML =
+      `<span class="avg-stars">${starsStr}</span> <span class="avg-num">${rounded}</span> ${d.reviewsAvgUnit} · ${reviewsCache.length} ${d.reviewsCountWord(reviewsCache.length)}`;
+  }
+
+  function renderReviewsList(){
+    const d = dict[lang];
+    if(reviewsCache === null){
+      el.reviewList.innerHTML = `<div class="review-loading">${d.reviewLoading}</div>`;
+      return;
+    }
+    if(reviewsCache.length === 0){
+      el.reviewList.innerHTML = `<div class="review-empty">${d.reviewEmpty}</div>`;
+      return;
+    }
+    const localeMap = { ru: 'ru-RU', hy: 'hy-AM', en: 'en-US' };
+    el.reviewList.innerHTML = reviewsCache.map(()=>
+      `<div class="review-card">
+        <div class="review-top">
+          <span class="review-stars"></span>
+          <span class="review-date"></span>
+        </div>
+        <p class="review-text"></p>
+      </div>`
+    ).join('');
+    const cards = el.reviewList.querySelectorAll('.review-card');
+    cards.forEach((card, i)=>{
+      const r = reviewsCache[i];
+      card.querySelector('.review-stars').textContent = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+      card.querySelector('.review-date').textContent = r.createTime
+        ? new Date(r.createTime).toLocaleDateString(localeMap[lang] || 'en-US', { day: '2-digit', month: 'short' })
+        : '';
+      card.querySelector('.review-text').textContent = r.text;
     });
   }
 
@@ -826,6 +1097,7 @@
       b.classList.toggle('active', b.dataset.lang === lang);
     });
     renderFaq();
+    renderReviewStrings();
   }
 
   function showMain(){
@@ -953,6 +1225,92 @@
     }catch(e){
       renderValue(null);
     }
+  })();
+
+  // ---- Reviews & star ratings (shared across all visitors via Firebase) ----
+  (function reviewsModule(){
+    const FIREBASE_PROJECT_ID = 'veda--vpn';
+    const FIREBASE_API_KEY = 'AIzaSyBL--Cf68JvuQmzsu1u8xcTS5Euzp0JfLQ';
+    const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+
+    function updateStarButtons(){
+      el.reviewStarsPicker.querySelectorAll('.star-btn').forEach(btn=>{
+        btn.classList.toggle('active', parseInt(btn.dataset.star, 10) <= selectedStars);
+      });
+    }
+
+    el.reviewStarsPicker.querySelectorAll('.star-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        selectedStars = parseInt(btn.dataset.star, 10);
+        updateStarButtons();
+        el.reviewStarsLabel.textContent = dict[lang].reviewStarsHint(selectedStars);
+      });
+    });
+
+    async function fetchReviews(){
+      try{
+        const res = await fetch(`${FIRESTORE_BASE}/reviews?pageSize=200&key=${FIREBASE_API_KEY}`);
+        const data = await res.json();
+        const docs = data.documents || [];
+        reviewsCache = docs.map(doc=>{
+          const f = doc.fields || {};
+          return {
+            text: (f.text && f.text.stringValue) || '',
+            rating: (f.rating && parseInt(f.rating.integerValue, 10)) || 0,
+            createTime: doc.createTime || null,
+          };
+        }).sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
+      }catch(e){
+        reviewsCache = reviewsCache || [];
+      }
+      renderReviewsSummary();
+      renderReviewsList();
+    }
+
+    el.reviewSubmitBtn.addEventListener('click', async ()=>{
+      const d = dict[lang];
+      const text = el.reviewText.value.trim();
+      if(!text || selectedStars < 1){
+        el.reviewStatus.textContent = d.reviewErrEmpty;
+        el.reviewStatus.className = 'review-status err';
+        return;
+      }
+      el.reviewSubmitBtn.disabled = true;
+      el.reviewStatus.textContent = d.reviewSending;
+      el.reviewStatus.className = 'review-status';
+      try{
+        const body = {
+          fields: {
+            text: { stringValue: text.slice(0, 500) },
+            rating: { integerValue: String(selectedStars) }
+          }
+        };
+        const res = await fetch(`${FIRESTORE_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if(!res.ok) throw new Error('request failed');
+        el.reviewText.value = '';
+        selectedStars = 0;
+        updateStarButtons();
+        el.reviewStarsLabel.textContent = dict[lang].reviewStarsHint(0);
+        el.reviewStatus.textContent = d.reviewOk;
+        el.reviewStatus.className = 'review-status ok';
+        await fetchReviews();
+      }catch(e){
+        el.reviewStatus.textContent = d.reviewErrFail;
+        el.reviewStatus.className = 'review-status err';
+      }finally{
+        el.reviewSubmitBtn.disabled = false;
+        setTimeout(()=>{
+          el.reviewStatus.textContent = '';
+          el.reviewStatus.className = 'review-status';
+        }, 4000);
+      }
+    });
+
+    fetchReviews();
   })();
 })();
 </script>
