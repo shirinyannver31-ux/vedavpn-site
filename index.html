@@ -454,6 +454,41 @@
     align-items:flex-start;
   }
 
+  /* ---------- Device type picker ---------- */
+  .device-picker{ margin-bottom:18px; }
+  .device-picker-label{
+    font-size:12.5px;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  .device-switch{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .device-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:11px 10px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--muted);
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:13.5px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, transform .1s ease;
+  }
+  .device-btn:active{ transform:scale(0.97); }
+  .device-btn.active{
+    color:var(--signal);
+    border-color:var(--signal-dim);
+    background:rgba(57,255,158,0.08);
+  }
+
   /* ---------- FAQ ---------- */
   .faq-section{ margin-top:30px; }
   .faq-heading{
@@ -773,6 +808,18 @@
           <span>1️⃣</span><span id="step1Text"></span>
         </div>
 
+        <div class="device-picker">
+          <p class="device-picker-label" id="devicePickerLabel"></p>
+          <div class="device-switch">
+            <button type="button" class="device-btn" id="deviceBtnAndroid" data-device="android">
+              <span>🤖</span><span id="deviceBtnAndroidText"></span>
+            </button>
+            <button type="button" class="device-btn" id="deviceBtnIos" data-device="ios">
+              <span>🍏</span><span id="deviceBtnIosText"></span>
+            </button>
+          </div>
+        </div>
+
         <div class="app-block">
           <p class="app-name">📱 Happ</p>
           <ul class="app-steps" id="happSteps"></ul>
@@ -860,13 +907,27 @@
     return 'other';
   }
 
+  // The device type used for store fallback links. We start from an
+  // auto-detected guess (based on the browser's user agent), but the user
+  // can explicitly pick Android or iPhone via the device-picker buttons —
+  // that explicit choice always wins and is remembered for next time.
+  let selectedDevice = localStorage.getItem('vedavpn_device') ||
+    (detectOS() === 'ios' ? 'ios' : 'android');
+
+  function renderDevicePicker(){
+    el.deviceBtnAndroid.classList.toggle('active', selectedDevice === 'android');
+    el.deviceBtnIos.classList.toggle('active', selectedDevice === 'ios');
+  }
+
   // Tries to open the app via its deep link. If the page is still visible
   // after a short delay (meaning the OS never switched away to open the
   // app), we assume it isn't installed and send the user to the matching
-  // store page instead.
+  // store page instead. The store link is chosen from the device type the
+  // user explicitly selected in the device picker, not auto-detection —
+  // that keeps Android/iPhone users each on their own correct App Store
+  // link even if the browser's user agent is ambiguous or unreliable.
   function openAppOrRedirectToStore(deepLink, storeUrlsByOs){
-    const os = detectOS();
-    const storeUrl = storeUrlsByOs[os];
+    const storeUrl = storeUrlsByOs[selectedDevice];
     let didHide = false;
 
     function onVisibilityChange(){
@@ -881,8 +942,8 @@
       if(!didHide && storeUrl){
         window.location.href = storeUrl;
       }
-      // If there's no store URL for this OS (e.g. iOS link not added yet)
-      // and the app didn't open, we simply do nothing further — the
+      // If there's no store URL for this device (e.g. iOS link not added
+      // yet) and the app didn't open, we simply do nothing further — the
       // subscription link is already in the clipboard as a fallback.
     }, 1500);
   }
@@ -914,6 +975,8 @@
         'Выберите сервер и подключитесь'
       ],
       openHapp: 'Открыть в Happ', openIncy: 'Открыть в INCY',
+      devicePickerLabel: 'Какой у вас телефон?',
+      deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Канал', tipBot: 'Бот', tipForum: 'Форум',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Частые вопросы',
@@ -962,6 +1025,8 @@
         'Ընտրիր սերվեր և միացիր'
       ],
       openHapp: 'Բացել Happ-ում', openIncy: 'Բացել INCY-ում',
+      devicePickerLabel: 'Ի՞նչ հեռախոս ունես',
+      deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Ալիք', tipBot: 'Բոտ', tipForum: 'Ֆորում',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Հաճախակի հարցեր',
@@ -1010,6 +1075,8 @@
         'Pick a server and connect'
       ],
       openHapp: 'Open in Happ', openIncy: 'Open in INCY',
+      devicePickerLabel: 'What phone do you have?',
+      deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Channel', tipBot: 'Bot', tipForum: 'Forum',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Frequently asked questions',
@@ -1064,6 +1131,11 @@
     openIncyBtn: document.getElementById('openIncyBtn'),
     openHappBtnText: document.getElementById('openHappBtnText'),
     openIncyBtnText: document.getElementById('openIncyBtnText'),
+    devicePickerLabel: document.getElementById('devicePickerLabel'),
+    deviceBtnAndroid: document.getElementById('deviceBtnAndroid'),
+    deviceBtnIos: document.getElementById('deviceBtnIos'),
+    deviceBtnAndroidText: document.getElementById('deviceBtnAndroidText'),
+    deviceBtnIosText: document.getElementById('deviceBtnIosText'),
     tipChannel: document.getElementById('tipChannel'),
     tipBot: document.getElementById('tipBot'),
     tipForum: document.getElementById('tipForum'),
@@ -1176,6 +1248,10 @@
     el.openIncyBtnText.textContent = d.openIncy;
     el.openHappBtn.href = happDeepLink;
     el.openIncyBtn.href = incyDeepLink;
+    el.devicePickerLabel.textContent = d.devicePickerLabel;
+    el.deviceBtnAndroidText.textContent = d.deviceAndroid;
+    el.deviceBtnIosText.textContent = d.deviceIOS;
+    renderDevicePicker();
     el.tipChannel.textContent = d.tipChannel;
     el.tipBot.textContent = d.tipBot;
     el.tipForum.textContent = d.tipForum;
@@ -1236,6 +1312,17 @@
   }
   el.openHappBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, happDeepLink, storeLinks.happ); });
   el.openIncyBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, incyDeepLink, storeLinks.incy); });
+
+  el.deviceBtnAndroid.addEventListener('click', ()=>{
+    selectedDevice = 'android';
+    localStorage.setItem('vedavpn_device', selectedDevice);
+    renderDevicePicker();
+  });
+  el.deviceBtnIos.addEventListener('click', ()=>{
+    selectedDevice = 'ios';
+    localStorage.setItem('vedavpn_device', selectedDevice);
+    renderDevicePicker();
+  });
 
   el.copyBtn.addEventListener('click', async ()=>{
     try{
