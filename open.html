@@ -74,7 +74,18 @@
   var device = params.get('device') === 'ios' ? 'ios' : 'android';
   var subUrl = params.get('link') || '';
 
-  var deepLinkPrefixes = { happ: 'happ://add/', incy: 'incy://add/' };
+  // Confirmed correct formats:
+  //   Happ: happ://add/${encodeURIComponent(subUrl)}
+  //         (this is exactly what 3x-ui's official subscription page uses:
+  //         github.com/MHSanaei/3x-ui commit 8ff4e1f, web/assets/js/subscription.js)
+  //         Plain concatenation or base64 both get rejected as
+  //         "URL подписки не валидна" because Happ expects the URL
+  //         percent-encoded, not raw and not base64.
+  //   INCY:  incy://add/<raw url> — already confirmed working as-is.
+  var deepLinkBuilders = {
+    happ: function(url){ return 'happ://add/' + encodeURIComponent(url); },
+    incy: function(url){ return 'incy://add/' + url; }
+  };
   var storeLinks = {
     happ: {
       android: 'https://play.google.com/store/apps/details?id=com.happproxy',
@@ -93,7 +104,7 @@
 
   var storeUrl = (storeLinks[app] || {})[device];
 
-  if(!app || !deepLinkPrefixes[app] || !storeUrl){
+  if(!app || !deepLinkBuilders[app] || !storeUrl){
     // Missing/unknown params — nothing sensible to do.
     spinnerEl.style.display = 'none';
     titleEl.textContent = 'Ссылка недействительна';
@@ -112,12 +123,7 @@
   }
   if(subUrl){ copyToClipboardSilently(subUrl); }
 
-  // happ:// and incy:// deep links (like happ's own routing/crypto links)
-  // expect the payload as base64, not a raw/plain URL. Concatenating the
-  // raw subscription URL after "add/" produces a string with two URLs
-  // glued together (e.g. "happ://add/https://gist..."), which the app's
-  // URI parser rejects as "URL подписки не валидна".
-  var deepLink = deepLinkPrefixes[app] + btoa(subUrl);
+  var deepLink = deepLinkBuilders[app](subUrl);
   var didHide = false;
   function onVisibilityChange(){ if(document.hidden) didHide = true; }
   document.addEventListener('visibilitychange', onVisibilityChange);
