@@ -927,8 +927,8 @@
 
     <div class="stats">
       <div class="stat"><div class="num" id="stat1Num">—</div><div class="label" id="stat1"></div></div>
-      <div class="stat"><div class="num">15</div><div class="label" id="stat2"></div></div>
-      <div class="stat"><div class="num">99.9%</div><div class="label" id="stat3"></div></div>
+      <div class="stat"><div class="num" id="stat2Num">15</div><div class="label" id="stat2"></div></div>
+      <div class="stat"><div class="num" id="stat3Num">99.9%</div><div class="label" id="stat3"></div></div>
     </div>
 
     <div class="features">
@@ -1069,12 +1069,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
-  const subUrl = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
+  // Single source of truth for the backend base URL. Change this one line
+  // if the API ever moves to a different host/path.
+  const API = "https://api.vedavpn.lol";
+
+  // Used only if the API request fails, so the page never breaks even if
+  // the backend is temporarily unreachable.
+  const FALLBACK_SUBSCRIPTION_URL = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
+  let subUrl = FALLBACK_SUBSCRIPTION_URL;
 
   // Deep-link URIs that let Happ / INCY import the subscription directly,
-  // without the user having to copy-paste the link manually.
-  const happDeepLink = 'happ://add/' + subUrl;
-  const incyDeepLink = 'incy://add/' + subUrl;
+  // without the user having to copy-paste the link manually. Built as
+  // functions (not consts) because subUrl is replaced asynchronously once
+  // GET /subscription responds.
+  function getHappDeepLink(){ return 'happ://add/' + subUrl; }
+  function getIncyDeepLink(){ return 'incy://add/' + subUrl; }
 
   // Store links used when the app isn't installed, or when the visitor's
   // actual device doesn't match what they picked in the device switch.
@@ -1319,6 +1328,9 @@
     stat1: document.getElementById('stat1'),
     stat2: document.getElementById('stat2'),
     stat3: document.getElementById('stat3'),
+    stat1Num: document.getElementById('stat1Num'),
+    stat2Num: document.getElementById('stat2Num'),
+    stat3Num: document.getElementById('stat3Num'),
     feat1: document.getElementById('feat1'),
     feat2: document.getElementById('feat2'),
     feat3: document.getElementById('feat3'),
@@ -1386,6 +1398,38 @@
     });
   }
   renderQr();
+
+  // ---- Subscription link now comes from the backend. Anything already ----
+  // ---- painted with the fallback value gets refreshed once it arrives. ----
+  async function loadSubscription(){
+    try{
+      const res = await fetch(`${API}/subscription`);
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      if(data && typeof data.url === 'string' && data.url){
+        subUrl = data.url;
+      }
+    }catch(e){
+      // Keep FALLBACK_SUBSCRIPTION_URL, already assigned to subUrl.
+    }
+    if(el.linkBox) el.linkBox.textContent = subUrl;
+    renderQr();
+  }
+  loadSubscription();
+
+  // ---- Server-count / uptime badges now come from the backend too. ----
+  async function loadStats(){
+    try{
+      const res = await fetch(`${API}/stats`);
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      if(data && typeof data.servers === 'number') el.stat2Num.textContent = data.servers;
+      if(data && typeof data.uptime === 'string') el.stat3Num.textContent = data.uptime;
+    }catch(e){
+      // Keep the static fallback numbers already in the HTML.
+    }
+  }
+  loadStats();
 
   function renderFaq(){
     const d = dict[lang];
@@ -1594,8 +1638,8 @@
       window.location.href = storeUrl;
     }
   }
-  el.openHappBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, happDeepLink, storeLinks.happ); });
-  el.openIncyBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, incyDeepLink, storeLinks.incy); });
+  el.openHappBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, getHappDeepLink(), storeLinks.happ); });
+  el.openIncyBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, getIncyDeepLink(), storeLinks.incy); });
 
   el.deviceBtnAndroid.addEventListener('click', ()=>{
     selectedDevice = 'android';
@@ -1694,13 +1738,11 @@
         localStorage.setItem(VISITED_KEY, visitorId);
       }
 
-      // New visitor -> increment the shared counter once.
-      // Returning visitor -> only read the current value, don't increment.
-      const endpoint = isNewVisitor
-        ? 'https://countapi.mileshilliard.com/api/v1/hit/vedavpn-lol-site-visits-v2'
-        : 'https://countapi.mileshilliard.com/api/v1/get/vedavpn-lol-site-visits-v2';
-
-      const res = await fetch(endpoint);
+      // New visitor -> increment the shared counter once (POST).
+      // Returning visitor -> only read the current value, don't increment (GET).
+      const res = isNewVisitor
+        ? await fetch(`${API}/visitors`, { method: 'POST' })
+        : await fetch(`${API}/visitors`);
       const data = await res.json();
       renderValue(data && data.value);
     }catch(e){
@@ -1708,12 +1750,8 @@
     }
   })();
 
-  // ---- Reviews & star ratings (shared across all visitors via Firebase) ----
+  // ---- Reviews & star ratings (shared across all visitors via our API) ----
   (function reviewsModule(){
-    const FIREBASE_PROJECT_ID = 'veda--vpn';
-    const FIREBASE_API_KEY = 'AIzaSyBL--Cf68JvuQmzsu1u8xcTS5Euzp0JfLQ';
-    const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
-
     function updateStarButtons(){
       el.reviewStarsPicker.querySelectorAll('.star-btn').forEach(btn=>{
         btn.classList.toggle('active', parseInt(btn.dataset.star, 10) <= selectedStars);
@@ -1730,17 +1768,13 @@
 
     async function fetchReviews(){
       try{
-        const res = await fetch(`${FIRESTORE_BASE}/reviews?pageSize=200&key=${FIREBASE_API_KEY}`);
+        const res = await fetch(`${API}/reviews`);
+        if(!res.ok) throw new Error('bad response');
         const data = await res.json();
-        const docs = data.documents || [];
-        reviewsCache = docs.map(doc=>{
-          const f = doc.fields || {};
-          return {
-            text: (f.text && f.text.stringValue) || '',
-            rating: (f.rating && parseInt(f.rating.integerValue, 10)) || 0,
-            createTime: doc.createTime || null,
-          };
-        }).sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
+        // The API already returns [{text, rating, createTime}, ...].
+        reviewsCache = (Array.isArray(data) ? data : [])
+          .slice()
+          .sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
       }catch(e){
         reviewsCache = reviewsCache || [];
       }
@@ -1760,13 +1794,8 @@
       el.reviewStatus.textContent = d.reviewSending;
       el.reviewStatus.className = 'review-status';
       try{
-        const body = {
-          fields: {
-            text: { stringValue: text.slice(0, 500) },
-            rating: { integerValue: String(selectedStars) }
-          }
-        };
-        const res = await fetch(`${FIRESTORE_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
+        const body = { text: text.slice(0, 500), rating: selectedStars };
+        const res = await fetch(`${API}/reviews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
