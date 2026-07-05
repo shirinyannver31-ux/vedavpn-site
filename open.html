@@ -9,6 +9,7 @@
     --bg:#0a0f0d; --panel:#101713; --line:#1e2b24;
     --signal:#39ff9e; --signal-dim:rgba(57,255,158,0.35);
     --text:#eafff1; --muted:#8aa398;
+    --warn:#ff9e39; --warn-dim:rgba(255,158,57,0.35);
   }
   *{box-sizing:border-box;}
   html,body{
@@ -31,11 +32,15 @@
     border-top-color:var(--signal);
     animation:spin 0.8s linear infinite;
   }
+  .spinner.warn{
+    border-top-color:var(--warn);
+  }
   @keyframes spin{ to{ transform:rotate(360deg); } }
   h1{
     font-size:17px; font-weight:600; margin:0;
     color:var(--text);
   }
+  h1.warn{ color:var(--warn); }
   p{
     font-size:14px; color:var(--muted);
     margin:0; line-height:1.5; max-width:320px;
@@ -66,31 +71,59 @@
 <script>
 (function(){
   // Expected query params:
-  //   app    = "happ" | "incy"
-  //   device = "android" | "ios"
+  //   app    = "incy"  (happ has been removed from this flow)
+  //   device = "android" | "ios"   -- the device the user picked in the bot
   //   link   = the VPN subscription URL to import (URL-encoded)
+  //   lang   = "hy" | "ru"         -- current bot language, for this page's text
   var params = new URLSearchParams(window.location.search);
   var app = params.get('app');
-  var device = params.get('device') === 'ios' ? 'ios' : 'android';
+  var selectedDevice = params.get('device') === 'ios' ? 'ios' : 'android';
   var subUrl = params.get('link') || '';
+  var lang = params.get('lang') === 'hy' ? 'hy' : 'ru';
 
-  // Confirmed correct formats:
-  //   Happ: happ://add/${encodeURIComponent(subUrl)}
-  //         (this is exactly what 3x-ui's official subscription page uses:
-  //         github.com/MHSanaei/3x-ui commit 8ff4e1f, web/assets/js/subscription.js)
-  //         Plain concatenation or base64 both get rejected as
-  //         "URL подписки не валидна" because Happ expects the URL
-  //         percent-encoded, not raw and not base64.
-  //   INCY:  incy://add/<raw url> — already confirmed working as-is.
+  var TEXTS = {
+    ru: {
+      opening: 'Открываем приложение…',
+      hint: 'Если приложение не установлено, вы будете автоматически перенаправлены в магазин приложений.',
+      notFoundTitle: 'Приложение не найдено',
+      notFoundHint: 'Переходим в магазин приложений…',
+      fallbackBtn: 'Перейти в магазин приложений',
+      invalidTitle: 'Ссылка недействительна',
+      invalidHint: 'Откройте эту страницу из бота или сайта VedaVPN.',
+      openedTitle: 'Ссылка скопирована',
+      openedHint: 'Если INCY не открылось само — установите его и вставьте ссылку вручную (кнопкой ниже или из буфера обмена).',
+      wrongDeviceTitle: 'Неверный тип телефона',
+      // shown when the phone actually is `actual`, but the user picked the other one in the bot
+      wrongDevice: {
+        android: 'Похоже, вы выбрали iPhone, но пользуетесь Android. Пожалуйста, вернитесь в бот и выберите ANDROID, затем снова нажмите «Открыть в INCY».',
+        ios: 'Похоже, вы выбрали Android, но пользуетесь iPhone. Пожалуйста, вернитесь в бот и выберите IPHONE, затем снова нажмите «Открыть в INCY».'
+      }
+    },
+    hy: {
+      opening: 'Բացվում է հավելվածը…',
+      hint: 'Եթե հավելվածը տեղադրված չէ, դուք ավտոմատ կուղղորդվեք հավելվածների խանութ։',
+      notFoundTitle: 'Հավելվածը չի գտնվել',
+      notFoundHint: 'Անցում ենք կատարում հավելվածների խանութ…',
+      fallbackBtn: 'Անցնել հավելվածների խանութ',
+      invalidTitle: 'Հղումն անվավեր է',
+      invalidHint: 'Բացեք այս էջը VedaVPN բոտից կամ կայքից։',
+      openedTitle: 'Հղումը պատճենվեց',
+      openedHint: 'Եթե INCY-ն ինքն իրեն չբացվեց՝ տեղադրեք հավելվածը և հղումը մուտքագրեք ձեռքով (ներքևի կոճակով կամ clipboard-ից)։',
+      wrongDeviceTitle: 'Հեռախոսի սխալ տեսակ',
+      wrongDevice: {
+        android: 'Կարծես ընտրել եք iPhone, բայց օգտագործում եք Android։ Խնդրում ենք վերադառնալ բոտ, ընտրել ANDROID, և կրկին սեղմել «Բացել INCY-ում»։',
+        ios: 'Կարծես ընտրել եք Android, բայց օգտագործում եք iPhone։ Խնդրում ենք վերադառնալ բոտ, ընտրել IPHONE, և կրկին սեղմել «Բացել INCY-ում»։'
+      }
+    }
+  };
+  var T = TEXTS[lang];
+
+  // Confirmed correct format:
+  //   INCY: incy://add/<raw url> -- already confirmed working as-is.
   var deepLinkBuilders = {
-    happ: function(url){ return 'happ://add/' + encodeURIComponent(url); },
     incy: function(url){ return 'incy://add/' + url; }
   };
   var storeLinks = {
-    happ: {
-      android: 'https://play.google.com/store/apps/details?id=com.happproxy',
-      ios: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215'
-    },
     incy: {
       android: 'https://play.google.com/store/apps/details?id=llc.itdev.incy',
       ios: 'https://apps.apple.com/ru/app/incy/id6756943388'
@@ -102,20 +135,54 @@
   var spinnerEl = document.getElementById('spinner');
   var fallbackBtn = document.getElementById('fallbackBtn');
 
-  var storeUrl = (storeLinks[app] || {})[device];
+  var storeUrl = (storeLinks[app] || {})[selectedDevice];
 
   if(!app || !deepLinkBuilders[app] || !storeUrl){
     // Missing/unknown params — nothing sensible to do.
     spinnerEl.style.display = 'none';
-    titleEl.textContent = 'Ссылка недействительна';
-    hintEl.textContent = 'Откройте эту страницу из бота или сайта VedaVPN.';
+    titleEl.textContent = T.invalidTitle;
+    hintEl.textContent = T.invalidHint;
     return;
   }
 
-  // Always show a manual fallback link right away, in case the automatic
-  // redirect below is blocked by an in-app browser (e.g. Telegram's own
-  // webview sometimes restricts custom URL scheme navigation).
+  // Detect the phone's real OS from the browser itself. This is what
+  // lets us catch a mismatch between what was picked in the bot
+  // (selectedDevice) and what the person is actually holding.
+  function detectActualDevice(){
+    var ua = (navigator.userAgent || navigator.vendor || window.opera || '');
+    if(/android/i.test(ua)) return 'android';
+    if(/iphone|ipad|ipod/i.test(ua)) return 'ios';
+    return null; // can't tell (e.g. desktop browser) -- don't block in that case
+  }
+  var actualDevice = detectActualDevice();
+
+  if(actualDevice && actualDevice !== selectedDevice){
+    // Wrong device selected in the bot: never open/redirect anything,
+    // just tell the person to go back and pick the right one. This is
+    // what guarantees that picking Android always opens the Android
+    // app and picking iPhone always opens the iOS app -- we simply
+    // refuse to proceed at all when there's a mismatch.
+    spinnerEl.style.display = 'none';
+    spinnerEl.classList.add('warn');
+    titleEl.classList.add('warn');
+    titleEl.textContent = T.wrongDeviceTitle;
+    hintEl.textContent = T.wrongDevice[actualDevice];
+    return;
+  }
+
+  titleEl.textContent = T.opening;
+  hintEl.textContent = T.hint;
+
+  // Show the manual store fallback link right away too, but — unlike
+  // before — we never auto-navigate to it. In-app browsers (Telegram's
+  // webview in particular) frequently don't fire `visibilitychange` even
+  // when the incy:// deep link successfully opened the app, so a
+  // timeout-based "app not found, redirecting to store" check was
+  // yanking people to the App/Play Store even though INCY had actually
+  // opened and imported the link just fine. Now that navigation only
+  // happens if the person taps the button themselves.
   fallbackBtn.href = storeUrl;
+  fallbackBtn.textContent = T.fallbackBtn;
   fallbackBtn.classList.add('show');
 
   function copyToClipboardSilently(text){
@@ -124,19 +191,16 @@
   if(subUrl){ copyToClipboardSilently(subUrl); }
 
   var deepLink = deepLinkBuilders[app](subUrl);
-  var didHide = false;
-  function onVisibilityChange(){ if(document.hidden) didHide = true; }
-  document.addEventListener('visibilitychange', onVisibilityChange);
-
   window.location.href = deepLink;
 
+  // After a short delay, stop showing the spinner and update the hint to
+  // say "tap below if it didn't open" — but don't move the page anywhere
+  // on our own. The VPN link is also already copied to the clipboard as
+  // a backup in case INCY needs it pasted in manually.
   setTimeout(function(){
-    document.removeEventListener('visibilitychange', onVisibilityChange);
-    if(!didHide){
-      titleEl.textContent = 'Приложение не найдено';
-      hintEl.textContent = 'Переходим в магазин приложений…';
-      window.location.href = storeUrl;
-    }
+    spinnerEl.style.display = 'none';
+    titleEl.textContent = T.openedTitle;
+    hintEl.textContent = T.openedHint;
   }, 1500);
 })();
 </script>
