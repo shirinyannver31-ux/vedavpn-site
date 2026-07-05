@@ -769,21 +769,44 @@
   if(lang){ showMain(); }
 
   // ---- Live, real visitor counter (no signup, public free API) ----
-  // Increments a shared counter on every real page load and displays the
-  // actual total — not a made-up number.
+  // Each unique visitor (identified by an id stored in localStorage) counts
+  // ONCE, ever. Reopening or refreshing the page will NOT increment the
+  // counter again — it will just show the current total.
   (async function trackRealVisit(){
     const statEl = document.getElementById('stat1Num');
-    try{
-      const res = await fetch('https://countapi.mileshilliard.com/api/v1/hit/vedavpn-lol-site-visits');
-      const data = await res.json();
-      const value = data && data.value;
+    const VISITED_KEY = 'vedavpn_visitor_id';
+
+    function renderValue(value){
       if(typeof value === 'number'){
         statEl.textContent = value.toLocaleString('en-US');
       } else {
         statEl.textContent = '—';
       }
+    }
+
+    try{
+      let visitorId = localStorage.getItem(VISITED_KEY);
+      const isNewVisitor = !visitorId;
+
+      if(isNewVisitor){
+        // Generate and persist a unique id for this visitor so future
+        // visits (refresh, reopen, etc.) are recognized and skipped.
+        visitorId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+          'v-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+        localStorage.setItem(VISITED_KEY, visitorId);
+      }
+
+      // New visitor -> increment the shared counter once.
+      // Returning visitor -> only read the current value, don't increment.
+      const endpoint = isNewVisitor
+        ? 'https://countapi.mileshilliard.com/api/v1/hit/vedavpn-lol-site-visits'
+        : 'https://countapi.mileshilliard.com/api/v1/get/vedavpn-lol-site-visits';
+
+      const res = await fetch(endpoint);
+      const data = await res.json();
+      renderValue(data && data.value);
     }catch(e){
-      statEl.textContent = '—';
+      renderValue(null);
     }
   })();
 })();
