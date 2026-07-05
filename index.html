@@ -799,8 +799,8 @@
       // New visitor -> increment the shared counter once.
       // Returning visitor -> only read the current value, don't increment.
       const endpoint = isNewVisitor
-        ? 'https://countapi.mileshilliard.com/api/v1/hit/vedavpn-lol-site-visits'
-        : 'https://countapi.mileshilliard.com/api/v1/get/vedavpn-lol-site-visits';
+        ? 'https://countapi.mileshilliard.com/api/v1/hit/vedavpn-lol-site-visits-v2'
+        : 'https://countapi.mileshilliard.com/api/v1/get/vedavpn-lol-site-visits-v2';
 
       const res = await fetch(endpoint);
       const data = await res.json();
