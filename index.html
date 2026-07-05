@@ -421,6 +421,26 @@
     color:var(--signal-dim);
     flex-shrink:0;
   }
+  .open-app-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-top:10px;
+    padding:9px 16px;
+    border-radius:10px;
+    border:1px solid var(--signal-dim);
+    background:rgba(57,255,158,0.08);
+    color:var(--signal);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    text-decoration:none;
+    cursor:pointer;
+    transition:transform .12s ease, background-color .15s ease;
+  }
+  .open-app-btn:active{ transform:scale(0.96); }
+  .open-app-btn:hover{ background:rgba(57,255,158,0.14); }
   .step-1{
     font-size:13px;
     color:var(--text);
@@ -756,10 +776,16 @@
         <div class="app-block">
           <p class="app-name">📱 Happ</p>
           <ul class="app-steps" id="happSteps"></ul>
+          <a href="#" class="open-app-btn" id="openHappBtn">
+            <span>🚀</span><span id="openHappBtnText"></span>
+          </a>
         </div>
         <div class="app-block">
           <p class="app-name">📱 INCY</p>
           <ul class="app-steps" id="incySteps"></ul>
+          <a href="#" class="open-app-btn" id="openIncyBtn">
+            <span>🚀</span><span id="openIncyBtnText"></span>
+          </a>
         </div>
       </div>
     </div>
@@ -810,6 +836,56 @@
 <script>
 (function(){
   const subUrl = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
+  // Deep-link URIs that let Happ / INCY import the subscription directly,
+  // without the user having to copy-paste the link manually.
+  const happDeepLink = 'happ://add/' + subUrl;
+  const incyDeepLink = 'incy://add/' + subUrl;
+
+  // Store links used as a fallback when the app isn't installed.
+  const storeLinks = {
+    happ: {
+      android: 'https://play.google.com/store/apps/details?id=com.happproxy',
+      ios: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215'
+    },
+    incy: {
+      android: 'https://play.google.com/store/apps/details?id=llc.itdev.incy',
+      ios: 'https://apps.apple.com/ru/app/incy/id6756943388'
+    }
+  };
+
+  function detectOS(){
+    const ua = navigator.userAgent || '';
+    if(/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+    if(/Android/i.test(ua)) return 'android';
+    return 'other';
+  }
+
+  // Tries to open the app via its deep link. If the page is still visible
+  // after a short delay (meaning the OS never switched away to open the
+  // app), we assume it isn't installed and send the user to the matching
+  // store page instead.
+  function openAppOrRedirectToStore(deepLink, storeUrlsByOs){
+    const os = detectOS();
+    const storeUrl = storeUrlsByOs[os];
+    let didHide = false;
+
+    function onVisibilityChange(){
+      if(document.hidden) didHide = true;
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    window.location.href = deepLink;
+
+    setTimeout(()=>{
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      if(!didHide && storeUrl){
+        window.location.href = storeUrl;
+      }
+      // If there's no store URL for this OS (e.g. iOS link not added yet)
+      // and the app didn't open, we simply do nothing further — the
+      // subscription link is already in the clipboard as a fallback.
+    }, 1500);
+  }
 
   const dict = {
     ru: {
@@ -837,6 +913,7 @@
         'Подтвердите ссылку',
         'Выберите сервер и подключитесь'
       ],
+      openHapp: 'Открыть в Happ', openIncy: 'Открыть в INCY',
       tipChannel: 'Канал', tipBot: 'Бот', tipForum: 'Форум',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Частые вопросы',
@@ -884,6 +961,7 @@
         'Հաստատիր հղումը',
         'Ընտրիր սերվեր և միացիր'
       ],
+      openHapp: 'Բացել Happ-ում', openIncy: 'Բացել INCY-ում',
       tipChannel: 'Ալիք', tipBot: 'Բոտ', tipForum: 'Ֆորում',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Հաճախակի հարցեր',
@@ -931,6 +1009,7 @@
         'Confirm the link',
         'Pick a server and connect'
       ],
+      openHapp: 'Open in Happ', openIncy: 'Open in INCY',
       tipChannel: 'Channel', tipBot: 'Bot', tipForum: 'Forum',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Frequently asked questions',
@@ -981,6 +1060,10 @@
     step1Text: document.getElementById('step1Text'),
     happSteps: document.getElementById('happSteps'),
     incySteps: document.getElementById('incySteps'),
+    openHappBtn: document.getElementById('openHappBtn'),
+    openIncyBtn: document.getElementById('openIncyBtn'),
+    openHappBtnText: document.getElementById('openHappBtnText'),
+    openIncyBtnText: document.getElementById('openIncyBtnText'),
     tipChannel: document.getElementById('tipChannel'),
     tipBot: document.getElementById('tipBot'),
     tipForum: document.getElementById('tipForum'),
@@ -1089,6 +1172,10 @@
     el.step1Text.textContent = d.step1;
     el.happSteps.innerHTML = d.happ.map(s=>`<li>${s}</li>`).join('');
     el.incySteps.innerHTML = d.incy.map(s=>`<li>${s}</li>`).join('');
+    el.openHappBtnText.textContent = d.openHapp;
+    el.openIncyBtnText.textContent = d.openIncy;
+    el.openHappBtn.href = happDeepLink;
+    el.openIncyBtn.href = incyDeepLink;
     el.tipChannel.textContent = d.tipChannel;
     el.tipBot.textContent = d.tipBot;
     el.tipForum.textContent = d.tipForum;
@@ -1128,6 +1215,27 @@
       setTimeout(()=>{ el.revealPanel.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 150);
     }
   });
+
+  // Also copy the subscription link to the clipboard when an "Open in X"
+  // button is tapped. If the deep link fails to launch the app (not
+  // installed, or the URI scheme is blocked in some in-app browser), the
+  // link is still in the clipboard so the user can fall back to
+  // "+" -> "From Clipboard" inside the app, per each app's own instructions.
+  function copyToClipboardSilently(text){
+    try{
+      navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
+    }catch(e){ /* ignore */ }
+  }
+  // Tapping "Open in Happ / INCY": copy the link to clipboard as a safety
+  // net, try to launch the app via deep link, and fall back to the store
+  // page if the app doesn't open.
+  function handleOpenAppClick(e, deepLink, storeUrlsByOs){
+    e.preventDefault();
+    copyToClipboardSilently(subUrl);
+    openAppOrRedirectToStore(deepLink, storeUrlsByOs);
+  }
+  el.openHappBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, happDeepLink, storeLinks.happ); });
+  el.openIncyBtn.addEventListener('click', (e)=>{ handleOpenAppClick(e, incyDeepLink, storeLinks.incy); });
 
   el.copyBtn.addEventListener('click', async ()=>{
     try{
