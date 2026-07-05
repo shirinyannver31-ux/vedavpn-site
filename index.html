@@ -289,14 +289,26 @@
   }
   .cta-btn:active{ transform:scale(0.98); }
 
-  /* ---------- Reveal panel ---------- */
-  #revealPanel{
-    margin-top:18px;
-    max-height:0;
-    overflow:hidden;
-    transition:max-height .4s ease;
+  /* ---------- VPN screen (separate screen shown after tapping Get VPN) ---------- */
+  #vpnScreen{ display:none; flex:1; flex-direction:column; }
+  #vpnScreen .top-row{ justify-content:flex-start; margin-bottom:18px; }
+  .back-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:14px;
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .1s ease;
   }
-  #revealPanel.open{ max-height:1200px; }
+  .back-btn:hover{ border-color:var(--signal-dim); }
+  .back-btn:active{ transform:scale(0.97); }
   .reveal-card{
     background:var(--panel);
     border:1px solid var(--line);
@@ -317,6 +329,31 @@
     width:8px; height:8px; border-radius:50%;
     background:var(--signal);
     box-shadow:0 0 8px var(--signal);
+  }
+  .qr-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .qr-box{
+    background:#FFFFFF;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    line-height:0;
+  }
+  .qr-box img, .qr-box canvas, .qr-box table{
+    display:block;
+    width:150px !important;
+    height:150px !important;
+  }
+  .qr-hint{
+    font-size:12px;
+    color:var(--muted);
+    margin:0;
+    text-align:center;
   }
   .link-row{
     display:flex;
@@ -495,12 +532,29 @@
     margin:0 0 10px;
   }
   .device-switch{
-    display:grid;
-    grid-template-columns:1fr 1fr;
+    position:relative;
+    display:flex;
     gap:10px;
+    padding:4px;
+    border-radius:18px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+  }
+  .device-switch-thumb{
+    position:absolute;
+    top:4px; bottom:4px; left:4px;
+    width:0;
+    border-radius:14px;
+    background:rgba(57,255,158,0.1);
+    border:1.5px solid var(--signal);
+    transition:transform .28s cubic-bezier(.4,0,.2,1), width .28s ease;
+    z-index:0;
+    pointer-events:none;
   }
   .device-btn{
     position:relative;
+    z-index:1;
+    flex:1;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -508,12 +562,12 @@
     gap:4px;
     padding:16px 10px;
     border-radius:14px;
-    border:1.5px solid var(--line);
-    background:var(--panel-2);
+    border:1.5px solid transparent;
+    background:transparent;
     color:var(--muted);
     font-family:'Inter', sans-serif;
     cursor:pointer;
-    transition:border-color .15s ease, color .15s ease, transform .1s ease, background-color .15s ease;
+    transition:color .15s ease, transform .1s ease;
   }
   .device-btn .device-ico{ font-size:26px; line-height:1; }
   .device-btn .device-label{
@@ -536,10 +590,6 @@
     transition:border-color .15s ease, background-color .15s ease;
   }
   .device-btn:active{ transform:scale(0.97); }
-  .device-btn.active{
-    border-color:var(--signal);
-    background:rgba(57,255,158,0.1);
-  }
   .device-btn.active .device-label{ color:var(--signal); }
   .device-btn.active .device-check{
     border-color:var(--signal);
@@ -600,6 +650,47 @@
 
   /* ---------- Reviews ---------- */
   .reviews-section{ margin-top:30px; }
+
+  /* ---------- Footer ---------- */
+  .site-footer{
+    margin-top:36px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    text-align:center;
+  }
+  .footer-brand{ display:flex; align-items:center; gap:8px; }
+  .footer-brand .brand{ font-size:15px; }
+  .footer-links{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .footer-links a{
+    color:var(--muted);
+    font-size:13px;
+    font-weight:500;
+    text-decoration:none;
+    transition:color .15s ease;
+  }
+  .footer-links a:hover{ color:var(--signal); }
+  .footer-disclaimer{
+    font-size:11.5px;
+    color:var(--muted);
+    max-width:340px;
+    line-height:1.55;
+    margin:0;
+  }
+  .footer-copy{
+    font-size:11px;
+    color:var(--muted);
+    margin:0;
+    font-family:'IBM Plex Mono', monospace;
+  }
   .reviews-heading{
     font-family:'Space Grotesk', sans-serif;
     font-weight:600;
@@ -848,61 +939,6 @@
 
     <button class="cta-btn" id="ctaBtn"></button>
 
-    <div id="revealPanel">
-      <div class="reveal-card">
-        <p class="reveal-title"><span class="pulse"></span><span id="revealTitle"></span></p>
-        <div class="link-row">
-          <div class="link-box" id="linkBox"></div>
-          <button class="copy-btn" id="copyBtn">
-            <svg class="check-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            <span id="copyBtnText"></span>
-          </button>
-        </div>
-
-        <hr class="divider">
-
-        <p class="instr-title" id="instrTitle"></p>
-        <div class="step-1">
-          <span>1️⃣</span><span id="step1Text"></span>
-        </div>
-
-        <div class="device-picker">
-          <p class="device-picker-label" id="devicePickerLabel"></p>
-          <div class="device-switch">
-            <button type="button" class="device-btn" id="deviceBtnAndroid" data-device="android">
-              <span class="device-check"></span>
-              <span class="device-ico">🤖</span>
-              <span class="device-label" id="deviceBtnAndroidText"></span>
-              <span class="device-sub">Google Play</span>
-            </button>
-            <button type="button" class="device-btn" id="deviceBtnIos" data-device="ios">
-              <span class="device-check"></span>
-              <span class="device-ico">🍏</span>
-              <span class="device-label" id="deviceBtnIosText"></span>
-              <span class="device-sub">App Store</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="app-block">
-          <p class="app-name">📱 Happ</p>
-          <ul class="app-steps" id="happSteps"></ul>
-          <a href="#" class="open-app-btn" id="openHappBtn" target="_blank" rel="noopener">
-            <span class="store-ico" id="openHappBtnIco"></span>
-            <span class="store-text"><small id="openHappBtnSmall"></small><strong id="openHappBtnText"></strong></span>
-          </a>
-        </div>
-        <div class="app-block">
-          <p class="app-name">📱 INCY</p>
-          <ul class="app-steps" id="incySteps"></ul>
-          <a href="#" class="open-app-btn" id="openIncyBtn" target="_blank" rel="noopener">
-            <span class="store-ico" id="openIncyBtnIco"></span>
-            <span class="store-text"><small id="openIncyBtnSmall"></small><strong id="openIncyBtnText"></strong></span>
-          </a>
-        </div>
-      </div>
-    </div>
-
     <div class="faq-section">
       <p class="faq-heading" id="faqHeading"></p>
       <div id="faqList"></div>
@@ -936,6 +972,90 @@
         <div class="review-loading" id="reviewLoading"></div>
       </div>
     </div>
+
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <div class="logo-mark-sm"><img src="veda-logo.png" alt="VedaVPN"></div>
+        <span class="brand">Veda<span>VPN</span></span>
+      </div>
+      <div class="footer-links">
+        <a href="https://t.me/vedavpn" target="_blank" rel="noopener" id="footerChannel"></a>
+        <a href="https://t.me/vedavpn_bot" target="_blank" rel="noopener" id="footerBot"></a>
+        <a href="https://t.me/vedavpnforum" target="_blank" rel="noopener" id="footerForum"></a>
+      </div>
+      <p class="footer-disclaimer" id="footerDisclaimer"></p>
+      <p class="footer-copy" id="footerCopy"></p>
+    </footer>
+  </div>
+
+  <!-- ===== VPN screen (shown after tapping "Get VPN") ===== -->
+  <div id="vpnScreen">
+    <div class="top-row">
+      <button class="back-btn" id="backBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M15 18l-6-6 6-6"/></svg>
+        <span id="backBtnText"></span>
+      </button>
+    </div>
+
+    <div class="reveal-card">
+      <p class="reveal-title"><span class="pulse"></span><span id="revealTitle"></span></p>
+
+      <div class="qr-wrap">
+        <div class="qr-box" id="qrCode"></div>
+        <p class="qr-hint" id="qrHint"></p>
+      </div>
+
+      <div class="link-row">
+        <div class="link-box" id="linkBox"></div>
+        <button class="copy-btn" id="copyBtn">
+          <svg class="check-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          <span id="copyBtnText"></span>
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <p class="instr-title" id="instrTitle"></p>
+      <div class="step-1">
+        <span>1️⃣</span><span id="step1Text"></span>
+      </div>
+
+      <div class="device-picker">
+        <p class="device-picker-label" id="devicePickerLabel"></p>
+        <div class="device-switch" id="deviceSwitch">
+          <div class="device-switch-thumb" id="deviceThumb"></div>
+          <button type="button" class="device-btn" id="deviceBtnAndroid" data-device="android">
+            <span class="device-check"></span>
+            <span class="device-ico">🤖</span>
+            <span class="device-label" id="deviceBtnAndroidText"></span>
+            <span class="device-sub">Google Play</span>
+          </button>
+          <button type="button" class="device-btn" id="deviceBtnIos" data-device="ios">
+            <span class="device-check"></span>
+            <span class="device-ico">🍏</span>
+            <span class="device-label" id="deviceBtnIosText"></span>
+            <span class="device-sub">App Store</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="app-block">
+        <p class="app-name">📱 Happ</p>
+        <ul class="app-steps" id="happSteps"></ul>
+        <a href="#" class="open-app-btn" id="openHappBtn" target="_blank" rel="noopener">
+          <span class="store-ico" id="openHappBtnIco"></span>
+          <span class="store-text"><small id="openHappBtnSmall"></small><strong id="openHappBtnText"></strong></span>
+        </a>
+      </div>
+      <div class="app-block">
+        <p class="app-name">📱 INCY</p>
+        <ul class="app-steps" id="incySteps"></ul>
+        <a href="#" class="open-app-btn" id="openIncyBtn" target="_blank" rel="noopener">
+          <span class="store-ico" id="openIncyBtnIco"></span>
+          <span class="store-text"><small id="openIncyBtnSmall"></small><strong id="openIncyBtnText"></strong></span>
+        </a>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -946,6 +1066,7 @@
   <a href="https://t.me/vedavpnforum" target="_blank" rel="noopener"><span class="tip" id="tipForum"></span>💬</a>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
   const subUrl = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
@@ -983,9 +1104,20 @@
   let selectedDevice = localStorage.getItem('vedavpn_device') ||
     (detectOS() === 'ios' ? 'ios' : 'android');
 
+  function positionDeviceThumb(){
+    const activeBtn = selectedDevice === 'ios' ? el.deviceBtnIos : el.deviceBtnAndroid;
+    if(!activeBtn || !el.deviceSwitch || !el.deviceThumb) return;
+    const containerRect = el.deviceSwitch.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    if(btnRect.width === 0) return; // switch isn't visible/laid out yet
+    el.deviceThumb.style.width = btnRect.width + 'px';
+    el.deviceThumb.style.transform = `translateX(${btnRect.left - containerRect.left}px)`;
+  }
+
   function renderDevicePicker(){
     el.deviceBtnAndroid.classList.toggle('active', selectedDevice === 'android');
     el.deviceBtnIos.classList.toggle('active', selectedDevice === 'ios');
+    positionDeviceThumb();
   }
 
   // Point each "open app" button at the correct store page for the
@@ -1017,7 +1149,9 @@
       feat1: 'Без логов', feat2: 'Высокая скорость', feat3: 'Серверы по миру',
       stat1: 'посетителей сайта', stat2: 'серверов', stat3: 'аптайм',
       cta: '🔓 Получить VPN',
+      back: '← Назад',
       revealTitle: 'Ваша VPN ссылка',
+      qrHint: 'Или отсканируйте QR-код камерой телефона',
       copy: 'Копировать', copied: 'Скопировано ✓',
       instrTitle: '📖 Как добавить VPN ссылку',
       step1: 'Сначала скопируйте VPN ссылку, нажав на кнопку «Копировать» выше',
@@ -1040,6 +1174,7 @@
       devicePickerLabel: 'Какой у вас телефон?',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Канал', tipBot: 'Бот', tipForum: 'Форум',
+      footerDisclaimer: 'VedaVPN предоставляется бесплатно подписчикам нашего канала. Используйте на свой страх и риск.',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Частые вопросы',
       faq: [
@@ -1068,7 +1203,9 @@
       feat1: 'Առանց logs', feat2: 'Բարձր արագություն', feat3: 'Սերվերներ աշխարհով',
       stat1: 'կայքի այցելու', stat2: 'սերվեր', stat3: 'uptime',
       cta: '🔓 Ստանալ VPN',
+      back: '← Հետ',
       revealTitle: 'Ձեր VPN հղումը',
+      qrHint: 'Կամ սկանավորեք QR կոդը հեռախոսի տեսախցիկով',
       copy: 'Կրկնօրինակել', copied: 'Կրկնօրինակված ✓',
       instrTitle: '📖 Ինչպես ավելացնել VPN հղումը',
       step1: 'Նախ կրկնօրինակիր VPN հղումը՝ սեղմելով վերևի «Կրկնօրինակել» կոճակին',
@@ -1091,6 +1228,7 @@
       devicePickerLabel: 'Ի՞նչ հեռախոս ունես',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Ալիք', tipBot: 'Բոտ', tipForum: 'Ֆորում',
+      footerDisclaimer: 'VedaVPN-ը տրամադրվում է անվճար մեր ալիքի բաժանորդներին։ Օգտագործեք ձեր պատասխանատվությամբ։',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Հաճախակի հարցեր',
       faq: [
@@ -1119,7 +1257,9 @@
       feat1: 'No logs', feat2: 'High speed', feat3: 'Servers worldwide',
       stat1: 'site visitors', stat2: 'servers', stat3: 'uptime',
       cta: '🔓 Get VPN',
+      back: '← Back',
       revealTitle: 'Your VPN link',
+      qrHint: 'Or scan the QR code with your phone camera',
       copy: 'Copy', copied: 'Copied ✓',
       instrTitle: '📖 How to add the VPN link',
       step1: 'First copy the VPN link by tapping the "Copy" button above',
@@ -1142,6 +1282,7 @@
       devicePickerLabel: 'What phone do you have?',
       deviceAndroid: 'Android', deviceIOS: 'iPhone',
       tipChannel: 'Channel', tipBot: 'Bot', tipForum: 'Forum',
+      footerDisclaimer: 'VedaVPN is provided free of charge to our channel subscribers. Use at your own discretion.',
       langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading: '❓ Frequently asked questions',
       faq: [
@@ -1182,8 +1323,12 @@
     feat2: document.getElementById('feat2'),
     feat3: document.getElementById('feat3'),
     ctaBtn: document.getElementById('ctaBtn'),
-    revealPanel: document.getElementById('revealPanel'),
+    vpnScreen: document.getElementById('vpnScreen'),
+    backBtn: document.getElementById('backBtn'),
+    backBtnText: document.getElementById('backBtnText'),
     revealTitle: document.getElementById('revealTitle'),
+    qrCode: document.getElementById('qrCode'),
+    qrHint: document.getElementById('qrHint'),
     linkBox: document.getElementById('linkBox'),
     copyBtn: document.getElementById('copyBtn'),
     copyBtnText: document.getElementById('copyBtnText'),
@@ -1200,6 +1345,8 @@
     openHappBtnIco: document.getElementById('openHappBtnIco'),
     openIncyBtnIco: document.getElementById('openIncyBtnIco'),
     devicePickerLabel: document.getElementById('devicePickerLabel'),
+    deviceSwitch: document.getElementById('deviceSwitch'),
+    deviceThumb: document.getElementById('deviceThumb'),
     deviceBtnAndroid: document.getElementById('deviceBtnAndroid'),
     deviceBtnIos: document.getElementById('deviceBtnIos'),
     deviceBtnAndroidText: document.getElementById('deviceBtnAndroidText'),
@@ -1217,7 +1364,28 @@
     reviewSubmitBtn: document.getElementById('reviewSubmitBtn'),
     reviewStatus: document.getElementById('reviewStatus'),
     reviewList: document.getElementById('reviewList'),
+    footerChannel: document.getElementById('footerChannel'),
+    footerBot: document.getElementById('footerBot'),
+    footerForum: document.getElementById('footerForum'),
+    footerDisclaimer: document.getElementById('footerDisclaimer'),
+    footerCopy: document.getElementById('footerCopy'),
   };
+
+  // The VPN link doesn't change with language, so the QR code only needs
+  // to be generated once, using the qrcodejs library loaded above.
+  function renderQr(){
+    if(typeof QRCode === 'undefined' || !el.qrCode) return;
+    el.qrCode.innerHTML = '';
+    new QRCode(el.qrCode, {
+      text: subUrl,
+      width: 150,
+      height: 150,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+  renderQr();
 
   function renderFaq(){
     const d = dict[lang];
@@ -1305,7 +1473,9 @@
     el.feat2.textContent = d.feat2;
     el.feat3.textContent = d.feat3;
     el.ctaBtn.textContent = d.cta;
+    el.backBtnText.textContent = d.back;
     el.revealTitle.textContent = d.revealTitle;
+    el.qrHint.textContent = d.qrHint;
     el.linkBox.textContent = subUrl;
     el.copyBtnText.textContent = d.copy;
     el.instrTitle.textContent = d.instrTitle;
@@ -1320,6 +1490,11 @@
     el.tipChannel.textContent = d.tipChannel;
     el.tipBot.textContent = d.tipBot;
     el.tipForum.textContent = d.tipForum;
+    el.footerChannel.textContent = d.tipChannel;
+    el.footerBot.textContent = d.tipBot;
+    el.footerForum.textContent = d.tipForum;
+    el.footerDisclaimer.textContent = d.footerDisclaimer;
+    el.footerCopy.textContent = `© ${new Date().getFullYear()} VedaVPN`;
     document.documentElement.lang = lang;
     document.querySelectorAll('.lang-switch button').forEach(b=>{
       b.classList.toggle('active', b.dataset.lang === lang);
@@ -1330,9 +1505,22 @@
 
   function showMain(){
     el.langScreen.style.display = 'none';
+    el.vpnScreen.style.display = 'none';
     el.mainScreen.style.display = 'flex';
     renderMain();
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
   }
+
+  function showVpnScreen(){
+    el.mainScreen.style.display = 'none';
+    el.vpnScreen.style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    // The switch has width:0 while its screen is display:none, so the
+    // thumb can only be measured/positioned correctly once it's visible.
+    requestAnimationFrame(positionDeviceThumb);
+  }
+
+  window.addEventListener('resize', positionDeviceThumb);
 
   document.querySelectorAll('#langScreen .lang-btn').forEach(b=>{
     b.addEventListener('click', ()=>{
@@ -1351,10 +1539,11 @@
   });
 
   el.ctaBtn.addEventListener('click', ()=>{
-    el.revealPanel.classList.toggle('open');
-    if(el.revealPanel.classList.contains('open')){
-      setTimeout(()=>{ el.revealPanel.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 150);
-    }
+    showVpnScreen();
+  });
+
+  el.backBtn.addEventListener('click', ()=>{
+    showMain();
   });
 
   // Also copy the subscription link to the clipboard when an "Open" button
