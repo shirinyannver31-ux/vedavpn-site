@@ -112,7 +112,7 @@
   }
   if(subUrl){ copyToClipboardSilently(subUrl); }
 
-  var deepLink = deepLinkPrefixes[app] + encodeURIComponent(subUrl);
+  var deepLink = deepLinkPrefixes[app] + subUrl;
   var didHide = false;
   function onVisibilityChange(){ if(document.hidden) didHide = true; }
   document.addEventListener('visibilitychange', onVisibilityChange);
