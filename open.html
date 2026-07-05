@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VedaVPN — Открытие приложения</title>
+<style>
+  :root{
+    --bg:#0a0f0d; --panel:#101713; --line:#1e2b24;
+    --signal:#39ff9e; --signal-dim:rgba(57,255,158,0.35);
+    --text:#eafff1; --muted:#8aa398;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--bg); color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+  }
+  .wrap{
+    min-height:100%;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+    padding:32px 24px;
+    gap:18px;
+  }
+  .spinner{
+    width:40px; height:40px;
+    border-radius:50%;
+    border:3px solid var(--line);
+    border-top-color:var(--signal);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  h1{
+    font-size:17px; font-weight:600; margin:0;
+    color:var(--text);
+  }
+  p{
+    font-size:14px; color:var(--muted);
+    margin:0; line-height:1.5; max-width:320px;
+  }
+  .fallback-btn{
+    display:none;
+    margin-top:8px;
+    padding:12px 22px;
+    border-radius:12px;
+    border:1px solid var(--signal-dim);
+    background:rgba(57,255,158,0.08);
+    color:var(--signal);
+    font-weight:600;
+    font-size:14px;
+    text-decoration:none;
+  }
+  .fallback-btn.show{ display:inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="spinner" id="spinner"></div>
+  <h1 id="title">Открываем приложение…</h1>
+  <p id="hint">Если приложение не установлено, вы будете автоматически перенаправлены в магазин приложений.</p>
+  <a href="#" class="fallback-btn" id="fallbackBtn">Перейти в магазин приложений</a>
+</div>
+
+<script>
+(function(){
+  // Expected query params:
+  //   app    = "happ" | "incy"
+  //   device = "android" | "ios"
+  //   link   = the VPN subscription URL to import (URL-encoded)
+  var params = new URLSearchParams(window.location.search);
+  var app = params.get('app');
+  var device = params.get('device') === 'ios' ? 'ios' : 'android';
+  var subUrl = params.get('link') || '';
+
+  var deepLinkPrefixes = { happ: 'happ://add/', incy: 'incy://add/' };
+  var storeLinks = {
+    happ: {
+      android: 'https://play.google.com/store/apps/details?id=com.happproxy',
+      ios: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215'
+    },
+    incy: {
+      android: 'https://play.google.com/store/apps/details?id=llc.itdev.incy',
+      ios: 'https://apps.apple.com/ru/app/incy/id6756943388'
+    }
+  };
+
+  var titleEl = document.getElementById('title');
+  var hintEl = document.getElementById('hint');
+  var spinnerEl = document.getElementById('spinner');
+  var fallbackBtn = document.getElementById('fallbackBtn');
+
+  var storeUrl = (storeLinks[app] || {})[device];
+
+  if(!app || !deepLinkPrefixes[app] || !storeUrl){
+    // Missing/unknown params — nothing sensible to do.
+    spinnerEl.style.display = 'none';
+    titleEl.textContent = 'Ссылка недействительна';
+    hintEl.textContent = 'Откройте эту страницу из бота или сайта VedaVPN.';
+    return;
+  }
+
+  // Always show a manual fallback link right away, in case the automatic
+  // redirect below is blocked by an in-app browser (e.g. Telegram's own
+  // webview sometimes restricts custom URL scheme navigation).
+  fallbackBtn.href = storeUrl;
+  fallbackBtn.classList.add('show');
+
+  function copyToClipboardSilently(text){
+    try{ navigator.clipboard && navigator.clipboard.writeText(text).catch(function(){}); }catch(e){}
+  }
+  if(subUrl){ copyToClipboardSilently(subUrl); }
+
+  var deepLink = deepLinkPrefixes[app] + encodeURIComponent(subUrl);
+  var didHide = false;
+  function onVisibilityChange(){ if(document.hidden) didHide = true; }
+  document.addEventListener('visibilitychange', onVisibilityChange);
+
+  window.location.href = deepLink;
+
+  setTimeout(function(){
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    if(!didHide){
+      titleEl.textContent = 'Приложение не найдено';
+      hintEl.textContent = 'Переходим в магазин приложений…';
+      window.location.href = storeUrl;
+    }
+  }, 1500);
+})();
+</script>
+</body>
+</html>
