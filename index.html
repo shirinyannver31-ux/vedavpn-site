@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VedaVPN</title>
+<meta property="og:title" content="VedaVPN — Fast &amp; Secure VPN">
+<meta property="og:description" content="Get your free VPN link in seconds. No logs, high speed, servers worldwide.">
+<meta property="og:image" content="https://vedavpn.lol/og-image.png">
+<meta property="og:url" content="https://vedavpn.lol/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VedaVPN — Fast &amp; Secure VPN">
+<meta name="twitter:description" content="Get your free VPN link in seconds. No logs, high speed, servers worldwide.">
+<meta name="twitter:image" content="https://vedavpn.lol/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:        #0A0F1A;
+    --panel:     #10182B;
+    --panel-2:   #131D33;
+    --line:      #212B42;
+    --signal:    #39FF9E;
+    --signal-dim:#1D8F60;
+    --accent:    #6EA8FE;
+    --text:      #ECEFF4;
+    --muted:     #838DA3;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(57,255,158,0.07), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 32px);
+  }
+  .wrap{
+    max-width:460px;
+    margin:0 auto;
+    min-height:100vh;
+    padding:28px 20px 100px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- Language picker screen ---------- */
+  #langScreen{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:26px;
+    text-align:center;
+  }
+  .logo-mark{
+    width:64px; height:64px;
+    border-radius:18px;
+    background:linear-gradient(160deg, #16233d, #0d1526);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo-mark svg{ width:28px; height:28px; }
+  .brand{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .brand span{ color:var(--signal); }
+  .lang-prompt{
+    color:var(--muted);
+    font-size:14px;
+    margin:0;
+  }
+  .lang-options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+  }
+  .lang-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    width:100%;
+    padding:15px 18px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:15px;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .1s ease;
+  }
+  .lang-btn:active{ transform:scale(0.98); }
+  .lang-btn:hover{ border-color:var(--signal-dim); }
+  .flag{ font-size:20px; }
+
+  /* ---------- Main app screen ---------- */
+  #mainScreen{ display:none; flex:1; flex-direction:column; }
+  .top-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:26px;
+  }
+  .top-row .brand{ font-size:20px; }
+  .lang-switch{
+    display:flex; gap:4px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+  }
+  .lang-switch button{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:4px 8px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .lang-switch button.active{ color:var(--signal); border-color:var(--signal-dim); }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 8px var(--signal);
+    animation:blink 1.8s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+  .hero-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:22px;
+    line-height:1.35;
+    margin:0 0 8px;
+  }
+  .hero-sub{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.55;
+    margin:0 0 26px;
+  }
+
+  /* ---------- Stats row ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .stat{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 8px;
+    text-align:center;
+  }
+  .stat .num{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:19px;
+    color:var(--signal);
+    margin-bottom:2px;
+  }
+  .stat .label{
+    font-size:10px;
+    color:var(--muted);
+    line-height:1.3;
+  }
+
+  .features{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:28px;
+  }
+  .feature{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 8px;
+    text-align:center;
+  }
+  .feature .ico{ font-size:18px; margin-bottom:6px; }
+  .feature .label{
+    font-size:10.5px;
+    color:var(--muted);
+    line-height:1.3;
+  }
+
+  .cta-btn{
+    width:100%;
+    border:none;
+    border-radius:16px;
+    padding:18px 20px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:17px;
+    background:var(--signal);
+    color:#062012;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition:transform .12s ease;
+  }
+  .cta-btn:active{ transform:scale(0.98); }
+
+  /* ---------- Reveal panel ---------- */
+  #revealPanel{
+    margin-top:18px;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .4s ease;
+  }
+  #revealPanel.open{ max-height:1200px; }
+  .reveal-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px 20px;
+    margin-top:4px;
+  }
+  .reveal-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .reveal-title .pulse{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 8px var(--signal);
+  }
+  .link-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .link-box{
+    flex:1;
+    background:#0A0F1A;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--accent);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .copy-btn{
+    flex-shrink:0;
+    background:var(--signal);
+    border:none;
+    color:#062012;
+    border-radius:10px;
+    padding:0 18px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .copy-btn.copied{ background:var(--signal-dim); color:#0A0F1A; }
+
+  .divider{
+    border:none;
+    border-top:1px dashed var(--line);
+    margin:18px 0;
+  }
+
+  .instr-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    margin:0 0 14px;
+  }
+  .app-block{ margin-bottom:16px; }
+  .app-block:last-child{ margin-bottom:0; }
+  .app-name{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  .app-steps{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .app-steps li{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.5;
+    display:flex;
+    gap:8px;
+  }
+  .app-steps li::before{
+    content:'•';
+    color:var(--signal-dim);
+    flex-shrink:0;
+  }
+  .step-1{
+    font-size:13px;
+    color:var(--text);
+    background:rgba(57,255,158,0.07);
+    border:1px solid var(--signal-dim);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:16px;
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq-section{ margin-top:30px; }
+  .faq-heading{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 12px;
+  }
+  .faq-item{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:8px;
+    overflow:hidden;
+  }
+  .faq-q{
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:none;
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:13.5px;
+    padding:14px 16px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .faq-q .chev{
+    color:var(--muted);
+    transition:transform .2s ease;
+    flex-shrink:0;
+  }
+  .faq-item.open .faq-q .chev{ transform:rotate(180deg); }
+  .faq-a{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .faq-item.open .faq-a{ max-height:300px; }
+  .faq-a p{
+    margin:0;
+    padding:0 16px 14px;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.55;
+  }
+
+  /* ---------- Floating footer links ---------- */
+  .float-links{
+    position:fixed;
+    right:16px;
+    bottom:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:20;
+  }
+  .float-links a{
+    width:46px; height:46px;
+    border-radius:50%;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--text);
+    font-size:19px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, transform .12s ease;
+  }
+  .float-links a:active{ transform:scale(0.94); }
+  .float-links a:hover{ border-color:var(--signal-dim); }
+  .float-links .tip{
+    position:absolute;
+    right:56px;
+    top:50%;
+    transform:translateY(-50%);
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    padding:5px 10px;
+    border-radius:8px;
+    font-size:11px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  .float-links a{ position:relative; }
+  .float-links a:hover .tip{ opacity:1; }
+
+  @media (prefers-reduced-motion: reduce){ .dot{ animation:none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ===== Language picker ===== -->
+  <div id="langScreen">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#39FF9E" stroke-width="1.6">
+        <rect x="5" y="11" width="14" height="9" rx="2"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+    </div>
+    <h1 class="brand">Veda<span>VPN</span></h1>
+    <p class="lang-prompt" id="langPromptText">Выберите язык / Ընտրեք լեզուն / Choose language</p>
+    <div class="lang-options">
+      <button class="lang-btn" data-lang="ru"><span class="flag">🇷🇺</span> Русский</button>
+      <button class="lang-btn" data-lang="hy"><span class="flag">🇦🇲</span> Հայերեն</button>
+      <button class="lang-btn" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+    </div>
+  </div>
+
+  <!-- ===== Main screen ===== -->
+  <div id="mainScreen">
+    <div class="top-row">
+      <h1 class="brand">Veda<span>VPN</span></h1>
+      <div class="lang-switch">
+        <button data-lang="ru">RU</button>
+        <button data-lang="hy">HY</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <div class="eyebrow"><span class="dot"></span><span id="eyebrowText"></span></div>
+    <h2 class="hero-title" id="heroTitle"></h2>
+    <p class="hero-sub" id="heroSub"></p>
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="stat1Num">—</div><div class="label" id="stat1"></div></div>
+      <div class="stat"><div class="num">15</div><div class="label" id="stat2"></div></div>
+      <div class="stat"><div class="num">99.9%</div><div class="label" id="stat3"></div></div>
+    </div>
+
+    <div class="features">
+      <div class="feature"><div class="ico">🔒</div><div class="label" id="feat1"></div></div>
+      <div class="feature"><div class="ico">⚡</div><div class="label" id="feat2"></div></div>
+      <div class="feature"><div class="ico">🌍</div><div class="label" id="feat3"></div></div>
+    </div>
+
+    <button class="cta-btn" id="ctaBtn"></button>
+
+    <div id="revealPanel">
+      <div class="reveal-card">
+        <p class="reveal-title"><span class="pulse"></span><span id="revealTitle"></span></p>
+        <div class="link-row">
+          <div class="link-box" id="linkBox"></div>
+          <button class="copy-btn" id="copyBtn"></button>
+        </div>
+
+        <hr class="divider">
+
+        <p class="instr-title" id="instrTitle"></p>
+        <div class="step-1">
+          <span>1️⃣</span><span id="step1Text"></span>
+        </div>
+
+        <div class="app-block">
+          <p class="app-name">📱 Happ</p>
+          <ul class="app-steps" id="happSteps"></ul>
+        </div>
+        <div class="app-block">
+          <p class="app-name">📱 INCY</p>
+          <ul class="app-steps" id="incySteps"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-section">
+      <p class="faq-heading" id="faqHeading"></p>
+      <div id="faqList"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="float-links">
+  <a href="https://t.me/vedavpn" target="_blank" rel="noopener"><span class="tip" id="tipChannel"></span>📢</a>
+  <a href="https://t.me/vedavpn_bot" target="_blank" rel="noopener"><span class="tip" id="tipBot"></span>🤖</a>
+  <a href="https://t.me/vedavpnforum" target="_blank" rel="noopener"><span class="tip" id="tipForum"></span>💬</a>
+</div>
+
+<script>
+(function(){
+  const subUrl = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
+
+  const dict = {
+    ru: {
+      eyebrow: 'Сеть активна',
+      heroTitle: 'Быстрый и безопасный VPN',
+      heroSub: 'Нажми кнопку ниже, чтобы получить свою ссылку и подключиться за минуту.',
+      feat1: 'Без логов', feat2: 'Высокая скорость', feat3: 'Серверы по миру',
+      stat1: 'посетителей сайта', stat2: 'серверов', stat3: 'аптайм',
+      cta: '🔓 Получить VPN',
+      revealTitle: 'Ваша VPN ссылка',
+      copy: 'Копировать', copied: 'Скопировано ✓',
+      instrTitle: '📖 Как добавить VPN ссылку',
+      step1: 'Сначала скопируйте VPN ссылку, нажав на кнопку «Копировать» выше',
+      happ: [
+        'Откройте Happ',
+        'Нажмите «+» вверху справа',
+        'Выберите «Add from Clipboard» или «Import from URL»',
+        'Подтвердите (ссылка уже в буфере обмена)',
+        'Выберите сервер из списка и нажмите Connect'
+      ],
+      incy: [
+        'Откройте INCY',
+        'Нажмите «+»',
+        'Выберите «Paste from Clipboard» или «Add Subscription»',
+        'Подтвердите ссылку',
+        'Выберите сервер и подключитесь'
+      ],
+      tipChannel: 'Канал', tipBot: 'Бот', tipForum: 'Форум',
+      langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
+      faqHeading: '❓ Частые вопросы',
+      faq: [
+        { q: 'Ссылка одна на всех?', a: 'Да, сейчас все пользователи используют одну общую VPN ссылку. Индивидуальные ссылки появятся позже.' },
+        { q: 'Нужно ли платить?', a: 'На данный момент VPN бесплатный. Следите за новостями в канале — там появятся все обновления.' },
+        { q: 'Ссылка перестала работать, что делать?', a: 'Проверьте актуальную ссылку в этом же боте или напишите в поддержку через бот @vedavpn_bot.' },
+        { q: 'Какое приложение лучше использовать?', a: 'Мы рекомендуем Happ или INCY — оба поддерживают эту ссылку и просты в настройке.' }
+      ]
+    },
+    hy: {
+      eyebrow: 'Ցանց ակտիվ',
+      heroTitle: 'Արագ և անվտանգ VPN',
+      heroSub: 'Սեղմիր ներքևի կոճակը՝ քո հղումը ստանալու և րոպեների ընթացքում միանալու համար։',
+      feat1: 'Առանց logs', feat2: 'Բարձր արագություն', feat3: 'Սերվերներ աշխարհով',
+      stat1: 'կայքի այցելու', stat2: 'սերվեր', stat3: 'uptime',
+      cta: '🔓 Ստանալ VPN',
+      revealTitle: 'Ձեր VPN հղումը',
+      copy: 'Կրկնօրինակել', copied: 'Կրկնօրինակված ✓',
+      instrTitle: '📖 Ինչպես ավելացնել VPN հղումը',
+      step1: 'Նախ կրկնօրինակիր VPN հղումը՝ սեղմելով վերևի «Կրկնօրինակել» կոճակին',
+      happ: [
+        'Բացիր Happ-ը',
+        'Սեղմիր «+»-ը վերևի աջ անկյունում',
+        'Ընտրիր «Add from Clipboard» կամ «Import from URL»',
+        'Հաստատիր (հղումն արդեն clipboard-ում է)',
+        'Ընտրիր սերվեր ցանկից և սեղմիր Connect'
+      ],
+      incy: [
+        'Բացիր INCY-ն',
+        'Սեղմիր «+»',
+        'Ընտրիր «Paste from Clipboard» կամ «Add Subscription»',
+        'Հաստատիր հղումը',
+        'Ընտրիր սերվեր և միացիր'
+      ],
+      tipChannel: 'Ալիք', tipBot: 'Բոտ', tipForum: 'Ֆորում',
+      langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
+      faqHeading: '❓ Հաճախակի հարցեր',
+      faq: [
+        { q: 'Հղումը մեկն ա բոլորի համար?', a: 'Այո, հիմա բոլոր user-երն օգտագործում են նույն ընդհանուր VPN հղումը։ Անհատական հղումները կհայտնվեն ավելի ուշ։' },
+        { q: 'Պե՞տք է վճարել', a: 'Այս պահին VPN-ը անվճար է։ Հետևիր ալիքի նորություններին, այնտեղ կերևան բոլոր փոփոխությունները։' },
+        { q: 'Հղումն այլևս չի աշխատում, ի՞նչ անել', a: 'Ստուգիր ընթացիկ հղումը հենց այս բոտում, կամ գրիր support-ին @vedavpn_bot-ի միջոցով։' },
+        { q: 'Ո՞ր հավելվածն է ավելի լավ', a: 'Խորհուրդ ենք տալիս Happ կամ INCY — երկուսն էլ աջակցում են այս հղումին և հեշտ են կարգավորել։' }
+      ]
+    },
+    en: {
+      eyebrow: 'Network active',
+      heroTitle: 'Fast and secure VPN',
+      heroSub: 'Tap the button below to get your link and connect within a minute.',
+      feat1: 'No logs', feat2: 'High speed', feat3: 'Servers worldwide',
+      stat1: 'site visitors', stat2: 'servers', stat3: 'uptime',
+      cta: '🔓 Get VPN',
+      revealTitle: 'Your VPN link',
+      copy: 'Copy', copied: 'Copied ✓',
+      instrTitle: '📖 How to add the VPN link',
+      step1: 'First copy the VPN link by tapping the "Copy" button above',
+      happ: [
+        'Open Happ',
+        'Tap "+" in the top right corner',
+        'Choose "Add from Clipboard" or "Import from URL"',
+        'Confirm (the link is already in your clipboard)',
+        'Pick a server from the list and tap Connect'
+      ],
+      incy: [
+        'Open INCY',
+        'Tap "+"',
+        'Choose "Paste from Clipboard" or "Add Subscription"',
+        'Confirm the link',
+        'Pick a server and connect'
+      ],
+      tipChannel: 'Channel', tipBot: 'Bot', tipForum: 'Forum',
+      langPrompt: 'Выберите язык / Ընտրեք լեզուն / Choose language',
+      faqHeading: '❓ Frequently asked questions',
+      faq: [
+        { q: 'Is the link the same for everyone?', a: 'Yes, right now all users share the same VPN link. Individual links will be added later.' },
+        { q: 'Do I need to pay?', a: 'The VPN is currently free. Follow the channel for any updates.' },
+        { q: 'The link stopped working, what do I do?', a: 'Check the current link right here in this bot, or contact support via @vedavpn_bot.' },
+        { q: 'Which app should I use?', a: 'We recommend Happ or INCY — both support this link and are easy to set up.' }
+      ]
+    }
+  };
+
+  let lang = localStorage.getItem('vedavpn_lang') || null;
+
+  const el = {
+    langScreen: document.getElementById('langScreen'),
+    mainScreen: document.getElementById('mainScreen'),
+    eyebrowText: document.getElementById('eyebrowText'),
+    heroTitle: document.getElementById('heroTitle'),
+    heroSub: document.getElementById('heroSub'),
+    stat1: document.getElementById('stat1'),
+    stat2: document.getElementById('stat2'),
+    stat3: document.getElementById('stat3'),
+    feat1: document.getElementById('feat1'),
+    feat2: document.getElementById('feat2'),
+    feat3: document.getElementById('feat3'),
+    ctaBtn: document.getElementById('ctaBtn'),
+    revealPanel: document.getElementById('revealPanel'),
+    revealTitle: document.getElementById('revealTitle'),
+    linkBox: document.getElementById('linkBox'),
+    copyBtn: document.getElementById('copyBtn'),
+    instrTitle: document.getElementById('instrTitle'),
+    step1Text: document.getElementById('step1Text'),
+    happSteps: document.getElementById('happSteps'),
+    incySteps: document.getElementById('incySteps'),
+    tipChannel: document.getElementById('tipChannel'),
+    tipBot: document.getElementById('tipBot'),
+    tipForum: document.getElementById('tipForum'),
+    faqHeading: document.getElementById('faqHeading'),
+    faqList: document.getElementById('faqList'),
+  };
+
+  function renderFaq(){
+    const d = dict[lang];
+    el.faqHeading.textContent = d.faqHeading;
+    el.faqList.innerHTML = d.faq.map((item, i) => `
+      <div class="faq-item" data-idx="${i}">
+        <button class="faq-q" type="button">
+          <span>${item.q}</span>
+          <span class="chev">⌄</span>
+        </button>
+        <div class="faq-a"><p>${item.a}</p></div>
+      </div>
+    `).join('');
+    el.faqList.querySelectorAll('.faq-q').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        btn.closest('.faq-item').classList.toggle('open');
+      });
+    });
+  }
+
+  function renderMain(){
+    const d = dict[lang];
+    el.eyebrowText.textContent = d.eyebrow;
+    el.heroTitle.textContent = d.heroTitle;
+    el.heroSub.textContent = d.heroSub;
+    el.stat1.textContent = d.stat1;
+    el.stat2.textContent = d.stat2;
+    el.stat3.textContent = d.stat3;
+    el.feat1.textContent = d.feat1;
+    el.feat2.textContent = d.feat2;
+    el.feat3.textContent = d.feat3;
+    el.ctaBtn.textContent = d.cta;
+    el.revealTitle.textContent = d.revealTitle;
+    el.linkBox.textContent = subUrl;
+    el.copyBtn.textContent = d.copy;
+    el.instrTitle.textContent = d.instrTitle;
+    el.step1Text.textContent = d.step1;
+    el.happSteps.innerHTML = d.happ.map(s=>`<li>${s}</li>`).join('');
+    el.incySteps.innerHTML = d.incy.map(s=>`<li>${s}</li>`).join('');
+    el.tipChannel.textContent = d.tipChannel;
+    el.tipBot.textContent = d.tipBot;
+    el.tipForum.textContent = d.tipForum;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    renderFaq();
+  }
+
+  function showMain(){
+    el.langScreen.style.display = 'none';
+    el.mainScreen.style.display = 'flex';
+    renderMain();
+  }
+
+  document.querySelectorAll('#langScreen .lang-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      lang = b.dataset.lang;
+      localStorage.setItem('vedavpn_lang', lang);
+      showMain();
+    });
+  });
+
+  document.querySelectorAll('.lang-switch button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      lang = b.dataset.lang;
+      localStorage.setItem('vedavpn_lang', lang);
+      renderMain();
+    });
+  });
+
+  el.ctaBtn.addEventListener('click', ()=>{
+    el.revealPanel.classList.toggle('open');
+    if(el.revealPanel.classList.contains('open')){
+      setTimeout(()=>{ el.revealPanel.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 150);
+    }
+  });
+
+  el.copyBtn.addEventListener('click', async ()=>{
+    try{
+      await navigator.clipboard.writeText(subUrl);
+    }catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = subUrl; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    el.copyBtn.textContent = dict[lang].copied;
+    el.copyBtn.classList.add('copied');
+    setTimeout(()=>{
+      el.copyBtn.textContent = dict[lang].copy;
+      el.copyBtn.classList.remove('copied');
+    }, 2000);
+  });
+
+  if(lang){ showMain(); }
+
+  // ---- Live, real visitor counter (no signup, public free API) ----
+  // Increments a shared counter on every real page load and displays the
+  // actual total — not a made-up number.
+  (async function trackRealVisit(){
+    const statEl = document.getElementById('stat1Num');
+    try{
+      const res = await fetch('https://countapi.mileshilliard.com/api/v1/hit/vedavpn-lol-site-visits');
+      const data = await res.json();
+      const value = data && data.value;
+      if(typeof value === 'number'){
+        statEl.textContent = value.toLocaleString('en-US');
+      } else {
+        statEl.textContent = '—';
+      }
+    }catch(e){
+      statEl.textContent = '—';
+    }
+  })();
+})();
+</script>
+</body>
+</html>
