@@ -27,6 +27,23 @@
     --accent:    #6EA8FE;
     --text:      #ECEFF4;
     --muted:     #838DA3;
+    --bg-glow:   rgba(57,255,158,0.07);
+    --bg-lines:  rgba(255,255,255,0.015);
+    --shadow:    rgba(0,0,0,0.35);
+  }
+  :root[data-theme="light"]{
+    --bg:        #F3F6FB;
+    --panel:     #FFFFFF;
+    --panel-2:   #FFFFFF;
+    --line:      #DDE4EF;
+    --signal:    #17A968;
+    --signal-dim:#0E8A54;
+    --accent:    #2B6CE0;
+    --text:      #101623;
+    --muted:     #6A7488;
+    --bg-glow:   rgba(23,169,104,0.08);
+    --bg-lines:  rgba(16,22,35,0.03);
+    --shadow:    rgba(16,22,35,0.10);
   }
   *{ box-sizing:border-box; }
   html,body{ height:100%; margin:0; }
@@ -35,9 +52,10 @@
     color:var(--text);
     font-family:'Inter', sans-serif;
     min-height:100vh;
+    transition:background-color .25s ease, color .25s ease;
     background-image:
-      radial-gradient(circle at 50% 0%, rgba(57,255,158,0.07), transparent 55%),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 32px);
+      radial-gradient(circle at 50% 0%, var(--bg-glow), transparent 55%),
+      repeating-linear-gradient(0deg, var(--bg-lines) 0px, var(--bg-lines) 1px, transparent 1px, transparent 32px);
   }
   .wrap{
     max-width:460px;
@@ -65,8 +83,36 @@
     background:linear-gradient(160deg, #16233d, #0d1526);
     border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
   }
+  .logo-mark img{ width:100%; height:100%; object-fit:cover; display:block; }
   .logo-mark svg{ width:28px; height:28px; }
+
+  /* ---------- Theme toggle ---------- */
+  .theme-toggle{
+    width:30px; height:30px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:border-color .15s ease, transform .1s ease;
+  }
+  .theme-toggle:active{ transform:scale(0.92); }
+  .theme-toggle:hover{ border-color:var(--signal-dim); }
+  .theme-toggle svg{ width:16px; height:16px; }
+  .theme-toggle .icon-moon{ display:block; }
+  .theme-toggle .icon-sun{ display:none; }
+  :root[data-theme="light"] .theme-toggle .icon-moon{ display:none; }
+  :root[data-theme="light"] .theme-toggle .icon-sun{ display:block; }
+  .lang-screen-top{
+    position:absolute;
+    top:20px; right:20px;
+  }
   .brand{
     font-family:'Space Grotesk', sans-serif;
     font-weight:700;
@@ -266,7 +312,7 @@
   }
   .link-box{
     flex:1;
-    background:#0A0F1A;
+    background:var(--panel-2);
     border:1px solid var(--line);
     border-radius:10px;
     padding:12px 12px;
@@ -276,6 +322,7 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    transition:background-color .25s ease;
   }
   .copy-btn{
     flex-shrink:0;
@@ -288,8 +335,39 @@
     font-weight:600;
     font-size:13px;
     cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    transition:background-color .2s ease, transform .15s ease;
   }
-  .copy-btn.copied{ background:var(--signal-dim); color:#0A0F1A; }
+  .copy-btn:active{ transform:scale(0.94); }
+  .copy-btn.copied{
+    background:var(--signal-dim);
+    color:#0A0F1A;
+    animation:copyPop .35s ease;
+  }
+  .copy-btn .check-ico{
+    display:none;
+    width:14px; height:14px;
+    animation:checkIn .3s ease;
+  }
+  .copy-btn.copied .check-ico{ display:block; }
+  @keyframes copyPop{
+    0%{ transform:scale(1); }
+    35%{ transform:scale(1.08); }
+    100%{ transform:scale(1); }
+  }
+  @keyframes checkIn{
+    0%{ transform:scale(0) rotate(-20deg); opacity:0; }
+    60%{ transform:scale(1.2) rotate(0deg); opacity:1; }
+    100%{ transform:scale(1); }
+  }
+  .link-box.flash{ animation:linkFlash .5s ease; }
+  @keyframes linkFlash{
+    0%{ background:rgba(57,255,158,0.20); }
+    100%{ background:var(--panel-2); }
+  }
 
   .divider{
     border:none;
@@ -447,11 +525,12 @@
 
   <!-- ===== Language picker ===== -->
   <div id="langScreen">
+    <button class="theme-toggle lang-screen-top" id="themeToggleLang" type="button" aria-label="Toggle theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
     <div class="logo-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#39FF9E" stroke-width="1.6">
-        <rect x="5" y="11" width="14" height="9" rx="2"/>
-        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-      </svg>
+      <img src="veda-logo.png" alt="VedaVPN">
     </div>
     <h1 class="brand">Veda<span>VPN</span></h1>
     <p class="lang-prompt" id="langPromptText">Выберите язык / Ընտրեք լեզուն / Choose language</p>
@@ -466,10 +545,16 @@
   <div id="mainScreen">
     <div class="top-row">
       <h1 class="brand">Veda<span>VPN</span></h1>
-      <div class="lang-switch">
-        <button data-lang="ru">RU</button>
-        <button data-lang="hy">HY</button>
-        <button data-lang="en">EN</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="lang-switch">
+          <button data-lang="ru">RU</button>
+          <button data-lang="hy">HY</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="theme-toggle" id="themeToggleMain" type="button" aria-label="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
       </div>
     </div>
 
@@ -496,7 +581,10 @@
         <p class="reveal-title"><span class="pulse"></span><span id="revealTitle"></span></p>
         <div class="link-row">
           <div class="link-box" id="linkBox"></div>
-          <button class="copy-btn" id="copyBtn"></button>
+          <button class="copy-btn" id="copyBtn">
+            <svg class="check-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span id="copyBtnText"></span>
+          </button>
         </div>
 
         <hr class="divider">
@@ -662,6 +750,7 @@
     revealTitle: document.getElementById('revealTitle'),
     linkBox: document.getElementById('linkBox'),
     copyBtn: document.getElementById('copyBtn'),
+    copyBtnText: document.getElementById('copyBtnText'),
     instrTitle: document.getElementById('instrTitle'),
     step1Text: document.getElementById('step1Text'),
     happSteps: document.getElementById('happSteps'),
@@ -706,7 +795,7 @@
     el.ctaBtn.textContent = d.cta;
     el.revealTitle.textContent = d.revealTitle;
     el.linkBox.textContent = subUrl;
-    el.copyBtn.textContent = d.copy;
+    el.copyBtnText.textContent = d.copy;
     el.instrTitle.textContent = d.instrTitle;
     el.step1Text.textContent = d.step1;
     el.happSteps.innerHTML = d.happ.map(s=>`<li>${s}</li>`).join('');
@@ -758,15 +847,53 @@
       ta.value = subUrl; document.body.appendChild(ta); ta.select();
       document.execCommand('copy'); document.body.removeChild(ta);
     }
-    el.copyBtn.textContent = dict[lang].copied;
+    el.copyBtnText.textContent = dict[lang].copied;
     el.copyBtn.classList.add('copied');
+    el.linkBox.classList.remove('flash');
+    void el.linkBox.offsetWidth; // restart animation
+    el.linkBox.classList.add('flash');
     setTimeout(()=>{
-      el.copyBtn.textContent = dict[lang].copy;
+      el.copyBtnText.textContent = dict[lang].copy;
       el.copyBtn.classList.remove('copied');
     }, 2000);
   });
 
   if(lang){ showMain(); }
+
+  // ---- Light/Dark theme: follows system setting by default, ----
+  // ---- button lets the user override + remembers the choice. ----
+  (function initTheme(){
+    const THEME_KEY = 'vedavpn_theme';
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+
+    function applyTheme(theme){
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    function currentTheme(){
+      const saved = localStorage.getItem(THEME_KEY);
+      if(saved === 'light' || saved === 'dark') return saved;
+      return mq.matches ? 'light' : 'dark';
+    }
+
+    applyTheme(currentTheme());
+
+    // If the user hasn't manually overridden, keep following the system.
+    mq.addEventListener('change', (e)=>{
+      if(!localStorage.getItem(THEME_KEY)){
+        applyTheme(e.matches ? 'light' : 'dark');
+      }
+    });
+
+    function toggleTheme(){
+      const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      localStorage.setItem(THEME_KEY, next);
+    }
+
+    document.getElementById('themeToggleLang').addEventListener('click', toggleTheme);
+    document.getElementById('themeToggleMain').addEventListener('click', toggleTheme);
+  })();
 
   // ---- Live, real visitor counter (no signup, public free API) ----
   // Each unique visitor (identified by an id stored in localStorage) counts
