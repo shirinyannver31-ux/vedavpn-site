@@ -1771,15 +1771,14 @@
     }
   })();
 
-  // ---- Reviews & star ratings (shared across all visitors) ----
-  // Backend: a small Cloudflare Worker + KV storage (see worker.js) — free,
-  // and reviews are stored permanently (no 24h/75-day auto-expiry, unlike
-  // free JSON-storage services).
-  //
-  // ONE-TIME SETUP: deploy worker.js to Cloudflare Workers (free account,
-  // no credit card), then paste your worker's URL below.
+  // ---- Reviews & star ratings (shared across all visitors via JSONBlob) ----
+  // Backend: jsonblob.com — free, public, no signup, no keys. It just stores
+  // one JSON document (here: the array of all reviews) at a fixed URL.
+  // To keep it from ever expiring, a free cron-job.org task pings this URL
+  // every few hours (see setup notes sent separately) — no code needed for that part.
   (function reviewsModule(){
-    const WORKER_URL = 'PASTE_YOUR_WORKER_URL_HERE/reviews';
+    const REVIEWS_BLOB_ID = '019f38a3-e33d-7b5a-a056-988e14610f07';
+    const REVIEWS_URL = `https://jsonblob.com/api/jsonBlob/${REVIEWS_BLOB_ID}`;
 
     // Guards against a slow/unreachable backend leaving the "Sending..."
     // status stuck for a long time — fails fast with an error instead.
@@ -1809,10 +1808,10 @@
 
     async function fetchReviews(){
       try{
-        const res = await fetchWithTimeout(WORKER_URL);
+        const res = await fetchWithTimeout(REVIEWS_URL);
         if(!res.ok) throw new Error('bad response');
         const data = await res.json();
-        // The worker returns [{text, rating, createTime}, ...].
+        // The blob stores [{text, rating, createTime}, ...].
         reviewsCache = (Array.isArray(data) ? data : [])
           .slice()
           .sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
@@ -1835,22 +1834,32 @@
       el.reviewStatus.textContent = d.reviewSending;
       el.reviewStatus.className = 'review-status';
       try{
-        const res = await fetchWithTimeout(WORKER_URL, {
-          method: 'POST',
+        const newEntry = {
+          text: text.slice(0, 500),
+          rating: selectedStars,
+          createTime: new Date().toISOString()
+        };
+        // JSONBlob only supports replacing the whole document, so we read
+        // the current list, append the new review, and write it all back.
+        const getRes = await fetchWithTimeout(REVIEWS_URL);
+        const current = getRes.ok ? await getRes.json() : [];
+        const updated = (Array.isArray(current) ? current : []).concat([newEntry]);
+
+        const res = await fetchWithTimeout(REVIEWS_URL, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text.slice(0, 500), rating: selectedStars })
+          body: JSON.stringify(updated)
         });
         if(!res.ok) throw new Error('request failed');
-        const data = await res.json();
-        reviewsCache = (Array.isArray(data) ? data : [])
-          .slice()
-          .sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
         el.reviewText.value = '';
         selectedStars = 0;
         updateStarButtons();
         el.reviewStarsLabel.textContent = dict[lang].reviewStarsHint(0);
         el.reviewStatus.textContent = d.reviewOk;
         el.reviewStatus.className = 'review-status ok';
+        reviewsCache = updated
+          .slice()
+          .sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
         renderReviewsSummary();
         renderReviewsList();
       }catch(e){
