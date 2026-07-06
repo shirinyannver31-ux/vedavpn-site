@@ -1710,19 +1710,38 @@
     document.getElementById('themeToggleMain').addEventListener('click', toggleTheme);
   })();
 
-  // ---- Live, real visitor counter (no signup, public free API) ----
-  // Each unique visitor (identified by an id stored in localStorage) counts
-  // ONCE, ever. Reopening or refreshing the page will NOT increment the
-  // counter again — it will just show the current total.
+  // ---- Live, real visitor counter ----
+  // Backend: CountAPI (countapi.mileshilliard.com) — free, public, no signup,
+  // no keys. Each unique visitor (identified by an id stored in localStorage)
+  // counts ONCE, ever. Reopening or refreshing the page will NOT increment
+  // the counter again — it will just show the current total.
+  //
+  // The counter key just needs to be unique so nobody else's counter
+  // collides with ours. No account or setup is needed — the key is created
+  // automatically the first time it's hit.
   (async function trackRealVisit(){
     const statEl = document.getElementById('stat1Num');
     const VISITED_KEY = 'vedavpn_visitor_id';
+    const COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
+    const COUNTER_KEY = 'vedavpn_lol_unique_visitors_2026';
 
     function renderValue(value){
-      if(typeof value === 'number'){
+      if(typeof value === 'number' && !isNaN(value)){
         statEl.textContent = value.toLocaleString('en-US');
       } else {
         statEl.textContent = '—';
+      }
+    }
+
+    // Guards against the request hanging forever if the service is slow
+    // or unreachable — fails fast instead of leaving the counter stuck.
+    async function fetchWithTimeout(url, timeoutMs = 8000){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try{
+        return await fetch(url, { signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
       }
     }
 
@@ -1738,20 +1757,42 @@
         localStorage.setItem(VISITED_KEY, visitorId);
       }
 
-      // New visitor -> increment the shared counter once (POST).
-      // Returning visitor -> only read the current value, don't increment (GET).
+      // New visitor -> increment the shared counter once ("hit").
+      // Returning visitor -> only read the current value, don't increment ("get").
       const res = isNewVisitor
-        ? await fetch(`${API}/visitors`, { method: 'POST' })
-        : await fetch(`${API}/visitors`);
+        ? await fetchWithTimeout(`${COUNTER_BASE}/hit/${COUNTER_KEY}`)
+        : await fetchWithTimeout(`${COUNTER_BASE}/get/${COUNTER_KEY}`);
+      if(!res.ok) throw new Error('bad response');
       const data = await res.json();
-      renderValue(data && data.value);
+      const value = (data && data.value != null) ? parseInt(data.value, 10) : null;
+      renderValue(value);
     }catch(e){
       renderValue(null);
     }
   })();
 
-  // ---- Reviews & star ratings (shared across all visitors via our API) ----
+  // ---- Reviews & star ratings (shared across all visitors) ----
+  // Backend: a small Cloudflare Worker + KV storage (see worker.js) — free,
+  // and reviews are stored permanently (no 24h/75-day auto-expiry, unlike
+  // free JSON-storage services).
+  //
+  // ONE-TIME SETUP: deploy worker.js to Cloudflare Workers (free account,
+  // no credit card), then paste your worker's URL below.
   (function reviewsModule(){
+    const WORKER_URL = 'PASTE_YOUR_WORKER_URL_HERE/reviews';
+
+    // Guards against a slow/unreachable backend leaving the "Sending..."
+    // status stuck for a long time — fails fast with an error instead.
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 9000){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try{
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     function updateStarButtons(){
       el.reviewStarsPicker.querySelectorAll('.star-btn').forEach(btn=>{
         btn.classList.toggle('active', parseInt(btn.dataset.star, 10) <= selectedStars);
@@ -1768,10 +1809,10 @@
 
     async function fetchReviews(){
       try{
-        const res = await fetch(`${API}/reviews`);
+        const res = await fetchWithTimeout(WORKER_URL);
         if(!res.ok) throw new Error('bad response');
         const data = await res.json();
-        // The API already returns [{text, rating, createTime}, ...].
+        // The worker returns [{text, rating, createTime}, ...].
         reviewsCache = (Array.isArray(data) ? data : [])
           .slice()
           .sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
@@ -1794,20 +1835,24 @@
       el.reviewStatus.textContent = d.reviewSending;
       el.reviewStatus.className = 'review-status';
       try{
-        const body = { text: text.slice(0, 500), rating: selectedStars };
-        const res = await fetch(`${API}/reviews`, {
+        const res = await fetchWithTimeout(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify({ text: text.slice(0, 500), rating: selectedStars })
         });
         if(!res.ok) throw new Error('request failed');
+        const data = await res.json();
+        reviewsCache = (Array.isArray(data) ? data : [])
+          .slice()
+          .sort((a, b)=> new Date(b.createTime) - new Date(a.createTime));
         el.reviewText.value = '';
         selectedStars = 0;
         updateStarButtons();
         el.reviewStarsLabel.textContent = dict[lang].reviewStarsHint(0);
         el.reviewStatus.textContent = d.reviewOk;
         el.reviewStatus.className = 'review-status ok';
-        await fetchReviews();
+        renderReviewsSummary();
+        renderReviewsList();
       }catch(e){
         el.reviewStatus.textContent = d.reviewErrFail;
         el.reviewStatus.className = 'review-status err';
