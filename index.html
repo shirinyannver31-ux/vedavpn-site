@@ -1657,11 +1657,12 @@ body.modal-open{ overflow:hidden; }
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '2.0.0'; // Major visual overhaul + PWA + Share + Server Status
+  const SITE_VERSION = '2.0.1'; // Fix: don't open app with unresolved subscription link (race condition)
 
   // ---- Subscription link ----
   const SUBSCRIPTION_GIST_URL = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
   let subUrl = SUBSCRIPTION_GIST_URL;
+  let subUrlReady = false;
 
   function getHappDeepLink(){ return 'happ://add/' + subUrl; }
   function getIncyDeepLink(){ return 'incy://add/' + subUrl; }
@@ -1718,6 +1719,7 @@ body.modal-open{ overflow:hidden; }
       revealTitle:'Ваша VPN ссылка',
       qrHint:'Или отсканируйте QR-код камерой телефона',
       copy:'Копировать', copied:'Скопировано ✓',
+      linkNotReady:'Ссылка ещё загружается, попробуйте через секунду',
       instrTitle:'📖 Как добавить VPN ссылку',
       instrNote:'Этот способ — для ручной установки, если автоматическое подключение (через кнопку выше) не сработало.',
       step1:'Сначала скопируйте VPN ссылку, нажав на кнопку «Копировать» выше',
@@ -1767,6 +1769,7 @@ body.modal-open{ overflow:hidden; }
       revealTitle:'Ձեր VPN հղումը',
       qrHint:'Կամ սկանավորեք QR կոդը հեռախոսի տեսախցիկով',
       copy:'Կրկնօրինակել', copied:'Կրկնօրինակված ✓',
+      linkNotReady:'Հղումը դեռ բեռնվում է, փորձիր մեկ վայրկյանից',
       instrTitle:'📖 Ինչպես ավելացնել VPN հղումը',
       instrNote:'Այս եղանակը նախատեսված է ձեռքով տեղադրման համար, եթե ավտոմատ միացումը (վերևի կոճակով) չաշխատեց։',
       step1:'Նախ կրկնօրինակիր VPN հղումը՝ սեղմելով վերևի «Կրկնօրինակել» կոճակին',
@@ -1816,6 +1819,7 @@ body.modal-open{ overflow:hidden; }
       revealTitle:'Your VPN link',
       qrHint:'Or scan the QR code with your phone camera',
       copy:'Copy', copied:'Copied ✓',
+      linkNotReady:'Link is still loading, try again in a second',
       instrTitle:'📖 How to add the VPN link',
       instrNote:"This method is for manual setup, in case the automatic connection (via the button above) didn't work.",
       step1:'First copy the VPN link by tapping the "Copy" button above',
@@ -1955,13 +1959,21 @@ body.modal-open{ overflow:hidden; }
   renderQr();
 
   // ---- Fetch subscription link ----
-  async function loadSubscription(){
-    try{
-      const res = await fetch(`${SUBSCRIPTION_GIST_URL}?t=${Date.now()}`);
-      if(!res.ok) throw new Error('bad response');
-      const text = (await res.text()).trim();
-      if(text) subUrl = text;
-    }catch(e){}
+  async function loadSubscription(retries = 3){
+    for(let attempt = 1; attempt <= retries; attempt++){
+      try{
+        const res = await fetch(`${SUBSCRIPTION_GIST_URL}?t=${Date.now()}`);
+        if(!res.ok) throw new Error('bad response');
+        const text = (await res.text()).trim();
+        if(text){
+          subUrl = text;
+          subUrlReady = true;
+          break;
+        }
+      }catch(e){
+        if(attempt < retries) await new Promise(r => setTimeout(r, 800 * attempt));
+      }
+    }
     if(el.linkBox) el.linkBox.textContent = subUrl;
     renderQr();
   }
@@ -2179,15 +2191,33 @@ body.modal-open{ overflow:hidden; }
       if(!didHide && storeUrl) window.location.href = storeUrl;
     }, 1500);
   }
-  function handleOpenAppClick(e, deepLink, storeUrlsByOs){
+  function flashBtnError(textEl, smallEl){
+    const origText = textEl.textContent;
+    const origSmall = smallEl ? smallEl.textContent : null;
+    textEl.textContent = dict[lang].linkNotReady;
+    if(smallEl) smallEl.textContent = '⚠️';
+    setTimeout(()=>{
+      textEl.textContent = origText;
+      if(smallEl) smallEl.textContent = origSmall;
+    }, 2200);
+  }
+  async function handleOpenAppClick(e, getDeepLink, storeUrlsByOs, textEl, smallEl){
     e.preventDefault();
+    if(!subUrlReady){
+      // One immediate retry in case the first load failed transiently
+      await loadSubscription(1);
+      if(!subUrlReady){
+        flashBtnError(textEl, smallEl);
+        return;
+      }
+    }
     copyToClipboardSilently(subUrl);
     const storeUrl = storeUrlsByOs[selectedDevice];
-    if(detectOS() === selectedDevice){ openAppOrGoToStore(deepLink, storeUrl); }
+    if(detectOS() === selectedDevice){ openAppOrGoToStore(getDeepLink(), storeUrl); }
     else if(storeUrl){ window.location.href = storeUrl; }
   }
-  el.openHappBtn.addEventListener('click',(e)=>{ handleOpenAppClick(e, getHappDeepLink(), storeLinks.happ); });
-  el.openIncyBtn.addEventListener('click',(e)=>{ handleOpenAppClick(e, getIncyDeepLink(), storeLinks.incy); });
+  el.openHappBtn.addEventListener('click',(e)=>{ handleOpenAppClick(e, getHappDeepLink, storeLinks.happ, el.openHappBtnText, el.openHappBtnSmall); });
+  el.openIncyBtn.addEventListener('click',(e)=>{ handleOpenAppClick(e, getIncyDeepLink, storeLinks.incy, el.openIncyBtnText, el.openIncyBtnSmall); });
 
   el.deviceBtnAndroid.addEventListener('click',()=>{
     selectedDevice='android'; localStorage.setItem('vedavpn_device', selectedDevice);
