@@ -1783,7 +1783,7 @@ body.modal-open{ overflow:hidden; }
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '2.1.0'; // Anti-spam: math captcha, auto-delete, keyword block, donate button
+  const SITE_VERSION = '2.1.1'; // Fix: captcha scope, submit btn, donate text rendering
 
   // ---- Subscription link ----
   const SUBSCRIPTION_GIST_URL = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
@@ -2230,6 +2230,15 @@ body.modal-open{ overflow:hidden; }
     }
   }
 
+  // ---- Math CAPTCHA (outer scope so renderMain can call it) ----
+  let captchaA = 0, captchaB = 0;
+  function generateCaptcha(){
+    captchaA = Math.floor(Math.random()*9)+1;
+    captchaB = Math.floor(Math.random()*9)+1;
+    if(el.captchaQuestion) el.captchaQuestion.textContent = dict[lang].reviewCaptchaLabel(captchaA, captchaB);
+    if(el.captchaAnswer)   el.captchaAnswer.value = '';
+  }
+
   // ---- Render main screen strings ----
   function renderMain(){
     const d = dict[lang];
@@ -2590,15 +2599,6 @@ body.modal-open{ overflow:hidden; }
     const URL_PATTERN = /https?:\/\/|www\.|t\.me\//i;
     const PAGE_LOAD_TS = Date.now();
     const MIN_READ_TIME_MS = 20000; // must spend 20s on page before submitting
-
-    // ---- Math CAPTCHA ----
-    let captchaA = 0, captchaB = 0;
-    function generateCaptcha(){
-      captchaA = Math.floor(Math.random()*9)+1;
-      captchaB = Math.floor(Math.random()*9)+1;
-      if(el.captchaQuestion) el.captchaQuestion.textContent = dict[lang].reviewCaptchaLabel(captchaA, captchaB);
-      if(el.captchaAnswer)   el.captchaAnswer.value = '';
-    }
 
     // Known spam keyword blocklist (lowercase)
     const SPAM_KEYWORDS = [
