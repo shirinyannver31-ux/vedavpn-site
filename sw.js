@@ -1,5 +1,5 @@
-// VedaVPN Service Worker — v2.1.0
-const CACHE_NAME = 'vedavpn-v2-1-0';
+// VedaVPN Service Worker — v2.1.1
+const CACHE_NAME = 'vedavpn-v2-1-1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
