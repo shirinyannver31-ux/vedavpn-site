@@ -1130,6 +1130,43 @@ body::after{
 .review-stars-picker .star-btn.active{ color:#F5B93D; transform:scale(1.1); }
 .review-stars-label{ font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
 
+.review-captcha-row{
+  display:flex; align-items:center; gap:10px; margin-top:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-border);
+  border-radius:10px; padding:10px 14px;
+}
+.review-captcha-question{
+  font-size:13.5px; color:var(--text); font-family:'IBM Plex Mono',monospace;
+  font-weight:500; flex:1; white-space:nowrap;
+}
+.review-captcha-input{
+  width:64px; padding:7px 10px; text-align:center;
+  background:rgba(255,255,255,.06);
+  border:1.5px solid var(--glass-border);
+  border-radius:8px; color:var(--text);
+  font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600;
+  transition:border-color .15s;
+  -moz-appearance:textfield;
+}
+.review-captcha-input::-webkit-outer-spin-button,
+.review-captcha-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.review-captcha-input:focus{
+  outline:none; border-color:var(--signal-dim);
+  box-shadow:0 0 0 3px rgba(var(--signal-rgb),.1);
+}
+
+.review-human-row{
+  display:flex; align-items:center; gap:10px; margin-top:10px; cursor:pointer; user-select:none;
+}
+.review-human-cb{
+  width:18px; height:18px; flex-shrink:0; cursor:pointer;
+  accent-color:var(--signal);
+}
+.review-human-label{
+  font-size:12.5px; color:var(--muted); font-family:'Inter',sans-serif;
+}
+
 .review-submit-row{
   display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px;
 }
@@ -1380,6 +1417,70 @@ body.modal-open{ overflow:hidden; }
 /* ============================================================
    MISC REVIEW HEADINGS
    ============================================================ */
+
+/* ============================================================
+   DONATE SECTION
+   ============================================================ */
+.donate-section{ margin-top:28px; }
+.donate-card{
+  background:var(--glass);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid rgba(var(--signal-rgb),.22);
+  border-radius:var(--radius-lg);
+  padding:24px 20px 20px;
+  box-shadow:var(--shadow-md), 0 0 40px rgba(var(--signal-rgb),.07);
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center; gap:10px;
+}
+.donate-icon{
+  font-size:34px; line-height:1;
+  animation:heartbeat 2.6s ease-in-out infinite;
+}
+@keyframes heartbeat{
+  0%,100%{ transform:scale(1); }
+  14%{ transform:scale(1.18); }
+  28%{ transform:scale(1); }
+  42%{ transform:scale(1.09); }
+  56%{ transform:scale(1); }
+}
+.donate-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:16px; font-weight:700; color:var(--text); margin:0;
+}
+.donate-sub{
+  font-size:12.5px; color:var(--muted); margin:0; line-height:1.6; max-width:300px;
+}
+.donate-btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  background:linear-gradient(135deg,rgba(var(--signal-rgb),.16),rgba(var(--signal-rgb),.07));
+  border:1.5px solid rgba(var(--signal-rgb),.45);
+  color:var(--signal);
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  padding:14px 28px; border-radius:var(--radius-pill);
+  text-decoration:none;
+  box-shadow:0 0 22px rgba(var(--signal-rgb),.13);
+  transition:background .18s, border-color .18s, transform .12s, box-shadow .18s;
+  width:100%; box-sizing:border-box; margin-top:4px;
+}
+.donate-btn:hover{
+  background:linear-gradient(135deg,rgba(var(--signal-rgb),.28),rgba(var(--signal-rgb),.16));
+  border-color:rgba(var(--signal-rgb),.75);
+  box-shadow:var(--glow-sm);
+  transform:translateY(-1px);
+}
+.donate-btn:active{ transform:scale(.97); }
+.donate-methods{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center;
+  margin-top:4px;
+}
+.donate-method-tag{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-border);
+  border-radius:6px; padding:3px 9px;
+  font-size:10.5px; color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;
+}
 </style>
 
 <!-- Firebase SDK -->
@@ -1515,6 +1616,14 @@ body.modal-open{ overflow:hidden; }
           </div>
           <span class="review-stars-label" id="reviewStarsLabel"></span>
         </div>
+        <div class="review-captcha-row">
+          <span class="review-captcha-question" id="captchaQuestion"></span>
+          <input type="number" id="captchaAnswer" class="review-captcha-input" placeholder="?" min="0" max="99" autocomplete="off">
+        </div>
+        <label class="review-human-row">
+          <input type="checkbox" id="reviewHumanCheck" class="review-human-cb">
+          <span class="review-human-label" id="reviewHumanLabel"></span>
+        </label>
         <div class="review-submit-row">
           <button type="button" class="review-submit-btn" id="reviewSubmitBtn"></button>
           <span class="review-status" id="reviewStatus"></span>
@@ -1522,6 +1631,23 @@ body.modal-open{ overflow:hidden; }
       </div>
       <div class="review-list" id="reviewList">
         <div class="review-loading" id="reviewLoading"></div>
+      </div>
+    </div>
+
+    <!-- Donate -->
+    <div class="donate-section">
+      <div class="donate-card">
+        <div class="donate-icon">💜</div>
+        <p class="donate-title" id="donateTitle"></p>
+        <p class="donate-sub" id="donateSub"></p>
+        <a class="donate-btn" id="donateBtn" href="https://dalink.to/vedavpn_official" target="_blank" rel="noopener"></a>
+        <div class="donate-methods">
+          <span class="donate-method-tag">Мир</span>
+          <span class="donate-method-tag">Mastercard</span>
+          <span class="donate-method-tag">Visa</span>
+          <span class="donate-method-tag">СБП</span>
+          <span class="donate-method-tag">USDT</span>
+        </div>
       </div>
     </div>
 
@@ -1755,7 +1881,15 @@ body.modal-open{ overflow:hidden; }
       reviewErrDuplicate:'Такой отзыв уже существует. Пожалуйста, напишите оригинальный текст.',
       reviewErrCooldown:(h)=>`Вы уже оставляли отзыв недавно. Попробуйте снова через ${h} ч.`,
       reviewLoading:'Загрузка отзывов...', reviewEmpty:'Пока нет отзывов. Будьте первым!',
-      pwaBannerHint:'Добавить на главный экран'
+      pwaBannerHint:'Добавить на главный экран',
+      reviewCaptchaLabel:(a,b)=>`Сколько будет ${a} + ${b} =`,
+      reviewErrCaptcha:'Неверный ответ на вопрос. Попробуйте снова.',
+      reviewHumanLabel:'Я живой человек, а не бот',
+      reviewErrNotHuman:'Подтвердите, что вы не бот',
+      reviewErrTooFast:'Читайте подольше перед отзывом 😊',
+      donateTitle:'Поддержать VedaVPN',
+      donateSub:'Сервис работает бесплатно. Если хочешь помочь развитию — любая поддержка важна.',
+      donateBtn:'💜 Поддержать проект',
     },
     hy:{
       eyebrow:'Ցանց ակտիվ',
@@ -1805,7 +1939,15 @@ body.modal-open{ overflow:hidden; }
       reviewErrDuplicate:'Նման կարծիք արդեն կա։ Խնդրում ենք գրել օրիգինալ տեքստ։',
       reviewErrCooldown:(h)=>`Դուք արդեն վերջերս կարծիք եք թողել։ Փորձեք կրկին ${h} ժամից։`,
       reviewLoading:'Կարծիքները բեռնվում են...', reviewEmpty:'Դեռ կարծիքներ չկան։ Եղիր առաջինը!',
-      pwaBannerHint:'Ավելացնել գլխավոր էկրան'
+      pwaBannerHint:'Ավելացնել գլխավոր էկրան',
+      reviewCaptchaLabel:(a,b)=>`${a} + ${b} = քա՞նի`,
+      reviewErrCaptcha:'Սխալ պատասխան։ Կրկին փորձիր։',
+      reviewHumanLabel:'Ես կենդանի մարդ եմ, ոչ բոտ',
+      reviewErrNotHuman:'Հաստատիր, որ բոտ չես',
+      reviewErrTooFast:'Կարդա ավելի երկար, հետո կարծիք թող 😊',
+      donateTitle:'Աջակցել VedaVPN-ին',
+      donateSub:'Ծառայությունն անվճար է։ Եթե ուզում ես օգնել զարգացմանը — ցանկացած աջակցություն կարևոր է։',
+      donateBtn:'💜 Աջակցել',
     },
     en:{
       eyebrow:'Network active',
@@ -1855,7 +1997,15 @@ body.modal-open{ overflow:hidden; }
       reviewErrDuplicate:'A similar review already exists. Please write an original text.',
       reviewErrCooldown:(h)=>`You already left a review recently. Try again in ${h}h.`,
       reviewLoading:'Loading reviews...', reviewEmpty:'No reviews yet. Be the first!',
-      pwaBannerHint:'Add to Home Screen'
+      pwaBannerHint:'Add to Home Screen',
+      reviewCaptchaLabel:(a,b)=>`What is ${a} + ${b} =`,
+      reviewErrCaptcha:'Wrong answer. Please try again.',
+      reviewHumanLabel:'I am a real person, not a bot',
+      reviewErrNotHuman:'Please confirm you are not a bot',
+      reviewErrTooFast:'Spend a bit more time reading first 😊',
+      donateTitle:'Support VedaVPN',
+      donateSub:'The service is free. If you want to help us grow — any support matters.',
+      donateBtn:'💜 Support the project',
     }
   };
 
@@ -1943,6 +2093,13 @@ body.modal-open{ overflow:hidden; }
     pwaInstallBtn:     document.getElementById('pwaInstallBtn'),
     pwaDismissBtn:     document.getElementById('pwaDismissBtn'),
     serverStatusLabel: document.getElementById('serverStatusLabel'),
+    captchaQuestion:  document.getElementById('captchaQuestion'),
+    captchaAnswer:    document.getElementById('captchaAnswer'),
+    reviewHumanCheck: document.getElementById('reviewHumanCheck'),
+    reviewHumanLabel: document.getElementById('reviewHumanLabel'),
+    donateTitle:  document.getElementById('donateTitle'),
+    donateSub:    document.getElementById('donateSub'),
+    donateBtn:    document.getElementById('donateBtn'),
   };
 
   // ---- QR code ----
@@ -2120,6 +2277,12 @@ body.modal-open{ overflow:hidden; }
     document.querySelectorAll('.lang-switch button').forEach(b=>{
       b.classList.toggle('active', b.dataset.lang === lang);
     });
+    if(el.reviewHumanLabel) el.reviewHumanLabel.textContent = d.reviewHumanLabel;
+    if(el.reviewHumanCheck) el.reviewHumanCheck.checked = false;
+    generateCaptcha();
+    if(el.donateTitle) el.donateTitle.textContent = d.donateTitle;
+    if(el.donateSub)   el.donateSub.textContent   = d.donateSub;
+    if(el.donateBtn)   el.donateBtn.textContent   = d.donateBtn;
     renderFaq();
     renderReviewStrings();
   }
@@ -2384,10 +2547,11 @@ body.modal-open{ overflow:hidden; }
     async function fetchReviews(){
       if(!reviewsCol){ reviewsCache=reviewsCache||[]; renderReviewsSummary(); renderReviewsList(); return; }
       try{
-        const snapshot = await reviewsCol.orderBy('createTime','desc').limit(200).get();
+        const snapshot = await reviewsCol.orderBy('createTime','desc').limit(500).get();
         reviewsCache = snapshot.docs.map(doc=>{
           const data = doc.data();
           return {
+            _ref: doc.ref,
             text: data.text,
             rating: data.rating,
             createTime: data.createTime&&data.createTime.toDate
@@ -2396,12 +2560,51 @@ body.modal-open{ overflow:hidden; }
         });
       }catch(e){ reviewsCache=reviewsCache||[]; }
       renderReviewsSummary(); renderReviewsList();
+      autoDeleteSpam();
     }
 
-    const REVIEW_COOLDOWN_MS = 6*60*60*1000;
+    // Auto-delete spam reviews from Firestore silently
+    async function autoDeleteSpam(){
+      if(!reviewsCol || !reviewsCache || reviewsCache.length === 0) return;
+      const spamItems = reviewsCache.filter(r => r._ref && r.text && isSpammyText(r.text));
+      if(spamItems.length === 0) return;
+      try{
+        // Firestore batch max = 500 ops — split if needed
+        const chunks = [];
+        for(let i = 0; i < spamItems.length; i += 490) chunks.push(spamItems.slice(i, i+490));
+        for(const chunk of chunks){
+          const batch = firebase.firestore().batch();
+          chunk.forEach(r => batch.delete(r._ref));
+          await batch.commit();
+        }
+        // Remove deleted items from local cache & re-render
+        const spamRefs = new Set(spamItems.map(r => r._ref.id));
+        reviewsCache = reviewsCache.filter(r => !spamRefs.has(r._ref && r._ref.id));
+        renderReviewsSummary(); renderReviewsList();
+      }catch(e){ /* silent — spam stays visible but harmless */ }
+    }
+
+    const REVIEW_COOLDOWN_MS = 24*60*60*1000; // increased to 24h
     const LAST_REVIEW_KEY    = 'vedavpn_last_review_ts';
-    const SENT_HASHES_KEY    = 'vedavpn_sent_hashes';   // texts already submitted (by this browser)
+    const SENT_HASHES_KEY    = 'vedavpn_sent_hashes';
     const URL_PATTERN = /https?:\/\/|www\.|t\.me\//i;
+    const PAGE_LOAD_TS = Date.now();
+    const MIN_READ_TIME_MS = 20000; // must spend 20s on page before submitting
+
+    // ---- Math CAPTCHA ----
+    let captchaA = 0, captchaB = 0;
+    function generateCaptcha(){
+      captchaA = Math.floor(Math.random()*9)+1;
+      captchaB = Math.floor(Math.random()*9)+1;
+      if(el.captchaQuestion) el.captchaQuestion.textContent = dict[lang].reviewCaptchaLabel(captchaA, captchaB);
+      if(el.captchaAnswer)   el.captchaAnswer.value = '';
+    }
+
+    // Known spam keyword blocklist (lowercase)
+    const SPAM_KEYWORDS = [
+      'сосите','рейдит','groozen','писюн','хуй','пизд','сука','блять','ублюдок',
+      'залупа','мудак','пидор','педик','шлюха','проститутка','курва',
+    ];
 
     // Simple non-crypto hash — good enough for duplicate detection
     function hashText(str){
@@ -2429,6 +2632,31 @@ body.modal-open{ overflow:hidden; }
 
     function isSpammyText(text){
       if(text.length < 10) return true;
+
+      const lower = text.toLowerCase();
+
+      // Keyword blocklist
+      if(SPAM_KEYWORDS.some(kw => lower.includes(kw))) return true;
+
+      // ALL CAPS check — if >70% of letters are uppercase → spam
+      const letters = text.replace(/[^a-zA-Zа-яА-ЯёЁ]/g,'');
+      if(letters.length >= 6){
+        const upperCount = (text.match(/[A-ZА-ЯЁ]/g)||[]).length;
+        if(upperCount / letters.length > 0.70) return true;
+      }
+
+      // @ mention spam — short text with a mention → almost certainly spam
+      if(/@\S+/.test(text) && text.length < 120) return true;
+
+      // Repeated word/phrase detection — same word appearing > 4 times
+      const words = lower.split(/\s+/).filter(Boolean);
+      if(words.length >= 2){
+        const freq={};
+        for(const w of words) freq[w]=(freq[w]||0)+1;
+        if(Math.max(...Object.values(freq)) > 4) return true;
+      }
+
+      // Most common single character ratio
       const mostCommonCharRatio = (()=>{
         const counts={};
         for(const ch of text) counts[ch]=(counts[ch]||0)+1;
@@ -2479,6 +2707,20 @@ body.modal-open{ overflow:hidden; }
       if(!text||selectedStars<1){
         el.reviewStatus.textContent=d.reviewErrEmpty; el.reviewStatus.className='review-status err'; return;
       }
+      // Math CAPTCHA check
+      const captchaVal = parseInt(el.captchaAnswer ? el.captchaAnswer.value : '', 10);
+      if(isNaN(captchaVal) || captchaVal !== captchaA + captchaB){
+        el.reviewStatus.textContent=d.reviewErrCaptcha; el.reviewStatus.className='review-status err';
+        generateCaptcha(); return;
+      }
+      // Human checkbox
+      if(!el.reviewHumanCheck || !el.reviewHumanCheck.checked){
+        el.reviewStatus.textContent=d.reviewErrNotHuman; el.reviewStatus.className='review-status err'; return;
+      }
+      // Minimum time on page (anti-bot)
+      if(Date.now() - PAGE_LOAD_TS < MIN_READ_TIME_MS){
+        el.reviewStatus.textContent=d.reviewErrTooFast; el.reviewStatus.className='review-status err'; return;
+      }
       if(isSpammyText(text)){
         el.reviewStatus.textContent=d.reviewErrSpam; el.reviewStatus.className='review-status err'; return;
       }
@@ -2505,6 +2747,8 @@ body.modal-open{ overflow:hidden; }
         markTextAsSent(text);
         el.reviewText.value=''; selectedStars=0; updateStarButtons();
         el.reviewStarsLabel.textContent=dict[lang].reviewStarsHint(0);
+        if(el.reviewHumanCheck) el.reviewHumanCheck.checked=false;
+        generateCaptcha();
         el.reviewStatus.textContent=d.reviewOk; el.reviewStatus.className='review-status ok';
         await fetchReviews();
       }catch(e){
