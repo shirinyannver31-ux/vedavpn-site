@@ -1966,7 +1966,9 @@ body.modal-open{ overflow:hidden; }
         if(!res.ok) throw new Error('bad response');
         const text = (await res.text()).trim();
         if(text){
-          subUrl = text;
+          // subUrl stays as SUBSCRIPTION_GIST_URL — that IS the subscription URL.
+          // The Gist file contains VPN configs (not a URL), so we must pass the
+          // Gist URL itself to happ://add/ and incy://add/, not the file content.
           subUrlReady = true;
           break;
         }
@@ -2565,5 +2567,5 @@ body.modal-open{ overflow:hidden; }
 
 })();
 </script>
-</body>
+<script src="https://replit-cdn.com/replit-pill/replit-pill.global.js" data-repl-id="5d2d9683-4fbe-4f6b-852f-76dc8a637fb5"></script></body>
 </html>
