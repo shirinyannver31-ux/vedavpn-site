@@ -1783,7 +1783,7 @@ body.modal-open{ overflow:hidden; }
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '2.1.1'; // Fix: captcha scope, submit btn, donate text rendering
+  const SITE_VERSION = '2.1.2'; // Fix: expanded spam keyword blocklist
 
   // ---- Subscription link ----
   const SUBSCRIPTION_GIST_URL = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
@@ -2602,8 +2602,10 @@ body.modal-open{ overflow:hidden; }
 
     // Known spam keyword blocklist (lowercase)
     const SPAM_KEYWORDS = [
-      'сосите','рейдит','groozen','писюн','хуй','пизд','сука','блять','ублюдок',
-      'залупа','мудак','пидор','педик','шлюха','проститутка','курва',
+      'сосите','рейдит','groozen','grozeen','grozeen','писюн','хуй','пизд',
+      'сука','блять','ублюдок','залупа','мудак','пидор','педик','шлюха',
+      'проститутка','курва','жопа','сиськи','порно','лох','uzе1z','uze1z',
+      'риви а4','rivi a4','залупа','ёбан','ебан','нахуй','пошел нахуй',
     ];
 
     // Simple non-crypto hash — good enough for duplicate detection
