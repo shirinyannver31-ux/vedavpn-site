@@ -19,9 +19,9 @@
 <style>
   :root{
     --bg:        #0A0F1A;
-    --panel:     #10182B;
-    --panel-2:   #131D33;
-    --line:      #212B42;
+    --panel:     #131D33;
+    --panel-2:   #1D2C4F;
+    --line:      #2C3A5C;
     --signal:    #39FF9E;
     --signal-rgb:57,255,158;
     --signal-dim:#1D8F60;
@@ -30,13 +30,13 @@
     --muted:     #838DA3;
     --bg-glow:   rgba(var(--signal-rgb),0.07);
     --bg-lines:  rgba(255,255,255,0.015);
-    --shadow:    rgba(0,0,0,0.35);
+    --shadow:    rgba(0,0,0,0.55);
   }
   :root[data-theme="light"]{
     --bg:        #F3F6FB;
     --panel:     #FFFFFF;
-    --panel-2:   #FFFFFF;
-    --line:      #DDE4EF;
+    --panel-2:   #E6F0FE;
+    --line:      #D7E1F3;
     --signal:    #17A968;
     --signal-rgb:23,169,104;
     --signal-dim:#0E8A54;
@@ -77,6 +77,11 @@
   }
   *{ box-sizing:border-box; }
   html,body{ height:100%; margin:0; }
+  :root{
+    --panel-grad: linear-gradient(165deg, var(--panel), var(--panel-2));
+    --card-shadow: 0 8px 22px var(--shadow), 0 1px 0 rgba(255,255,255,0.04) inset;
+    --btn-grad: linear-gradient(135deg, var(--signal), var(--signal-dim));
+  }
   body{
     background:var(--bg);
     color:var(--text);
@@ -191,18 +196,19 @@
     gap:10px;
     width:100%;
     padding:15px 18px;
-    border-radius:14px;
+    border-radius:16px;
     border:1px solid var(--line);
-    background:var(--panel);
+    background:var(--panel-grad);
     color:var(--text);
     font-family:'Inter', sans-serif;
     font-weight:500;
     font-size:15px;
     cursor:pointer;
-    transition:border-color .15s ease, transform .1s ease;
+    box-shadow:var(--card-shadow);
+    transition:border-color .15s ease, transform .1s ease, box-shadow .15s ease;
   }
   .lang-btn:active{ transform:scale(0.98); }
-  .lang-btn:hover{ border-color:var(--signal-dim); }
+  .lang-btn:hover{ border-color:var(--signal-dim); box-shadow:0 4px 20px rgba(var(--signal-rgb),0.18); }
   .flag{ font-size:20px; }
 
   /* ---------- Main app screen ---------- */
@@ -216,12 +222,13 @@
   #mainScreen.is-ready .eyebrow{ animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both; }
   #mainScreen.is-ready .hero-title{ animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .05s both; }
   #mainScreen.is-ready .hero-sub{ animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .1s both; }
+  #mainScreen.is-ready .route-trace{ animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .14s both; }
   #mainScreen.is-ready .stats{ animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .16s both; }
   #mainScreen.is-ready .features{ animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .22s both; }
   #mainScreen.is-ready .cta-btn{ animation:fadeUp .55s cubic-bezier(.22,1,.36,1) .28s both; }
   @media (prefers-reduced-motion: reduce){
     #mainScreen.is-ready .eyebrow, #mainScreen.is-ready .hero-title, #mainScreen.is-ready .hero-sub,
-    #mainScreen.is-ready .stats, #mainScreen.is-ready .features, #mainScreen.is-ready .cta-btn{
+    #mainScreen.is-ready .route-trace, #mainScreen.is-ready .stats, #mainScreen.is-ready .features, #mainScreen.is-ready .cta-btn{
       animation:none;
     }
   }
@@ -297,6 +304,82 @@
     margin:0 0 26px;
   }
 
+  /* ---------- Signature element: the encrypted route ----------
+     A literal, minimal diagram of what a VPN actually does — traffic
+     leaves your device, passes through an encrypted hop, exits on our
+     server. Doubles as the page's visual anchor in place of a generic
+     hero graphic, and reuses the same accent tokens as the theme/palette
+     switcher so it re-colors automatically with the rest of the page. */
+  .route-trace{
+    display:flex;
+    align-items:center;
+    margin:0 0 26px;
+    padding:16px 14px;
+    background:var(--panel-grad);
+    border:1px solid var(--line);
+    border-radius:20px;
+    box-shadow:var(--card-shadow);
+  }
+  .route-node{
+    flex-shrink:0;
+    width:38px; height:38px;
+    border-radius:11px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--muted);
+  }
+  .route-node svg{ width:18px; height:18px; }
+  .route-node.lock{
+    position:relative;
+    color:#062012;
+    background:var(--signal);
+    border-color:var(--signal);
+  }
+  :root[data-theme="light"] .route-node.lock{ color:#fff; }
+  .route-node.lock::after{
+    content:'';
+    position:absolute; inset:-4px;
+    border-radius:14px;
+    border:1px solid rgba(var(--signal-rgb),0.45);
+    animation:lockPulse 2.2s ease-out infinite;
+  }
+  @keyframes lockPulse{
+    0%{ transform:scale(0.85); opacity:.9; }
+    100%{ transform:scale(1.4); opacity:0; }
+  }
+  .route-track{
+    flex:1;
+    height:2px;
+    margin:0 8px;
+    position:relative;
+    background-image:linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
+    background-size:12px 2px;
+    background-repeat:repeat-x;
+  }
+  .route-track::before{
+    content:'';
+    position:absolute;
+    top:50%; left:0;
+    width:6px; height:6px;
+    margin-top:-3px;
+    border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 6px rgba(var(--signal-rgb),0.8);
+    animation:packetMove 2.6s linear infinite;
+    opacity:0;
+  }
+  .route-track.rt-2::before{ animation-delay:1.3s; }
+  @keyframes packetMove{
+    0%{ left:0; opacity:0; }
+    8%{ opacity:1; }
+    88%{ opacity:1; }
+    100%{ left:calc(100% - 6px); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .route-node.lock::after, .route-track::before{ animation:none; display:none; }
+  }
+
   /* ---------- Stats row ---------- */
   .stats{
     display:grid;
@@ -305,11 +388,21 @@
     margin-bottom:20px;
   }
   .stat{
-    background:var(--panel);
+    position:relative;
+    background:var(--panel-grad);
     border:1px solid var(--line);
-    border-radius:12px;
-    padding:14px 8px;
+    border-radius:18px;
+    padding:15px 8px 14px;
     text-align:center;
+    box-shadow:var(--card-shadow);
+    overflow:hidden;
+  }
+  .stat::before{
+    content:'';
+    position:absolute; top:0; left:14%; right:14%;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--signal), transparent);
+    opacity:.55;
   }
   .stat .num{
     font-family:'Space Grotesk', sans-serif;
@@ -331,11 +424,12 @@
     margin-bottom:28px;
   }
   .feature{
-    background:var(--panel);
+    background:var(--panel-grad);
     border:1px solid var(--line);
-    border-radius:12px;
-    padding:12px 8px;
+    border-radius:18px;
+    padding:13px 8px;
     text-align:center;
+    box-shadow:var(--card-shadow);
   }
   .feature .ico{ font-size:18px; margin-bottom:6px; }
   .feature .label{
@@ -345,26 +439,38 @@
   }
 
   .cta-btn{
+    position:relative;
     width:100%;
     border:none;
-    border-radius:18px;
+    border-radius:22px;
     padding:20px 22px;
     font-family:'Space Grotesk', sans-serif;
     font-weight:700;
     font-size:18px;
     letter-spacing:.01em;
-    background:linear-gradient(135deg, var(--signal), var(--signal-dim));
+    background:var(--btn-grad);
     color:#062012;
     cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
     gap:10px;
-    box-shadow:0 6px 24px rgba(var(--signal-rgb),0.32), 0 1px 0 rgba(255,255,255,0.25) inset;
+    box-shadow:0 8px 28px rgba(var(--signal-rgb),0.34), 0 1px 0 rgba(255,255,255,0.28) inset;
     transition:transform .12s ease, box-shadow .15s ease;
+    overflow:hidden;
   }
-  .cta-btn:active{ transform:scale(0.98); box-shadow:0 3px 14px rgba(var(--signal-rgb),0.28), 0 1px 0 rgba(255,255,255,0.25) inset; }
-  .cta-btn:hover{ box-shadow:0 8px 30px rgba(var(--signal-rgb),0.4), 0 1px 0 rgba(255,255,255,0.25) inset; }
+  .cta-btn::after{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.22) 50%, transparent 60%);
+    background-size:220% 100%;
+    background-position:120% 0;
+    transition:background-position .5s ease;
+    pointer-events:none;
+  }
+  .cta-btn:hover::after{ background-position:-20% 0; }
+  .cta-btn:active{ transform:scale(0.98); box-shadow:0 4px 16px rgba(var(--signal-rgb),0.3), 0 1px 0 rgba(255,255,255,0.25) inset; }
+  .cta-btn:hover{ box-shadow:0 10px 34px rgba(var(--signal-rgb),0.42), 0 1px 0 rgba(255,255,255,0.25) inset; }
 
   /* ---------- VPN screen (separate screen shown after tapping Get VPN) ---------- */
   #vpnScreen{ display:none; flex:1; flex-direction:column; }
@@ -387,11 +493,12 @@
   .back-btn:hover{ border-color:var(--signal-dim); }
   .back-btn:active{ transform:scale(0.97); }
   .reveal-card{
-    background:var(--panel);
+    background:var(--panel-grad);
     border:1px solid var(--line);
-    border-radius:18px;
+    border-radius:22px;
     padding:22px 20px;
     margin-top:4px;
+    box-shadow:var(--card-shadow);
   }
   .reveal-title{
     font-family:'Space Grotesk', sans-serif;
@@ -417,9 +524,10 @@
   .qr-box{
     background:#FFFFFF;
     padding:12px;
-    border-radius:14px;
+    border-radius:16px;
     border:1px solid var(--line);
     line-height:0;
+    box-shadow:var(--card-shadow);
   }
   .qr-box img, .qr-box canvas, .qr-box table{
     display:block;
@@ -441,7 +549,7 @@
     flex:1;
     background:var(--panel-2);
     border:1px solid var(--line);
-    border-radius:10px;
+    border-radius:14px;
     padding:12px 12px;
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
@@ -449,14 +557,15 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    box-shadow:inset 0 1px 3px var(--shadow);
     transition:background-color .25s ease;
   }
   .copy-btn{
     flex-shrink:0;
-    background:var(--signal);
+    background:var(--btn-grad);
     border:none;
     color:#062012;
-    border-radius:10px;
+    border-radius:14px;
     padding:0 18px;
     font-family:'Space Grotesk', sans-serif;
     font-weight:600;
@@ -466,7 +575,8 @@
     align-items:center;
     justify-content:center;
     gap:6px;
-    transition:background-color .2s ease, transform .15s ease;
+    box-shadow:0 4px 16px rgba(var(--signal-rgb),0.28);
+    transition:background-color .2s ease, transform .15s ease, box-shadow .15s ease;
   }
   .copy-btn:active{ transform:scale(0.94); }
   .copy-btn.copied{
@@ -517,9 +627,10 @@
   .app-block{
     margin-bottom:14px;
     border:1px solid var(--line);
-    border-radius:14px;
+    border-radius:18px;
     padding:14px;
-    background:var(--panel-2);
+    background:var(--panel-grad);
+    box-shadow:var(--card-shadow);
   }
   .app-block:last-child{ margin-bottom:0; }
   .app-name{
@@ -640,14 +751,14 @@
     gap:16px;
     width:100%;
     padding:16px 18px;
-    border-radius:16px;
+    border-radius:18px;
     border:1.5px solid var(--line);
-    background:var(--panel-2);
+    background:var(--panel-grad);
     color:var(--muted);
     font-family:'Inter', sans-serif;
     cursor:pointer;
     text-align:left;
-    box-shadow:none;
+    box-shadow:var(--card-shadow);
     transition:background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .1s ease;
   }
   .device-btn .device-ico{ font-size:30px; line-height:1; flex-shrink:0; }
@@ -696,11 +807,12 @@
     margin:0 0 12px;
   }
   .faq-item{
-    background:var(--panel);
+    background:var(--panel-grad);
     border:1px solid var(--line);
-    border-radius:12px;
+    border-radius:18px;
     margin-bottom:8px;
     overflow:hidden;
+    box-shadow:var(--card-shadow);
   }
   .faq-q{
     width:100%;
@@ -803,11 +915,12 @@
   .reviews-summary .avg-num{ color:var(--text); font-weight:600; }
 
   .review-form{
-    background:var(--panel);
+    background:var(--panel-grad);
     border:1px solid var(--line);
-    border-radius:14px;
+    border-radius:18px;
     padding:16px;
     margin:14px 0 18px;
+    box-shadow:var(--card-shadow);
   }
   .hp-field{
     position:absolute;
@@ -872,15 +985,16 @@
     margin-top:14px;
   }
   .review-submit-btn{
-    background:var(--signal);
+    background:var(--btn-grad);
     border:none;
     color:#062012;
-    border-radius:10px;
+    border-radius:12px;
     padding:9px 20px;
     font-family:'Space Grotesk', sans-serif;
     font-weight:600;
     font-size:13px;
     cursor:pointer;
+    box-shadow:0 3px 12px rgba(var(--signal-rgb),0.26);
     transition:transform .12s ease, opacity .15s ease;
   }
   .review-submit-btn:active{ transform:scale(0.95); }
@@ -899,10 +1013,11 @@
     gap:10px;
   }
   .review-card{
-    background:var(--panel);
+    background:var(--panel-grad);
     border:1px solid var(--line);
-    border-radius:12px;
+    border-radius:18px;
     padding:14px 16px;
+    box-shadow:var(--card-shadow);
   }
   .review-card .review-top{
     display:flex;
@@ -1036,6 +1151,20 @@
     <div class="eyebrow"><span class="dot"></span><span id="eyebrowText"></span></div>
     <h2 class="hero-title" id="heroTitle"></h2>
     <p class="hero-sub" id="heroSub"></p>
+
+    <div class="route-trace" aria-hidden="true">
+      <div class="route-node device">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
+      </div>
+      <div class="route-track rt-1"></div>
+      <div class="route-node lock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <div class="route-track rt-2"></div>
+      <div class="route-node server">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
+      </div>
+    </div>
 
     <div class="stats">
       <div class="stat"><div class="num" id="stat1Num">—</div><div class="label" id="stat1"></div></div>
@@ -1208,16 +1337,14 @@
   //   MINOR — new feature or section added (e.g. a new page), no breaking changes
   //   MAJOR — large-scale/structural change (full redesign, architecture change)
   // Bump this on every deployed update so the footer always reflects what's live.
-  const SITE_VERSION = '1.4.0';
+  const SITE_VERSION = '1.8.0'; // stronger, visibly distinct card/button redesign
 
-  // Single source of truth for the backend base URL. Change this one line
-  // if the API ever moves to a different host/path.
-  const API = "https://api.vedavpn.lol";
-
-  // Used only if the API request fails, so the page never breaks even if
-  // the backend is temporarily unreachable.
-  const FALLBACK_SUBSCRIPTION_URL = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
-  let subUrl = FALLBACK_SUBSCRIPTION_URL;
+  // Backend removed: the site is now fully static (GitHub Pages only).
+  // The VPN subscription link is served from this Gist. To roll out a new
+  // link/server, edit the Gist's content directly — the page fetches it
+  // fresh on every load and always shows whatever is currently there.
+  const SUBSCRIPTION_GIST_URL = 'https://gist.githubusercontent.com/shirinyannver31-ux/6b16a88d07db0830b49ab8b02536c3b6/raw/VedaVPN.txt';
+  let subUrl = SUBSCRIPTION_GIST_URL;
 
   // Deep-link URIs that let Happ / INCY import the subscription directly,
   // without the user having to copy-paste the link manually. Built as
@@ -1549,37 +1676,27 @@
   }
   renderQr();
 
-  // ---- Subscription link now comes from the backend. Anything already ----
-  // ---- painted with the fallback value gets refreshed once it arrives. ----
+  // ---- Subscription link is fetched fresh from the Gist on every load. ----
+  // ---- If the Gist is briefly unreachable, the last-known value (the ----
+  // ---- constant it started as) stays on screen instead of breaking. ----
   async function loadSubscription(){
     try{
-      const res = await fetch(`${API}/subscription`);
+      const res = await fetch(`${SUBSCRIPTION_GIST_URL}?t=${Date.now()}`);
       if(!res.ok) throw new Error('bad response');
-      const data = await res.json();
-      if(data && typeof data.url === 'string' && data.url){
-        subUrl = data.url;
+      const text = (await res.text()).trim();
+      if(text){
+        subUrl = text;
       }
     }catch(e){
-      // Keep FALLBACK_SUBSCRIPTION_URL, already assigned to subUrl.
+      // Keep whatever subUrl already holds.
     }
     if(el.linkBox) el.linkBox.textContent = subUrl;
     renderQr();
   }
   loadSubscription();
 
-  // ---- Server-count / uptime badges now come from the backend too. ----
-  async function loadStats(){
-    try{
-      const res = await fetch(`${API}/stats`);
-      if(!res.ok) throw new Error('bad response');
-      const data = await res.json();
-      if(data && typeof data.servers === 'number') el.stat2Num.textContent = data.servers;
-      if(data && typeof data.uptime === 'string') el.stat3Num.textContent = data.uptime;
-    }catch(e){
-      // Keep the static fallback numbers already in the HTML.
-    }
-  }
-  loadStats();
+  // ---- Server-count / uptime badges: static values, no backend. Edit ----
+  // ---- the numbers directly in the HTML (stat2Num / stat3Num) if needed. ----
 
   function renderFaq(){
     const d = dict[lang];
