@@ -988,32 +988,44 @@ body::after{
 .app-steps li::before{ content:'•'; color:var(--signal-dim); flex-shrink:0; }
 
 .open-app-btn{
-  display:flex; align-items:center; justify-content:center; gap:14px;
-  margin-top:16px; padding:16px 20px;
-  border-radius:var(--radius-md);
-  border:1px solid var(--signal-dim);
-  background:linear-gradient(135deg, rgba(var(--signal-rgb),.16), rgba(var(--signal-rgb),.06));
-  color:var(--text); text-decoration:none; cursor:pointer;
-  box-shadow:0 4px 18px rgba(var(--signal-rgb),.14);
-  transition: transform .12s, background .15s, border-color .15s, box-shadow .15s;
+  display:flex; align-items:stretch;
+  margin-top:14px;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(var(--signal-rgb),.25);
+  background:rgba(10,10,18,.75);
+  text-decoration:none; cursor:pointer;
+  box-shadow:0 6px 28px rgba(0,0,0,.55), 0 0 0 0 rgba(var(--signal-rgb),0);
+  transition: transform .13s cubic-bezier(.22,1,.36,1), box-shadow .18s, border-color .18s;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 }
-.open-app-btn:active{ transform:scale(.97); }
 .open-app-btn:hover{
-  background:linear-gradient(135deg, rgba(var(--signal-rgb),.26), rgba(var(--signal-rgb),.12));
-  border-color:var(--signal);
-  box-shadow:0 6px 28px rgba(var(--signal-rgb),.25);
+  transform:translateY(-2px);
+  border-color:rgba(var(--signal-rgb),.55);
+  box-shadow:0 10px 38px rgba(0,0,0,.6), 0 0 18px rgba(var(--signal-rgb),.22);
 }
-.open-app-btn .store-ico{ font-size:28px; line-height:1; flex-shrink:0; }
+.open-app-btn:active{ transform:scale(.97) translateY(0); }
+
+/* Left accent stripe */
+.open-app-btn .store-ico{
+  display:flex; align-items:center; justify-content:center;
+  width:62px; flex-shrink:0;
+  background: linear-gradient(160deg, var(--signal), var(--accent));
+  font-size:26px; line-height:1;
+}
+
+/* Right text area */
 .open-app-btn .store-text{
-  display:flex; flex-direction:column; align-items:flex-start; line-height:1.3;
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  padding:14px 18px; gap:2px; flex:1;
 }
 .open-app-btn .store-text small{
-  font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600;
-  color:var(--muted); text-transform:uppercase; letter-spacing:.04em;
+  font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+  color:rgba(255,255,255,.45); text-transform:uppercase; letter-spacing:.08em;
 }
 .open-app-btn .store-text strong{
-  font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:700;
-  color:var(--signal);
+  font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700;
+  color:#fff; letter-spacing:-.01em;
 }
 
 /* ============================================================
@@ -1188,6 +1200,88 @@ body::after{
 .footer-copy{
   font-size:11px; color:var(--muted); margin:0; font-family:'IBM Plex Mono',monospace;
 }
+
+/* ============================================================
+   REVIEWS FULL MODAL (bottom sheet)
+   ============================================================ */
+.reviews-modal-backdrop{
+  position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  display:none; align-items:flex-end; justify-content:center;
+  animation:backdropIn .2s ease both;
+}
+.reviews-modal-backdrop.open{ display:flex; }
+@keyframes backdropIn{ from{opacity:0;} to{opacity:1;} }
+body.modal-open{ overflow:hidden; }
+
+.reviews-modal{
+  width:100%; max-width:480px;
+  max-height:88vh;
+  background:var(--panel);
+  border-radius:24px 24px 0 0;
+  border:1px solid var(--glass-border);
+  border-bottom:none;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  animation:sheetUp .3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes sheetUp{ from{transform:translateY(100%);} to{transform:translateY(0);} }
+
+.reviews-modal-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px 14px;
+  border-bottom:1px solid var(--glass-border);
+  flex-shrink:0;
+}
+.reviews-modal-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:17px; font-weight:700; color:var(--text);
+}
+.reviews-modal-close{
+  width:34px; height:34px; border-radius:50%;
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--glass-border);
+  color:var(--muted); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .15s, color .15s;
+}
+.reviews-modal-close:hover{ background:rgba(255,255,255,.13); color:var(--text); }
+
+.reviews-modal-body{
+  overflow-y:auto; flex:1;
+  padding:16px 16px 24px;
+  display:flex; flex-direction:column; gap:10px;
+  overscroll-behavior:contain;
+}
+
+/* Clickable count badge */
+.reviews-count-btn{
+  background:none; border:none; padding:0; margin:0;
+  color:var(--signal); font:inherit; cursor:pointer;
+  font-size:inherit; font-weight:700;
+  text-decoration:underline dotted;
+  text-underline-offset:2px;
+  transition:opacity .15s;
+}
+.reviews-count-btn:hover{ opacity:.75; }
+
+/* See all inline button */
+.reviews-see-all-btn{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  margin-top:4px; padding:13px 20px;
+  border-radius:var(--radius-pill);
+  border:1.5px solid rgba(var(--signal-rgb),.3);
+  background:rgba(var(--signal-rgb),.07);
+  color:var(--signal); font-family:'Inter',sans-serif;
+  font-size:14px; font-weight:600; cursor:pointer;
+  transition:background .15s, border-color .15s, transform .12s;
+}
+.reviews-see-all-btn:hover{
+  background:rgba(var(--signal-rgb),.14);
+  border-color:rgba(var(--signal-rgb),.5);
+}
+.reviews-see-all-btn:active{ transform:scale(.97); }
 
 /* ============================================================
    FLOATING ACTION LINKS
@@ -1533,6 +1627,17 @@ body::after{
   <a href="https://t.me/vedavpnforum" target="_blank" rel="noopener"><span class="tip" id="tipForum"></span>💬</a>
 </div>
 
+<!-- Reviews full modal -->
+<div class="reviews-modal-backdrop" id="reviewsModalBackdrop" role="dialog" aria-modal="true" aria-label="All reviews">
+  <div class="reviews-modal">
+    <div class="reviews-modal-header">
+      <span class="reviews-modal-title" id="reviewsModalTitle">Reviews</span>
+      <button class="reviews-modal-close" id="reviewsModalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="reviews-modal-body" id="reviewsModalBody"></div>
+  </div>
+</div>
+
 <!-- PWA install banner -->
 <div class="pwa-banner" id="pwaBanner" role="dialog" aria-label="Install app">
   <div class="pwa-banner-icon"><img src="veda-logo.png" alt="VedaVPN"></div>
@@ -1637,13 +1742,15 @@ body::after{
       reviewsHeading:'💬 Отзывы',
       reviewsAvgUnit:'из 5',
       reviewsCountWord:(n)=> n===1?'отзыв':(n>=2&&n<=4?'отзыва':'отзывов'),
+      reviewsSeeAll:(n)=>`Все ${n} отзыва`,
       reviewPlaceholder:'Напишите, что думаете о VPN...',
       reviewStarsHint:(n)=> n?`Оценка: ${n} из 5`:'Выберите оценку',
       reviewSubmit:'Опубликовать', reviewSending:'Отправка...',
       reviewOk:'Спасибо! Отзыв опубликован ✓',
       reviewErrEmpty:'Напишите отзыв и выберите оценку',
       reviewErrFail:'Не удалось отправить. Попробуйте ещё раз.',
-      reviewErrSpam:'Отзыв похож на спам. Уберите ссылки и напишите настоящий текст.',
+      reviewErrSpam:'Отзыв похож на спам. Напишите настоящий текст (мин. 10 символов).',
+      reviewErrDuplicate:'Такой отзыв уже существует. Пожалуйста, напишите оригинальный текст.',
       reviewErrCooldown:(h)=>`Вы уже оставляли отзыв недавно. Попробуйте снова через ${h} ч.`,
       reviewLoading:'Загрузка отзывов...', reviewEmpty:'Пока нет отзывов. Будьте первым!',
       pwaBannerHint:'Добавить на главный экран'
@@ -1684,13 +1791,15 @@ body::after{
       reviewsHeading:'💬 Կարծիքներ',
       reviewsAvgUnit:'5-ից',
       reviewsCountWord:(n)=> n===1?'կարծիք':'կարծիք',
+      reviewsSeeAll:(n)=>`Բոլոր ${n} կարծիքները`,
       reviewPlaceholder:'Գրիր, թե ինչ ես մտածում VPN-ի մասին...',
       reviewStarsHint:(n)=> n?`Գնահատական՝ ${n} 5-ից`:'Ընտրիր գնահատականը',
       reviewSubmit:'Հրապարակել', reviewSending:'Ուղարկվում է...',
       reviewOk:'Շնորհակալություն! Կարծիքը հրապարակվեց ✓',
       reviewErrEmpty:'Գրիր կարծիք և ընտրիր գնահատական',
       reviewErrFail:'Չհաջողվեց ուղարկել։ Փորձիր նորից։',
-      reviewErrSpam:'Կարծիքը նման է spam-ի։ Հեռացրեք հղումները և գրեք իրական տեքստ։',
+      reviewErrSpam:'Կարծիքը նման է spam-ի։ Գրեք իրական տեքստ (նվազ. 10 նիշ)։',
+      reviewErrDuplicate:'Նման կարծիք արդեն կա։ Խնդրում ենք գրել օրիգինալ տեքստ։',
       reviewErrCooldown:(h)=>`Դուք արդեն վերջերս կարծիք եք թողել։ Փորձեք կրկին ${h} ժամից։`,
       reviewLoading:'Կարծիքները բեռնվում են...', reviewEmpty:'Դեռ կարծիքներ չկան։ Եղիր առաջինը!',
       pwaBannerHint:'Ավելացնել գլխավոր էկրան'
@@ -1731,13 +1840,15 @@ body::after{
       reviewsHeading:'💬 Reviews',
       reviewsAvgUnit:'out of 5',
       reviewsCountWord:(n)=> n===1?'review':'reviews',
+      reviewsSeeAll:(n)=>`See all ${n} reviews`,
       reviewPlaceholder:'Share your thoughts about the VPN...',
       reviewStarsHint:(n)=> n?`Rating: ${n} out of 5`:'Choose a rating',
       reviewSubmit:'Publish', reviewSending:'Sending...',
       reviewOk:'Thanks! Your review is published ✓',
       reviewErrEmpty:'Write a review and choose a rating',
       reviewErrFail:'Failed to send. Please try again.',
-      reviewErrSpam:'This looks like spam. Remove links and write a real review.',
+      reviewErrSpam:'This looks like spam. Write a real review (min. 10 characters).',
+      reviewErrDuplicate:'A similar review already exists. Please write an original text.',
       reviewErrCooldown:(h)=>`You already left a review recently. Try again in ${h}h.`,
       reviewLoading:'Loading reviews...', reviewEmpty:'No reviews yet. Be the first!',
       pwaBannerHint:'Add to Home Screen'
@@ -1804,6 +1915,10 @@ body::after{
     faqList:           document.getElementById('faqList'),
     reviewsHeading:    document.getElementById('reviewsHeading'),
     reviewsSummary:    document.getElementById('reviewsSummary'),
+    reviewsModalBackdrop: document.getElementById('reviewsModalBackdrop'),
+    reviewsModalBody:  document.getElementById('reviewsModalBody'),
+    reviewsModalClose: document.getElementById('reviewsModalClose'),
+    reviewsModalTitle: document.getElementById('reviewsModalTitle'),
     reviewText:        document.getElementById('reviewText'),
     reviewWebsite:     document.getElementById('reviewWebsite'),
     reviewStarsPicker: document.getElementById('reviewStarsPicker'),
@@ -1876,6 +1991,46 @@ body::after{
     renderReviewsSummary();
     renderReviewsList();
   }
+  const REVIEWS_INLINE = 5; // how many to show inline before "see all"
+
+  function buildReviewCards(container, list){
+    const localeMap = {ru:'ru-RU', hy:'hy-AM', en:'en-US'};
+    container.innerHTML = list.map(()=>`
+      <div class="review-card">
+        <div class="review-top"><span class="review-stars"></span><span class="review-date"></span></div>
+        <p class="review-text"></p>
+      </div>`).join('');
+    container.querySelectorAll('.review-card').forEach((card,i)=>{
+      const r = list[i];
+      card.querySelector('.review-stars').textContent = '★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
+      card.querySelector('.review-date').textContent = r.createTime
+        ? new Date(r.createTime).toLocaleDateString(localeMap[lang]||'en-US',{day:'2-digit',month:'short'}) : '';
+      card.querySelector('.review-text').textContent = r.text;
+    });
+  }
+
+  let _reviewsModalOpener = null; // element that triggered open, for focus restore
+
+  function openReviewsModal(){
+    const d = dict[lang];
+    el.reviewsModalTitle.textContent = d.reviewsHeading;
+    buildReviewCards(el.reviewsModalBody, reviewsCache||[]);
+    _reviewsModalOpener = document.activeElement;
+    el.reviewsModalBackdrop.classList.add('open');
+    document.body.classList.add('modal-open');
+    // Move focus into modal
+    requestAnimationFrame(()=> el.reviewsModalClose && el.reviewsModalClose.focus());
+  }
+  function closeReviewsModal(){
+    if(!el.reviewsModalBackdrop.classList.contains('open')) return;
+    el.reviewsModalBackdrop.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    // Restore focus to trigger element
+    if(_reviewsModalOpener && typeof _reviewsModalOpener.focus==='function'){
+      _reviewsModalOpener.focus(); _reviewsModalOpener=null;
+    }
+  }
+
   function renderReviewsSummary(){
     const d = dict[lang];
     if(!reviewsCache || reviewsCache.length === 0){ el.reviewsSummary.innerHTML=''; return; }
@@ -1883,27 +2038,25 @@ body::after{
     const rounded = Math.round(avg*10)/10;
     const fullStars = Math.round(avg);
     const starsStr = '★'.repeat(fullStars)+'☆'.repeat(5-fullStars);
+    const n = reviewsCache.length;
     el.reviewsSummary.innerHTML =
-      `<span class="avg-stars">${starsStr}</span> <span class="avg-num">${rounded}</span> ${d.reviewsAvgUnit} · ${reviewsCache.length} ${d.reviewsCountWord(reviewsCache.length)}`;
+      `<span class="avg-stars">${starsStr}</span> <span class="avg-num">${rounded}</span> ${d.reviewsAvgUnit} · <button class="reviews-count-btn" id="reviewsCountBtn">${n} ${d.reviewsCountWord(n)}</button>`;
+    document.getElementById('reviewsCountBtn')?.addEventListener('click', openReviewsModal);
   }
+
   function renderReviewsList(){
     const d = dict[lang];
     if(reviewsCache===null){ el.reviewList.innerHTML=`<div class="review-loading">${d.reviewLoading}</div>`; return; }
     if(reviewsCache.length===0){ el.reviewList.innerHTML=`<div class="review-empty">${d.reviewEmpty}</div>`; return; }
-    const localeMap = {ru:'ru-RU', hy:'hy-AM', en:'en-US'};
-    el.reviewList.innerHTML = reviewsCache.map(()=>`
-      <div class="review-card">
-        <div class="review-top"><span class="review-stars"></span><span class="review-date"></span></div>
-        <p class="review-text"></p>
-      </div>`).join('');
-    const cards = el.reviewList.querySelectorAll('.review-card');
-    cards.forEach((card,i)=>{
-      const r = reviewsCache[i];
-      card.querySelector('.review-stars').textContent = '★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
-      card.querySelector('.review-date').textContent = r.createTime
-        ? new Date(r.createTime).toLocaleDateString(localeMap[lang]||'en-US',{day:'2-digit',month:'short'}) : '';
-      card.querySelector('.review-text').textContent = r.text;
-    });
+    const slice = reviewsCache.slice(0, REVIEWS_INLINE);
+    buildReviewCards(el.reviewList, slice);
+    if(reviewsCache.length > REVIEWS_INLINE){
+      const btn = document.createElement('button');
+      btn.className='reviews-see-all-btn';
+      btn.textContent = d.reviewsSeeAll(reviewsCache.length);
+      btn.addEventListener('click', openReviewsModal);
+      el.reviewList.appendChild(btn);
+    }
   }
 
   // ---- Render main screen strings ----
@@ -2214,11 +2367,36 @@ body::after{
     }
 
     const REVIEW_COOLDOWN_MS = 6*60*60*1000;
-    const LAST_REVIEW_KEY = 'vedavpn_last_review_ts';
+    const LAST_REVIEW_KEY    = 'vedavpn_last_review_ts';
+    const SENT_HASHES_KEY    = 'vedavpn_sent_hashes';   // texts already submitted (by this browser)
     const URL_PATTERN = /https?:\/\/|www\.|t\.me\//i;
 
+    // Simple non-crypto hash — good enough for duplicate detection
+    function hashText(str){
+      let h=0x811c9dc5;
+      for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h*0x01000193)>>>0; }
+      return h.toString(36);
+    }
+
+    // Similarity ratio between two strings (0‒1)
+    function similarity(a, b){
+      a=a.toLowerCase(); b=b.toLowerCase();
+      if(a===b) return 1;
+      const longer=a.length>b.length?a:b;
+      const shorter=a.length>b.length?b:a;
+      if(longer.length===0) return 1;
+      // Count matching chars with sliding window
+      let matches=0;
+      for(let i=0;i<=longer.length-shorter.length;i++){
+        let m=0;
+        for(let j=0;j<shorter.length;j++) if(longer[i+j]===shorter[j]) m++;
+        if(m>matches) matches=m;
+      }
+      return matches/longer.length;
+    }
+
     function isSpammyText(text){
-      if(text.length < 3) return true;
+      if(text.length < 10) return true;
       const mostCommonCharRatio = (()=>{
         const counts={};
         for(const ch of text) counts[ch]=(counts[ch]||0)+1;
@@ -2227,6 +2405,32 @@ body::after{
       if(mostCommonCharRatio>0.6&&text.length>6) return true;
       if(URL_PATTERN.test(text)) return true;
       return false;
+    }
+
+    // Returns true if this text is a duplicate or near-duplicate of any cached review
+    function isDuplicateReview(text){
+      const norm = text.trim().toLowerCase();
+      // 1. Check against already-sent hashes stored locally
+      const sentRaw = localStorage.getItem(SENT_HASHES_KEY)||'[]';
+      let sent; try{ sent=JSON.parse(sentRaw); }catch(e){ sent=[]; }
+      if(sent.includes(hashText(norm))) return true;
+      // 2. Check against currently loaded reviews
+      if(!reviewsCache) return false;
+      for(const r of reviewsCache){
+        if(!r.text) continue;
+        const sim = similarity(norm, r.text.trim().toLowerCase());
+        if(sim>=0.85) return true;   // 85%+ similar → duplicate
+      }
+      return false;
+    }
+
+    function markTextAsSent(text){
+      const norm = text.trim().toLowerCase();
+      const sentRaw = localStorage.getItem(SENT_HASHES_KEY)||'[]';
+      let sent; try{ sent=JSON.parse(sentRaw); }catch(e){ sent=[]; }
+      sent.push(hashText(norm));
+      if(sent.length>50) sent=sent.slice(-50);  // keep last 50 hashes max
+      localStorage.setItem(SENT_HASHES_KEY, JSON.stringify(sent));
     }
 
     el.reviewSubmitBtn.addEventListener('click', async ()=>{
@@ -2246,6 +2450,9 @@ body::after{
       if(isSpammyText(text)){
         el.reviewStatus.textContent=d.reviewErrSpam; el.reviewStatus.className='review-status err'; return;
       }
+      if(isDuplicateReview(text)){
+        el.reviewStatus.textContent=d.reviewErrDuplicate; el.reviewStatus.className='review-status err'; return;
+      }
       const lastTs = parseInt(localStorage.getItem(LAST_REVIEW_KEY)||'0',10);
       const msLeft = REVIEW_COOLDOWN_MS-(Date.now()-lastTs);
       if(msLeft>0){
@@ -2263,6 +2470,7 @@ body::after{
           createTime:firebase.firestore.FieldValue.serverTimestamp()
         });
         localStorage.setItem(LAST_REVIEW_KEY, String(Date.now()));
+        markTextAsSent(text);
         el.reviewText.value=''; selectedStars=0; updateStarButtons();
         el.reviewStarsLabel.textContent=dict[lang].reviewStarsHint(0);
         el.reviewStatus.textContent=d.reviewOk; el.reviewStatus.className='review-status ok';
@@ -2286,11 +2494,22 @@ body::after{
     window.addEventListener('beforeinstallprompt', e=>{
       e.preventDefault();
       deferredPrompt = e;
-      // Show banner only if user hasn't dismissed it before
+      // Only show banner after language is chosen (user is on main screen)
+      // and hasn't dismissed it before
       if(!localStorage.getItem(DISMISSED_KEY)){
-        setTimeout(()=>{ el.pwaBanner && el.pwaBanner.classList.add('show'); }, 3000);
+        setTimeout(()=>{
+          const onMain = el.mainScreen && el.mainScreen.style.display !== 'none';
+          if(onMain) el.pwaBanner && el.pwaBanner.classList.add('show');
+        }, 4000);
       }
     });
+
+    // Reviews modal close
+    el.reviewsModalClose && el.reviewsModalClose.addEventListener('click', closeReviewsModal);
+    el.reviewsModalBackdrop && el.reviewsModalBackdrop.addEventListener('click', e=>{
+      if(e.target === el.reviewsModalBackdrop) closeReviewsModal();
+    });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReviewsModal(); });
 
     el.pwaInstallBtn && el.pwaInstallBtn.addEventListener('click', async ()=>{
       if(!deferredPrompt) return;
