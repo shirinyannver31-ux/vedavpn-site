@@ -1234,14 +1234,33 @@ body::after{
 .footer-disclaimer{
   font-size:11.5px; color:var(--muted); max-width:340px; line-height:1.6; margin:0;
 }
-.footer-uptime{
-  font-size:11.5px; color:var(--signal-dim); margin:0; font-family:'IBM Plex Mono',monospace;
-  display:flex; align-items:center; gap:6px;
+/* ---------- Uptime badge (days + hours since launch) ---------- */
+.uptime-badge{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin:14px auto 18px;
+  padding:9px 18px;
+  width:fit-content;
+  background: var(--glass);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border:1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12.5px;
+  font-weight:500;
+  color: var(--text);
+  letter-spacing:.2px;
 }
-.footer-uptime::before{
-  content:''; width:6px; height:6px; border-radius:50%;
-  background:var(--signal); box-shadow:0 0 6px rgba(var(--signal-rgb),.7);
-  flex-shrink:0;
+.uptime-badge-dot{
+  width:7px; height:7px; border-radius:50%; flex-shrink:0;
+  background: var(--signal);
+  box-shadow: 0 0 8px rgba(var(--signal-rgb),.75);
+  animation: uptimeDotPulse 2s ease-in-out infinite;
+}
+@keyframes uptimeDotPulse{
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:.4; transform:scale(.8); }
 }
 .footer-copy{
   font-size:11px; color:var(--muted); margin:0; font-family:'IBM Plex Mono',monospace;
@@ -1571,6 +1590,12 @@ body.modal-open{ overflow:hidden; }
       </div>
     </div>
 
+    <!-- Uptime badge: days + hours since launch -->
+    <div class="uptime-badge" id="uptimeBadge">
+      <span class="uptime-badge-dot"></span>
+      <span id="uptimeBadgeText"></span>
+    </div>
+
     <!-- Stats -->
     <div class="stats">
       <div class="stat"><div class="num" id="stat1Num">—</div><div class="label" id="stat1"></div></div>
@@ -1674,7 +1699,6 @@ body.modal-open{ overflow:hidden; }
         <a href="privacy-terms.html" id="footerLegalPage"></a>
       </div>
       <p class="footer-disclaimer" id="footerDisclaimer"></p>
-      <p class="footer-uptime" id="footerUptime"></p>
       <p class="footer-copy" id="footerCopy"></p>
     </footer>
   </div>
@@ -1793,15 +1817,15 @@ body.modal-open{ overflow:hidden; }
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '2.1.3'; // Feature: footer "days running" counter (auto-updates daily)
+  const SITE_VERSION = '2.1.5'; // Debug: log Firestore error code on failed review submit
 
-  // Site went live on 05.07.2026 — used to compute the "days running" counter.
-  const LAUNCH_DATE_UTC = Date.UTC(2026, 6, 5); // month is 0-indexed: 6 = July
+  // Site went live on 05.07.2026, 00:00 UTC — used to compute the uptime badge.
+  const LAUNCH_TS_UTC = Date.UTC(2026, 6, 5, 0, 0, 0); // month is 0-indexed: 6 = July
 
-  function daysSinceLaunch(){
-    const now = new Date();
-    const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    return Math.max(0, Math.floor((todayUTC - LAUNCH_DATE_UTC) / 86400000));
+  function runtimeSinceLaunch(){
+    const diffMs = Math.max(0, Date.now() - LAUNCH_TS_UTC);
+    const totalHours = Math.floor(diffMs / 3600000);
+    return { days: Math.floor(totalHours / 24), hours: totalHours % 24 };
   }
 
   // Russian noun case for "day": день / дня / дней
@@ -1886,7 +1910,7 @@ body.modal-open{ overflow:hidden; }
       tipChannel:'Канал', tipBot:'Бот', tipForum:'Форум',
       footerFaqLabel:'Вопросы', footerDownloadLabel:'Как подключиться', footerLegalLabel:'Политика и условия',
       footerDisclaimer:'VedaVPN предоставляется бесплатно подписчикам нашего канала. Используйте на свой страх и риск.',
-      daysRunningLabel:(n)=>`Работает уже ${n} ${ruDayWord(n)}`,
+      runtimeLabel:(days,hours)=>`${days} ${ruDayWord(days)} ${hours} ч. в сети`,
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Частые вопросы',
       faq:[
@@ -1945,7 +1969,7 @@ body.modal-open{ overflow:hidden; }
       tipChannel:'Ալիք', tipBot:'Բոտ', tipForum:'Ֆորում',
       footerFaqLabel:'Հարցեր', footerDownloadLabel:'Ինչպես միանալ', footerLegalLabel:'Քաղաքականություն',
       footerDisclaimer:'VedaVPN-ը տրամադրվում է անվճար մեր ալիքի բաժանորդներին։ Օգտագործեք ձեր պատասխանատվությամբ։',
-      daysRunningLabel:(n)=>`Աշխատում է արդեն ${n} օր`,
+      runtimeLabel:(days,hours)=>`${days} օր ${hours} ժամ ցանցում`,
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Հաճախակի հարցեր',
       faq:[
@@ -2004,7 +2028,7 @@ body.modal-open{ overflow:hidden; }
       tipChannel:'Channel', tipBot:'Bot', tipForum:'Forum',
       footerFaqLabel:'FAQ', footerDownloadLabel:'How to connect', footerLegalLabel:'Privacy & Terms',
       footerDisclaimer:'VedaVPN is provided free of charge to our channel subscribers. Use at your own discretion.',
-      daysRunningLabel:(n)=>`Running for ${n} day${n===1?'':'s'}`,
+      runtimeLabel:(days,hours)=>`${days}d ${hours}h online`,
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Frequently asked questions',
       faq:[
@@ -2117,8 +2141,8 @@ body.modal-open{ overflow:hidden; }
     footerDownloadPage:document.getElementById('footerDownloadPage'),
     footerLegalPage:   document.getElementById('footerLegalPage'),
     footerDisclaimer:  document.getElementById('footerDisclaimer'),
-    footerUptime:      document.getElementById('footerUptime'),
     footerCopy:        document.getElementById('footerCopy'),
+    uptimeBadgeText:   document.getElementById('uptimeBadgeText'),
     pwaBanner:         document.getElementById('pwaBanner'),
     pwaBannerHint:     document.getElementById('pwaBannerHint'),
     pwaInstallBtn:     document.getElementById('pwaInstallBtn'),
@@ -2311,7 +2335,7 @@ body.modal-open{ overflow:hidden; }
     el.footerDownloadPage.textContent = d.footerDownloadLabel;
     el.footerLegalPage.textContent  = d.footerLegalLabel;
     el.footerDisclaimer.textContent = d.footerDisclaimer;
-    el.footerUptime.textContent     = d.daysRunningLabel(daysSinceLaunch());
+    { const rt = runtimeSinceLaunch(); el.uptimeBadgeText.textContent = d.runtimeLabel(rt.days, rt.hours); }
     el.footerCopy.textContent       = `© ${new Date().getFullYear()} VedaVPN · v${SITE_VERSION}`;
     if(el.pwaBannerHint) el.pwaBannerHint.textContent = d.pwaBannerHint;
     document.documentElement.lang = lang;
@@ -2361,13 +2385,13 @@ body.modal-open{ overflow:hidden; }
   el.ctaBtn.addEventListener('click', showVpnScreen);
   el.backBtn.addEventListener('click', showMain);
 
-  // Keep the "days running" counter correct even if the page is left open
-  // across midnight, without needing a manual reload.
+  // Keep the uptime badge (days + hours) live without needing a page reload.
   setInterval(()=>{
     if(el.mainScreen.style.display !== 'none'){
-      el.footerUptime.textContent = dict[lang].daysRunningLabel(daysSinceLaunch());
+      const rt = runtimeSinceLaunch();
+      el.uptimeBadgeText.textContent = dict[lang].runtimeLabel(rt.days, rt.hours);
     }
-  }, 60 * 60 * 1000);
+  }, 60 * 1000);
 
   // ---- Share button ----
   el.shareBtn && el.shareBtn.addEventListener('click', async ()=>{
@@ -2794,6 +2818,7 @@ body.modal-open{ overflow:hidden; }
         el.reviewStatus.textContent=d.reviewOk; el.reviewStatus.className='review-status ok';
         await fetchReviews();
       }catch(e){
+        console.error('VedaVPN review submit failed:', e && e.code, e && e.message, e);
         el.reviewStatus.textContent=d.reviewErrFail; el.reviewStatus.className='review-status err';
       }finally{
         el.reviewSubmitBtn.disabled=false;
