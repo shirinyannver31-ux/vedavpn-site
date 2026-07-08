@@ -1167,10 +1167,14 @@ body::after{
   font-size:12.5px; color:var(--muted); font-family:'Inter',sans-serif;
 }
 
-.review-submit-row{
-  display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px;
+.review-submit-zone{
+  position:relative;
+  min-height:60px;
+  margin-top:14px;
 }
 .review-submit-btn{
+  position:absolute;
+  left:0; top:0;
   background:linear-gradient(135deg, var(--signal), color-mix(in srgb, var(--signal) 60%, var(--accent)));
   border:none; color:#041A0D;
   border-radius:var(--radius-pill);
@@ -1178,7 +1182,7 @@ body::after{
   font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
   cursor:pointer;
   box-shadow:0 3px 14px rgba(var(--signal-rgb),.3);
-  transition:transform .12s, opacity .15s, box-shadow .15s;
+  transition: left .4s cubic-bezier(.34,1.56,.64,1), top .4s cubic-bezier(.34,1.56,.64,1), transform .12s, opacity .15s, box-shadow .15s;
 }
 @supports not (color: color-mix(in srgb, red, blue)){
   .review-submit-btn{ background:var(--btn-grad); }
@@ -1187,6 +1191,8 @@ body::after{
 .review-submit-btn:hover{ box-shadow:0 5px 22px rgba(var(--signal-rgb),.45); }
 .review-submit-btn:disabled{ opacity:.4; cursor:not-allowed; }
 .review-status{
+  display:block;
+  margin-top:8px;
   font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace;
 }
 .review-status.ok{ color:var(--signal); }
@@ -1385,6 +1391,58 @@ body.modal-open{ overflow:hidden; }
   box-shadow:var(--shadow-sm);
 }
 .float-links a:hover .tip{ opacity:1; }
+
+/* ============================================================
+   SCROLL TO TOP
+   ============================================================ */
+.scroll-top-btn{
+  position:fixed;
+  left: calc(16px + env(safe-area-inset-left));
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  width:46px; height:46px; border-radius:50%;
+  background:var(--glass);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--glass-border);
+  color:var(--signal);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 18px rgba(0,0,0,.4);
+  cursor:pointer;
+  z-index:20;
+  opacity:0; pointer-events:none;
+  transform:translateY(12px) scale(.85);
+  transition:opacity .25s ease, transform .25s ease, border-color .15s, box-shadow .15s;
+}
+.scroll-top-btn svg{ width:20px; height:20px; }
+.scroll-top-btn.show{ opacity:1; pointer-events:auto; transform:translateY(0) scale(1); }
+.scroll-top-btn:active{ transform:scale(.9); }
+.scroll-top-btn:hover{
+  border-color:var(--signal-dim);
+  box-shadow:0 4px 18px rgba(0,0,0,.4), var(--glow-xs);
+}
+
+/* ============================================================
+   CONFETTI (review celebration)
+   ============================================================ */
+.confetti-layer{
+  position:fixed; inset:0; z-index:300;
+  pointer-events:none;
+  overflow:hidden;
+}
+.confetti-piece{
+  position:absolute;
+  top:-10px;
+  width:8px; height:8px;
+  border-radius:2px;
+  opacity:0;
+  animation-name: confettiFall;
+  animation-timing-function: cubic-bezier(.25,.46,.45,.94);
+  animation-fill-mode: forwards;
+}
+@keyframes confettiFall{
+  0%{   opacity:1; transform:translate(0,0) rotate(0deg); }
+  100%{ opacity:0; transform:var(--confetti-end) rotate(var(--confetti-spin)); }
+}
 
 /* ============================================================
    PWA INSTALL BANNER
@@ -1658,10 +1716,10 @@ body.modal-open{ overflow:hidden; }
           <input type="checkbox" id="reviewHumanCheck" class="review-human-cb">
           <span class="review-human-label" id="reviewHumanLabel"></span>
         </label>
-        <div class="review-submit-row">
+        <div class="review-submit-zone" id="reviewSubmitZone">
           <button type="button" class="review-submit-btn" id="reviewSubmitBtn"></button>
-          <span class="review-status" id="reviewStatus"></span>
         </div>
+        <span class="review-status" id="reviewStatus"></span>
       </div>
       <div class="review-list" id="reviewList">
         <div class="review-loading" id="reviewLoading"></div>
@@ -1787,6 +1845,14 @@ body.modal-open{ overflow:hidden; }
   <a href="https://t.me/vedavpnforum" target="_blank" rel="noopener"><span class="tip" id="tipForum"></span>💬</a>
 </div>
 
+<!-- Scroll to top -->
+<button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="Scroll to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<!-- Confetti layer (for review celebration) -->
+<div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
 <!-- Reviews full modal -->
 <div class="reviews-modal-backdrop" id="reviewsModalBackdrop" role="dialog" aria-modal="true" aria-label="All reviews">
   <div class="reviews-modal">
@@ -1817,7 +1883,7 @@ body.modal-open{ overflow:hidden; }
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '2.1.5'; // Debug: log Firestore error code on failed review submit
+  const SITE_VERSION = '2.1.7'; // Feature: scroll-to-top button, review confetti, haptic feedback
 
   // Site went live on 05.07.2026, 00:00 UTC — used to compute the uptime badge.
   const LAUNCH_TS_UTC = Date.UTC(2026, 6, 5, 0, 0, 0); // month is 0-indexed: 6 = July
@@ -2132,6 +2198,9 @@ body.modal-open{ overflow:hidden; }
     reviewStarsPicker: document.getElementById('reviewStarsPicker'),
     reviewStarsLabel:  document.getElementById('reviewStarsLabel'),
     reviewSubmitBtn:   document.getElementById('reviewSubmitBtn'),
+    reviewSubmitZone:  document.getElementById('reviewSubmitZone'),
+    scrollTopBtn:      document.getElementById('scrollTopBtn'),
+    confettiLayer:     document.getElementById('confettiLayer'),
     reviewStatus:      document.getElementById('reviewStatus'),
     reviewList:        document.getElementById('reviewList'),
     footerChannel:     document.getElementById('footerChannel'),
@@ -2382,7 +2451,7 @@ body.modal-open{ overflow:hidden; }
     });
   });
 
-  el.ctaBtn.addEventListener('click', showVpnScreen);
+  el.ctaBtn.addEventListener('click', ()=>{ haptic(10); showVpnScreen(); });
   el.backBtn.addEventListener('click', showMain);
 
   // Keep the uptime badge (days + hours) live without needing a page reload.
@@ -2473,6 +2542,7 @@ body.modal-open{ overflow:hidden; }
       ta.value = subUrl; document.body.appendChild(ta); ta.select();
       document.execCommand('copy'); document.body.removeChild(ta);
     }
+    haptic(10);
     el.copyBtnText.textContent = dict[lang].copied;
     el.copyBtn.classList.add('copied');
     el.linkBox.classList.remove('flash');
@@ -2664,6 +2734,23 @@ body.modal-open{ overflow:hidden; }
     const PAGE_LOAD_TS = Date.now();
     const MIN_READ_TIME_MS = 20000; // must spend 20s on page before submitting
 
+    // Anti-bot: relocate the submit button to a random spot inside its zone.
+    // Naive bots that click at a fixed saved coordinate will miss it; real
+    // users just see the button wherever it lands and click it normally.
+    function shuffleSubmitBtnPosition(){
+      const zone = el.reviewSubmitZone, btn = el.reviewSubmitBtn;
+      if(!zone || !btn) return;
+      const zoneW = zone.clientWidth, zoneH = zone.clientHeight;
+      const btnW = btn.offsetWidth || 140, btnH = btn.offsetHeight || 40;
+      const maxLeft = Math.max(0, zoneW - btnW);
+      const maxTop  = Math.max(0, zoneH - btnH);
+      btn.style.left = Math.round(Math.random() * maxLeft) + 'px';
+      btn.style.top  = Math.round(Math.random() * maxTop) + 'px';
+    }
+    // Initial placement (after layout/fonts settle) and on viewport resize.
+    setTimeout(shuffleSubmitBtnPosition, 300);
+    window.addEventListener('resize', shuffleSubmitBtnPosition);
+
     // Known spam keyword blocklist (lowercase)
     const SPAM_KEYWORDS = [
       'сосите','рейдит','groozen','grozeen','grozeen','писюн','хуй','пизд',
@@ -2816,6 +2903,9 @@ body.modal-open{ overflow:hidden; }
         if(el.reviewHumanCheck) el.reviewHumanCheck.checked=false;
         generateCaptcha();
         el.reviewStatus.textContent=d.reviewOk; el.reviewStatus.className='review-status ok';
+        shuffleSubmitBtnPosition();
+        confettiBurst();
+        haptic(15);
         await fetchReviews();
       }catch(e){
         console.error('VedaVPN review submit failed:', e && e.code, e && e.message, e);
@@ -2828,6 +2918,48 @@ body.modal-open{ overflow:hidden; }
 
     fetchReviews();
   })();
+
+  // ---- PWA install prompt ----
+  // ---- Haptic feedback helper (Android Chrome; no-op elsewhere) ----
+  function haptic(ms){
+    try{ if(navigator.vibrate) navigator.vibrate(ms||10); }catch(e){}
+  }
+
+  // ---- Scroll to top button ----
+  (function initScrollTop(){
+    if(!el.scrollTopBtn) return;
+    window.addEventListener('scroll', ()=>{
+      el.scrollTopBtn.classList.toggle('show', window.scrollY > 500);
+    }, {passive:true});
+    el.scrollTopBtn.addEventListener('click', ()=>{
+      haptic(8);
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  })();
+
+  // ---- Confetti burst (used to celebrate a successfully published review) ----
+  function confettiBurst(){
+    if(!el.confettiLayer) return;
+    const colors = ['#39FF9E','#6EA8FE','#B98CFF','#FF5C77','#FFD166'];
+    const originX = window.innerWidth / 2;
+    const pieceCount = 26;
+    for(let i=0;i<pieceCount;i++){
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      const angle = (Math.random()*Math.PI) + Math.PI; // upward-ish spread
+      const dist  = 90 + Math.random()*160;
+      const dx = Math.cos(angle)*dist;
+      const dy = Math.abs(Math.sin(angle)*dist) + 140 + Math.random()*120; // fall down
+      piece.style.setProperty('--confetti-end', `translate(${dx}px, ${dy}px)`);
+      piece.style.setProperty('--confetti-spin', `${(Math.random()*720-360)}deg`);
+      piece.style.left = (originX + (Math.random()*40-20)) + 'px';
+      piece.style.background = colors[i % colors.length];
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (900 + Math.random()*700) + 'ms';
+      el.confettiLayer.appendChild(piece);
+      piece.addEventListener('animationend', ()=> piece.remove());
+    }
+  }
 
   // ---- PWA install prompt ----
   (function initPWA(){
