@@ -216,6 +216,126 @@ body::after{
   text-align:center;
 }
 
+/* ============================================================
+   AUTH SCREEN (login / register gate)
+   ============================================================ */
+#authScreen{
+  display:none;
+  flex:1;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:22px;
+  text-align:center;
+}
+.auth-card{
+  width:100%;
+  background:var(--glass);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  box-shadow:var(--shadow-md);
+  box-sizing:border-box;
+}
+.auth-tabs{
+  display:flex; gap:8px; margin-bottom:18px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-pill);
+  padding:4px;
+}
+.auth-tab-btn{
+  flex:1;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  padding:10px 12px;
+  border:none; border-radius:var(--radius-pill);
+  background:transparent; color:var(--muted);
+  font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
+  cursor:pointer;
+  transition:background .18s, color .18s;
+}
+.auth-tab-btn.active{
+  background:var(--btn-grad);
+  color:#041A0D;
+}
+.auth-panel{ text-align:left; }
+.auth-hint{
+  font-size:13px; color:var(--muted); line-height:1.5;
+  margin:0 0 16px; text-align:center;
+}
+.auth-tg-widget{
+  display:flex; justify-content:center; min-height:40px;
+}
+.auth-mode-switch{
+  display:flex; gap:18px; margin-bottom:16px;
+  border-bottom:1px solid var(--glass-border);
+}
+.auth-mode-btn{
+  background:none; border:none; cursor:pointer;
+  padding:0 0 10px; margin-bottom:-1px;
+  font-family:'Inter',sans-serif; font-weight:600; font-size:14px;
+  color:var(--muted);
+  border-bottom:2px solid transparent;
+  transition:color .15s, border-color .15s;
+}
+.auth-mode-btn.active{ color:var(--text); border-bottom-color:var(--signal); }
+.auth-input{
+  width:100%; box-sizing:border-box;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-border);
+  border-radius:10px;
+  color:var(--text);
+  font-family:'Inter',sans-serif; font-size:16px;
+  padding:12px 14px;
+  margin-bottom:10px;
+  transition:border-color .15s;
+}
+.auth-input:focus{
+  outline:none;
+  border-color:var(--signal-dim);
+  box-shadow:0 0 0 3px rgba(var(--signal-rgb),.1);
+}
+.auth-submit-zone{ margin-top:6px; }
+.auth-submit-btn{
+  width:100%;
+  background:linear-gradient(135deg, var(--signal), color-mix(in srgb, var(--signal) 60%, var(--accent)));
+  border:none; color:#041A0D;
+  border-radius:var(--radius-pill);
+  padding:13px 22px;
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px;
+  cursor:pointer;
+  box-shadow:0 3px 14px rgba(var(--signal-rgb),.3);
+  transition:transform .12s, opacity .15s, box-shadow .15s;
+}
+@supports not (color: color-mix(in srgb, red, blue)){
+  .auth-submit-btn{ background:var(--btn-grad); }
+}
+.auth-submit-btn:active{ transform:scale(.97); }
+.auth-submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.auth-status{
+  display:block; margin-top:10px; min-height:16px;
+  font-size:12.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace;
+  text-align:center;
+}
+.auth-status.ok{ color:var(--signal); }
+.auth-status.err{ color:#FF6B6B; }
+.logout-btn{
+  width:38px; height:38px;
+  border-radius:12px;
+  border:1px solid var(--glass-border);
+  background:var(--glass);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  color:var(--text);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0;
+  transition:border-color .15s ease, color .15s ease;
+}
+.logout-btn:hover{ border-color:#FF6B6B; color:#FF6B6B; }
+.logout-btn svg{ width:16px; height:16px; }
+
 .lang-screen-top{
   position:absolute;
   top:20px; right:20px;
@@ -1069,156 +1189,6 @@ body::after{
 }
 
 /* ============================================================
-   REVIEWS
-   ============================================================ */
-.reviews-section{ margin-top:30px; }
-.reviews-heading{
-  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px;
-  margin:0 0 4px;
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.reviews-summary{
-  display:flex; align-items:center; gap:8px;
-  font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted);
-}
-.reviews-summary .avg-stars{ color:#F5B93D; letter-spacing:1px; }
-.reviews-summary .avg-num{ color:var(--text); font-weight:600; }
-
-.review-form{
-  background:var(--glass);
-  backdrop-filter:var(--blur-sm);
-  -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius-md);
-  padding:16px;
-  margin:14px 0 18px;
-  box-shadow:var(--shadow-sm);
-}
-.hp-field{
-  position:absolute; left:-9999px; width:1px; height:1px;
-  opacity:0; overflow:hidden; pointer-events:none;
-}
-.review-form textarea{
-  width:100%; min-height:70px; resize:vertical;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--glass-border);
-  border-radius:10px;
-  color:var(--text);
-  font-family:'Inter',sans-serif; font-size:16px;
-  padding:10px 12px; box-sizing:border-box;
-  transition:border-color .15s;
-}
-.review-form textarea:focus{
-  outline:none;
-  border-color:var(--signal-dim);
-  box-shadow:0 0 0 3px rgba(var(--signal-rgb),.1);
-}
-
-.review-stars-picker{
-  display:flex; align-items:center; gap:10px; margin-top:12px;
-}
-.review-stars-picker .stars{ display:flex; gap:2px; }
-.review-stars-picker .star-btn{
-  background:none; border:none; cursor:pointer;
-  font-size:22px; line-height:1;
-  color:var(--line); padding:8px 6px;
-  min-width:44px; min-height:44px;
-  display:flex; align-items:center; justify-content:center;
-  transition:transform .12s cubic-bezier(.34,1.56,.64,1), color .15s;
-}
-.review-stars-picker .star-btn:active{ transform:scale(.8); }
-.review-stars-picker .star-btn.active{ color:#F5B93D; transform:scale(1.1); }
-.review-stars-label{ font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
-
-.review-captcha-row{
-  display:flex; align-items:center; gap:10px; margin-top:14px;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--glass-border);
-  border-radius:10px; padding:10px 14px;
-}
-.review-captcha-question{
-  font-size:13.5px; color:var(--text); font-family:'IBM Plex Mono',monospace;
-  font-weight:500; flex:1; white-space:nowrap;
-}
-.review-captcha-input{
-  width:64px; padding:7px 10px; text-align:center;
-  background:rgba(255,255,255,.06);
-  border:1.5px solid var(--glass-border);
-  border-radius:8px; color:var(--text);
-  font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600;
-  transition:border-color .15s;
-  -moz-appearance:textfield;
-}
-.review-captcha-input::-webkit-outer-spin-button,
-.review-captcha-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-.review-captcha-input:focus{
-  outline:none; border-color:var(--signal-dim);
-  box-shadow:0 0 0 3px rgba(var(--signal-rgb),.1);
-}
-
-.review-human-row{
-  display:flex; align-items:center; gap:10px; margin-top:10px; cursor:pointer; user-select:none;
-}
-.review-human-cb{
-  width:18px; height:18px; flex-shrink:0; cursor:pointer;
-  accent-color:var(--signal);
-}
-.review-human-label{
-  font-size:12.5px; color:var(--muted); font-family:'Inter',sans-serif;
-}
-
-.review-submit-zone{
-  position:relative;
-  min-height:60px;
-  margin-top:14px;
-}
-.review-submit-btn{
-  position:absolute;
-  left:0; top:0;
-  background:linear-gradient(135deg, var(--signal), color-mix(in srgb, var(--signal) 60%, var(--accent)));
-  border:none; color:#041A0D;
-  border-radius:var(--radius-pill);
-  padding:10px 22px;
-  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
-  cursor:pointer;
-  box-shadow:0 3px 14px rgba(var(--signal-rgb),.3);
-  transition: left .4s cubic-bezier(.34,1.56,.64,1), top .4s cubic-bezier(.34,1.56,.64,1), transform .12s, opacity .15s, box-shadow .15s;
-}
-@supports not (color: color-mix(in srgb, red, blue)){
-  .review-submit-btn{ background:var(--btn-grad); }
-}
-.review-submit-btn:active{ transform:scale(.95); }
-.review-submit-btn:hover{ box-shadow:0 5px 22px rgba(var(--signal-rgb),.45); }
-.review-submit-btn:disabled{ opacity:.4; cursor:not-allowed; }
-.review-status{
-  display:block;
-  margin-top:8px;
-  font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace;
-}
-.review-status.ok{ color:var(--signal); }
-.review-status.err{ color:#FF6B6B; }
-
-.review-list{ display:flex; flex-direction:column; gap:10px; }
-.review-card{
-  background:var(--glass);
-  backdrop-filter:var(--blur-sm);
-  -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius-md);
-  padding:15px 16px;
-  box-shadow:var(--shadow-sm);
-  transition:border-color .2s, transform .2s;
-}
-.review-card:hover{ border-color:rgba(var(--signal-rgb),.15); transform:translateY(-1px); }
-.review-card .review-top{
-  display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;
-}
-.review-card .review-stars{ color:#F5B93D; font-size:14px; letter-spacing:1px; }
-.review-card .review-date{ font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
-.review-card .review-text{ font-size:13px; color:var(--text); line-height:1.55; margin:0; word-wrap:break-word; }
-.review-empty,.review-loading{ font-size:13px; color:var(--muted); padding:6px 2px; }
-
-/* ============================================================
    FOOTER
    ============================================================ */
 .site-footer{
@@ -1271,88 +1241,6 @@ body::after{
 .footer-copy{
   font-size:11px; color:var(--muted); margin:0; font-family:'IBM Plex Mono',monospace;
 }
-
-/* ============================================================
-   REVIEWS FULL MODAL (bottom sheet)
-   ============================================================ */
-.reviews-modal-backdrop{
-  position:fixed; inset:0; z-index:200;
-  background:rgba(0,0,0,.55);
-  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
-  display:none; align-items:flex-end; justify-content:center;
-  animation:backdropIn .2s ease both;
-}
-.reviews-modal-backdrop.open{ display:flex; }
-@keyframes backdropIn{ from{opacity:0;} to{opacity:1;} }
-body.modal-open{ overflow:hidden; }
-
-.reviews-modal{
-  width:100%; max-width:480px;
-  max-height:88vh;
-  background:var(--panel);
-  border-radius:24px 24px 0 0;
-  border:1px solid var(--glass-border);
-  border-bottom:none;
-  display:flex; flex-direction:column;
-  overflow:hidden;
-  animation:sheetUp .3s cubic-bezier(.22,1,.36,1) both;
-}
-@keyframes sheetUp{ from{transform:translateY(100%);} to{transform:translateY(0);} }
-
-.reviews-modal-header{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:18px 20px 14px;
-  border-bottom:1px solid var(--glass-border);
-  flex-shrink:0;
-}
-.reviews-modal-title{
-  font-family:'Space Grotesk',sans-serif;
-  font-size:17px; font-weight:700; color:var(--text);
-}
-.reviews-modal-close{
-  width:34px; height:34px; border-radius:50%;
-  background:rgba(255,255,255,.07);
-  border:1px solid var(--glass-border);
-  color:var(--muted); font-size:16px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:background .15s, color .15s;
-}
-.reviews-modal-close:hover{ background:rgba(255,255,255,.13); color:var(--text); }
-
-.reviews-modal-body{
-  overflow-y:auto; flex:1;
-  padding:16px 16px 24px;
-  display:flex; flex-direction:column; gap:10px;
-  overscroll-behavior:contain;
-}
-
-/* Clickable count badge */
-.reviews-count-btn{
-  background:none; border:none; padding:0; margin:0;
-  color:var(--signal); font:inherit; cursor:pointer;
-  font-size:inherit; font-weight:700;
-  text-decoration:underline dotted;
-  text-underline-offset:2px;
-  transition:opacity .15s;
-}
-.reviews-count-btn:hover{ opacity:.75; }
-
-/* See all inline button */
-.reviews-see-all-btn{
-  display:flex; align-items:center; justify-content:center; gap:6px;
-  margin-top:4px; padding:13px 20px;
-  border-radius:var(--radius-pill);
-  border:1.5px solid rgba(var(--signal-rgb),.3);
-  background:rgba(var(--signal-rgb),.07);
-  color:var(--signal); font-family:'Inter',sans-serif;
-  font-size:14px; font-weight:600; cursor:pointer;
-  transition:background .15s, border-color .15s, transform .12s;
-}
-.reviews-see-all-btn:hover{
-  background:rgba(var(--signal-rgb),.14);
-  border-color:rgba(var(--signal-rgb),.5);
-}
-.reviews-see-all-btn:active{ transform:scale(.97); }
 
 /* ============================================================
    FLOATING ACTION LINKS
@@ -1422,7 +1310,7 @@ body.modal-open{ overflow:hidden; }
 }
 
 /* ============================================================
-   CONFETTI (review celebration)
+   CONFETTI
    ============================================================ */
 .confetti-layer{
   position:fixed; inset:0; z-index:300;
@@ -1501,10 +1389,6 @@ body.modal-open{ overflow:hidden; }
 .pwa-dismiss-btn:hover{ border-color:var(--muted); color:var(--text); }
 
 /* ============================================================
-   MISC REVIEW HEADINGS
-   ============================================================ */
-
-/* ============================================================
    DONATE SECTION
    ============================================================ */
 .donate-section{ margin-top:28px; }
@@ -1571,11 +1455,54 @@ body.modal-open{ overflow:hidden; }
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
 
 <div class="wrap">
+
+  <!-- ===== Auth screen (login / register) ===== -->
+  <div id="authScreen">
+    <button class="theme-toggle lang-screen-top" id="themeToggleAuth" type="button" aria-label="Toggle theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      <svg class="icon-sun"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+    <div class="logo-mark">
+      <img src="veda-logo.png" alt="VedaVPN">
+    </div>
+    <h1 class="brand">Veda<span>VPN</span></h1>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab-btn active" data-tab="tg" id="authTabTgBtn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>
+          <span id="authTabTgLabel"></span>
+        </button>
+        <button type="button" class="auth-tab-btn" data-tab="email" id="authTabEmailBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+          <span id="authTabEmailLabel"></span>
+        </button>
+      </div>
+
+      <div class="auth-panel" id="authPanelTg">
+        <p class="auth-hint" id="authTgHintText"></p>
+        <div class="auth-tg-widget" id="telegramLoginContainer"></div>
+      </div>
+
+      <div class="auth-panel" id="authPanelEmail" style="display:none">
+        <div class="auth-mode-switch">
+          <button type="button" class="auth-mode-btn active" data-mode="login" id="authModeLoginBtn"></button>
+          <button type="button" class="auth-mode-btn" data-mode="register" id="authModeRegisterBtn"></button>
+        </div>
+        <input type="email" id="authEmailInput" class="auth-input" autocomplete="email" inputmode="email">
+        <input type="password" id="authPasswordInput" class="auth-input" autocomplete="current-password">
+        <div class="auth-submit-zone">
+          <button type="button" class="auth-submit-btn" id="authSubmitBtn"></button>
+        </div>
+        <span class="auth-status" id="authStatus"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== Language picker screen ===== -->
   <div id="langScreen">
@@ -1594,6 +1521,7 @@ body.modal-open{ overflow:hidden; }
       <button class="lang-btn" data-lang="en"><span class="flag">🇬🇧</span> English</button>
     </div>
   </div>
+
 
   <!-- ===== Main screen ===== -->
   <div id="mainScreen">
@@ -1618,6 +1546,9 @@ body.modal-open{ overflow:hidden; }
           <button class="palette-dot" data-palette="purple" style="--dot:#B98CFF" aria-label="Purple theme" type="button"></button>
           <button class="palette-dot" data-palette="red"    style="--dot:#FF5C77" aria-label="Red theme"    type="button"></button>
         </div>
+        <button class="logout-btn" id="logoutBtn" type="button" aria-label="Log out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
       </div>
     </div>
 
@@ -1687,43 +1618,6 @@ body.modal-open{ overflow:hidden; }
     <div class="faq-section">
       <p class="faq-heading" id="faqHeading"></p>
       <div id="faqList"></div>
-    </div>
-
-    <!-- Reviews -->
-    <div class="reviews-section">
-      <p class="reviews-heading">
-        <span id="reviewsHeading"></span>
-        <span class="reviews-summary" id="reviewsSummary"></span>
-      </p>
-      <div class="review-form">
-        <textarea id="reviewText" maxlength="500"></textarea>
-        <input type="text" id="reviewWebsite" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <div class="review-stars-picker">
-          <div class="stars" id="reviewStarsPicker">
-            <button type="button" class="star-btn" data-star="1">★</button>
-            <button type="button" class="star-btn" data-star="2">★</button>
-            <button type="button" class="star-btn" data-star="3">★</button>
-            <button type="button" class="star-btn" data-star="4">★</button>
-            <button type="button" class="star-btn" data-star="5">★</button>
-          </div>
-          <span class="review-stars-label" id="reviewStarsLabel"></span>
-        </div>
-        <div class="review-captcha-row">
-          <span class="review-captcha-question" id="captchaQuestion"></span>
-          <input type="number" id="captchaAnswer" class="review-captcha-input" placeholder="?" min="0" max="99" autocomplete="off">
-        </div>
-        <label class="review-human-row">
-          <input type="checkbox" id="reviewHumanCheck" class="review-human-cb">
-          <span class="review-human-label" id="reviewHumanLabel"></span>
-        </label>
-        <div class="review-submit-zone" id="reviewSubmitZone">
-          <button type="button" class="review-submit-btn" id="reviewSubmitBtn"></button>
-        </div>
-        <span class="review-status" id="reviewStatus"></span>
-      </div>
-      <div class="review-list" id="reviewList">
-        <div class="review-loading" id="reviewLoading"></div>
-      </div>
     </div>
 
     <!-- Donate -->
@@ -1850,19 +1744,8 @@ body.modal-open{ overflow:hidden; }
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
-<!-- Confetti layer (for review celebration) -->
+<!-- Confetti layer -->
 <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
-
-<!-- Reviews full modal -->
-<div class="reviews-modal-backdrop" id="reviewsModalBackdrop" role="dialog" aria-modal="true" aria-label="All reviews">
-  <div class="reviews-modal">
-    <div class="reviews-modal-header">
-      <span class="reviews-modal-title" id="reviewsModalTitle">Reviews</span>
-      <button class="reviews-modal-close" id="reviewsModalClose" aria-label="Close">✕</button>
-    </div>
-    <div class="reviews-modal-body" id="reviewsModalBody"></div>
-  </div>
-</div>
 
 <!-- PWA install banner -->
 <div class="pwa-banner" id="pwaBanner" role="dialog" aria-label="Install app">
@@ -1883,7 +1766,7 @@ body.modal-open{ overflow:hidden; }
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '2.1.7'; // Feature: scroll-to-top button, review confetti, haptic feedback
+  const SITE_VERSION = '3.0.0'; // Feature: authentication (Telegram + Email/Password), scroll-to-top, haptic feedback
 
   // Site went live on 05.07.2026, 00:00 UTC — used to compute the uptime badge.
   const LAUNCH_TS_UTC = Date.UTC(2026, 6, 5, 0, 0, 0); // month is 0-indexed: 6 = July
@@ -1985,29 +1868,28 @@ body.modal-open{ overflow:hidden; }
         {q:'Ссылка перестала работать, что делать?', a:'Проверьте актуальную ссылку в этом же боте или напишите в поддержку через бот @vedavpn_bot.'},
         {q:'Какое приложение лучше использовать?', a:'Мы рекомендуем Happ или INCY — оба поддерживают эту ссылку и просты в настройке.'}
       ],
-      reviewsHeading:'💬 Отзывы',
-      reviewsAvgUnit:'из 5',
-      reviewsCountWord:(n)=> n===1?'отзыв':(n>=2&&n<=4?'отзыва':'отзывов'),
-      reviewsSeeAll:(n)=>`Все ${n} отзыва`,
-      reviewPlaceholder:'Напишите, что думаете о VPN...',
-      reviewStarsHint:(n)=> n?`Оценка: ${n} из 5`:'Выберите оценку',
-      reviewSubmit:'Опубликовать', reviewSending:'Отправка...',
-      reviewOk:'Спасибо! Отзыв опубликован ✓',
-      reviewErrEmpty:'Напишите отзыв и выберите оценку',
-      reviewErrFail:'Не удалось отправить. Попробуйте ещё раз.',
-      reviewErrSpam:'Отзыв похож на спам. Напишите настоящий текст (мин. 10 символов).',
-      reviewErrDuplicate:'Такой отзыв уже существует. Пожалуйста, напишите оригинальный текст.',
-      reviewErrCooldown:(h)=>`Вы уже оставляли отзыв недавно. Попробуйте снова через ${h} ч.`,
-      reviewLoading:'Загрузка отзывов...', reviewEmpty:'Пока нет отзывов. Будьте первым!',
       pwaBannerHint:'Добавить на главный экран',
-      reviewCaptchaLabel:(a,b)=>`Сколько будет ${a} + ${b} =`,
-      reviewErrCaptcha:'Неверный ответ на вопрос. Попробуйте снова.',
-      reviewHumanLabel:'Я живой человек, а не бот',
-      reviewErrNotHuman:'Подтвердите, что вы не бот',
-      reviewErrTooFast:'Читайте подольше перед отзывом 😊',
       donateTitle:'Поддержать VedaVPN',
       donateSub:'Сервис работает бесплатно. Если хочешь помочь развитию — любая поддержка важна.',
       donateBtn:'💜 Поддержать проект',
+      authTabTg:'Telegram',
+      authTabEmail:'Email',
+      authTgHint:'Войдите одним нажатием через Telegram',
+      authModeLogin:'Вход',
+      authModeRegister:'Регистрация',
+      authEmailPlaceholder:'Email',
+      authPasswordPlaceholder:'Пароль',
+      authSubmitLogin:'Войти',
+      authSubmitRegister:'Зарегистрироваться',
+      authSending:'Проверка...',
+      authErrEmpty:'Заполните email и пароль',
+      authErrInvalidEmail:'Неверный формат email',
+      authErrWeakPassword:'Пароль должен быть не менее 6 символов',
+      authErrEmailInUse:'Этот email уже зарегистрирован',
+      authErrWrongPassword:'Неверный email или пароль',
+      authErrUserNotFound:'Пользователь не найден',
+      authErrGeneric:'Что-то пошло не так. Попробуйте снова.',
+      logoutLabel:'Выйти',
     },
     hy:{
       eyebrow:'Ցանց ակտիվ',
@@ -2044,29 +1926,28 @@ body.modal-open{ overflow:hidden; }
         {q:'Հղումն այլևս չի աշխատում, ի՞նչ անել', a:'Ստուգիր ընթացիկ հղումը հենց այս բոտում, կամ գրիր support-ին @vedavpn_bot-ի միջոցով։'},
         {q:'Ո՞ր հավելվածն է ավելի լավ', a:'Խորհուրդ ենք տալիս Happ կամ INCY — երկուսն էլ աջակցում են այս հղումին և հեշտ են կարգավորել։'}
       ],
-      reviewsHeading:'💬 Կարծիքներ',
-      reviewsAvgUnit:'5-ից',
-      reviewsCountWord:(n)=> n===1?'կարծիք':'կարծիք',
-      reviewsSeeAll:(n)=>`Բոլոր ${n} կարծիքները`,
-      reviewPlaceholder:'Գրիր, թե ինչ ես մտածում VPN-ի մասին...',
-      reviewStarsHint:(n)=> n?`Գնահատական՝ ${n} 5-ից`:'Ընտրիր գնահատականը',
-      reviewSubmit:'Հրապարակել', reviewSending:'Ուղարկվում է...',
-      reviewOk:'Շնորհակալություն! Կարծիքը հրապարակվեց ✓',
-      reviewErrEmpty:'Գրիր կարծիք և ընտրիր գնահատական',
-      reviewErrFail:'Չհաջողվեց ուղարկել։ Փորձիր նորից։',
-      reviewErrSpam:'Կարծիքը նման է spam-ի։ Գրեք իրական տեքստ (նվազ. 10 նիշ)։',
-      reviewErrDuplicate:'Նման կարծիք արդեն կա։ Խնդրում ենք գրել օրիգինալ տեքստ։',
-      reviewErrCooldown:(h)=>`Դուք արդեն վերջերս կարծիք եք թողել։ Փորձեք կրկին ${h} ժամից։`,
-      reviewLoading:'Կարծիքները բեռնվում են...', reviewEmpty:'Դեռ կարծիքներ չկան։ Եղիր առաջինը!',
       pwaBannerHint:'Ավելացնել գլխավոր էկրան',
-      reviewCaptchaLabel:(a,b)=>`${a} + ${b} = քա՞նի`,
-      reviewErrCaptcha:'Սխալ պատասխան։ Կրկին փորձիր։',
-      reviewHumanLabel:'Ես կենդանի մարդ եմ, ոչ բոտ',
-      reviewErrNotHuman:'Հաստատիր, որ բոտ չես',
-      reviewErrTooFast:'Կարդա ավելի երկար, հետո կարծիք թող 😊',
       donateTitle:'Աջակցել VedaVPN-ին',
       donateSub:'Ծառայությունն անվճար է։ Եթե ուզում ես օգնել զարգացմանը — ցանկացած աջակցություն կարևոր է։',
       donateBtn:'💜 Աջակցել',
+      authTabTg:'Telegram',
+      authTabEmail:'Email',
+      authTgHint:'Մուտք գործիր մեկ սեղմումով Telegram-ով',
+      authModeLogin:'Մուտք',
+      authModeRegister:'Գրանցում',
+      authEmailPlaceholder:'Email',
+      authPasswordPlaceholder:'Գաղտնաբառ',
+      authSubmitLogin:'Մուտք գործել',
+      authSubmitRegister:'Գրանցվել',
+      authSending:'Ստուգվում է...',
+      authErrEmpty:'Լրացրու email և գաղտնաբառը',
+      authErrInvalidEmail:'Սխալ email ձևաչափ',
+      authErrWeakPassword:'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ',
+      authErrEmailInUse:'Այս email-ն արդեն գրանցված է',
+      authErrWrongPassword:'Սխալ email կամ գաղտնաբառ',
+      authErrUserNotFound:'Օգտատերը չի գտնվել',
+      authErrGeneric:'Ինչ-որ բան սխալ գնաց։ Փորձիր նորից։',
+      logoutLabel:'Ելք',
     },
     en:{
       eyebrow:'Network active',
@@ -2103,37 +1984,35 @@ body.modal-open{ overflow:hidden; }
         {q:"The link stopped working, what do I do?", a:'Check the current link right here in this bot, or contact support via @vedavpn_bot.'},
         {q:'Which app should I use?', a:'We recommend Happ or INCY — both support this link and are easy to set up.'}
       ],
-      reviewsHeading:'💬 Reviews',
-      reviewsAvgUnit:'out of 5',
-      reviewsCountWord:(n)=> n===1?'review':'reviews',
-      reviewsSeeAll:(n)=>`See all ${n} reviews`,
-      reviewPlaceholder:'Share your thoughts about the VPN...',
-      reviewStarsHint:(n)=> n?`Rating: ${n} out of 5`:'Choose a rating',
-      reviewSubmit:'Publish', reviewSending:'Sending...',
-      reviewOk:'Thanks! Your review is published ✓',
-      reviewErrEmpty:'Write a review and choose a rating',
-      reviewErrFail:'Failed to send. Please try again.',
-      reviewErrSpam:'This looks like spam. Write a real review (min. 10 characters).',
-      reviewErrDuplicate:'A similar review already exists. Please write an original text.',
-      reviewErrCooldown:(h)=>`You already left a review recently. Try again in ${h}h.`,
-      reviewLoading:'Loading reviews...', reviewEmpty:'No reviews yet. Be the first!',
       pwaBannerHint:'Add to Home Screen',
-      reviewCaptchaLabel:(a,b)=>`What is ${a} + ${b} =`,
-      reviewErrCaptcha:'Wrong answer. Please try again.',
-      reviewHumanLabel:'I am a real person, not a bot',
-      reviewErrNotHuman:'Please confirm you are not a bot',
-      reviewErrTooFast:'Spend a bit more time reading first 😊',
       donateTitle:'Support VedaVPN',
       donateSub:'The service is free. If you want to help us grow — any support matters.',
       donateBtn:'💜 Support the project',
+      authTabTg:'Telegram',
+      authTabEmail:'Email',
+      authTgHint:'Sign in instantly with Telegram',
+      authModeLogin:'Log in',
+      authModeRegister:'Sign up',
+      authEmailPlaceholder:'Email',
+      authPasswordPlaceholder:'Password',
+      authSubmitLogin:'Log in',
+      authSubmitRegister:'Sign up',
+      authSending:'Checking...',
+      authErrEmpty:'Fill in email and password',
+      authErrInvalidEmail:'Invalid email format',
+      authErrWeakPassword:'Password must be at least 6 characters',
+      authErrEmailInUse:'This email is already registered',
+      authErrWrongPassword:'Wrong email or password',
+      authErrUserNotFound:'User not found',
+      authErrGeneric:'Something went wrong. Please try again.',
+      logoutLabel:'Log out',
     }
   };
 
   let lang = localStorage.getItem('vedavpn_lang') || null;
-  let selectedStars = 0;
-  let reviewsCache = null;
 
   const el = {
+    authScreen:        document.getElementById('authScreen'),
     langScreen:        document.getElementById('langScreen'),
     mainScreen:        document.getElementById('mainScreen'),
     eyebrowText:       document.getElementById('eyebrowText'),
@@ -2187,22 +2066,8 @@ body.modal-open{ overflow:hidden; }
     tipForum:          document.getElementById('tipForum'),
     faqHeading:        document.getElementById('faqHeading'),
     faqList:           document.getElementById('faqList'),
-    reviewsHeading:    document.getElementById('reviewsHeading'),
-    reviewsSummary:    document.getElementById('reviewsSummary'),
-    reviewsModalBackdrop: document.getElementById('reviewsModalBackdrop'),
-    reviewsModalBody:  document.getElementById('reviewsModalBody'),
-    reviewsModalClose: document.getElementById('reviewsModalClose'),
-    reviewsModalTitle: document.getElementById('reviewsModalTitle'),
-    reviewText:        document.getElementById('reviewText'),
-    reviewWebsite:     document.getElementById('reviewWebsite'),
-    reviewStarsPicker: document.getElementById('reviewStarsPicker'),
-    reviewStarsLabel:  document.getElementById('reviewStarsLabel'),
-    reviewSubmitBtn:   document.getElementById('reviewSubmitBtn'),
-    reviewSubmitZone:  document.getElementById('reviewSubmitZone'),
     scrollTopBtn:      document.getElementById('scrollTopBtn'),
     confettiLayer:     document.getElementById('confettiLayer'),
-    reviewStatus:      document.getElementById('reviewStatus'),
-    reviewList:        document.getElementById('reviewList'),
     footerChannel:     document.getElementById('footerChannel'),
     footerBot:         document.getElementById('footerBot'),
     footerForum:       document.getElementById('footerForum'),
@@ -2217,13 +2082,24 @@ body.modal-open{ overflow:hidden; }
     pwaInstallBtn:     document.getElementById('pwaInstallBtn'),
     pwaDismissBtn:     document.getElementById('pwaDismissBtn'),
     serverStatusLabel: document.getElementById('serverStatusLabel'),
-    captchaQuestion:  document.getElementById('captchaQuestion'),
-    captchaAnswer:    document.getElementById('captchaAnswer'),
-    reviewHumanCheck: document.getElementById('reviewHumanCheck'),
-    reviewHumanLabel: document.getElementById('reviewHumanLabel'),
     donateTitle:  document.getElementById('donateTitle'),
     donateSub:    document.getElementById('donateSub'),
     donateBtn:    document.getElementById('donateBtn'),
+    authTabTgBtn:      document.getElementById('authTabTgBtn'),
+    authTabTgLabel:    document.getElementById('authTabTgLabel'),
+    authTabEmailBtn:   document.getElementById('authTabEmailBtn'),
+    authTabEmailLabel: document.getElementById('authTabEmailLabel'),
+    authPanelTg:       document.getElementById('authPanelTg'),
+    authPanelEmail:    document.getElementById('authPanelEmail'),
+    authTgHintText:    document.getElementById('authTgHintText'),
+    telegramLoginContainer: document.getElementById('telegramLoginContainer'),
+    authModeLoginBtn:    document.getElementById('authModeLoginBtn'),
+    authModeRegisterBtn: document.getElementById('authModeRegisterBtn'),
+    authEmailInput:    document.getElementById('authEmailInput'),
+    authPasswordInput: document.getElementById('authPasswordInput'),
+    authSubmitBtn:     document.getElementById('authSubmitBtn'),
+    authStatus:        document.getElementById('authStatus'),
+    logoutBtn:         document.getElementById('logoutBtn'),
   };
 
   // ---- QR code ----
@@ -2276,92 +2152,6 @@ body.modal-open{ overflow:hidden; }
     });
   }
 
-  // ---- Reviews render ----
-  function renderReviewStrings(){
-    const d = dict[lang];
-    el.reviewsHeading.textContent = d.reviewsHeading;
-    el.reviewText.placeholder = d.reviewPlaceholder;
-    el.reviewSubmitBtn.textContent = d.reviewSubmit;
-    el.reviewStarsLabel.textContent = d.reviewStarsHint(selectedStars);
-    renderReviewsSummary();
-    renderReviewsList();
-  }
-  const REVIEWS_INLINE = 5; // how many to show inline before "see all"
-
-  function buildReviewCards(container, list){
-    const localeMap = {ru:'ru-RU', hy:'hy-AM', en:'en-US'};
-    container.innerHTML = list.map(()=>`
-      <div class="review-card">
-        <div class="review-top"><span class="review-stars"></span><span class="review-date"></span></div>
-        <p class="review-text"></p>
-      </div>`).join('');
-    container.querySelectorAll('.review-card').forEach((card,i)=>{
-      const r = list[i];
-      card.querySelector('.review-stars').textContent = '★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
-      card.querySelector('.review-date').textContent = r.createTime
-        ? new Date(r.createTime).toLocaleDateString(localeMap[lang]||'en-US',{day:'2-digit',month:'short'}) : '';
-      card.querySelector('.review-text').textContent = r.text;
-    });
-  }
-
-  let _reviewsModalOpener = null; // element that triggered open, for focus restore
-
-  function openReviewsModal(){
-    const d = dict[lang];
-    el.reviewsModalTitle.textContent = d.reviewsHeading;
-    buildReviewCards(el.reviewsModalBody, reviewsCache||[]);
-    _reviewsModalOpener = document.activeElement;
-    el.reviewsModalBackdrop.classList.add('open');
-    document.body.classList.add('modal-open');
-    // Move focus into modal
-    requestAnimationFrame(()=> el.reviewsModalClose && el.reviewsModalClose.focus());
-  }
-  function closeReviewsModal(){
-    if(!el.reviewsModalBackdrop.classList.contains('open')) return;
-    el.reviewsModalBackdrop.classList.remove('open');
-    document.body.classList.remove('modal-open');
-    // Restore focus to trigger element
-    if(_reviewsModalOpener && typeof _reviewsModalOpener.focus==='function'){
-      _reviewsModalOpener.focus(); _reviewsModalOpener=null;
-    }
-  }
-
-  function renderReviewsSummary(){
-    const d = dict[lang];
-    if(!reviewsCache || reviewsCache.length === 0){ el.reviewsSummary.innerHTML=''; return; }
-    const avg = reviewsCache.reduce((s,r)=> s+r.rating, 0) / reviewsCache.length;
-    const rounded = Math.round(avg*10)/10;
-    const fullStars = Math.round(avg);
-    const starsStr = '★'.repeat(fullStars)+'☆'.repeat(5-fullStars);
-    const n = reviewsCache.length;
-    el.reviewsSummary.innerHTML =
-      `<span class="avg-stars">${starsStr}</span> <span class="avg-num">${rounded}</span> ${d.reviewsAvgUnit} · <button class="reviews-count-btn" id="reviewsCountBtn">${n} ${d.reviewsCountWord(n)}</button>`;
-    document.getElementById('reviewsCountBtn')?.addEventListener('click', openReviewsModal);
-  }
-
-  function renderReviewsList(){
-    const d = dict[lang];
-    if(reviewsCache===null){ el.reviewList.innerHTML=`<div class="review-loading">${d.reviewLoading}</div>`; return; }
-    if(reviewsCache.length===0){ el.reviewList.innerHTML=`<div class="review-empty">${d.reviewEmpty}</div>`; return; }
-    const slice = reviewsCache.slice(0, REVIEWS_INLINE);
-    buildReviewCards(el.reviewList, slice);
-    if(reviewsCache.length > REVIEWS_INLINE){
-      const btn = document.createElement('button');
-      btn.className='reviews-see-all-btn';
-      btn.textContent = d.reviewsSeeAll(reviewsCache.length);
-      btn.addEventListener('click', openReviewsModal);
-      el.reviewList.appendChild(btn);
-    }
-  }
-
-  // ---- Math CAPTCHA (outer scope so renderMain can call it) ----
-  let captchaA = 0, captchaB = 0;
-  function generateCaptcha(){
-    captchaA = Math.floor(Math.random()*9)+1;
-    captchaB = Math.floor(Math.random()*9)+1;
-    if(el.captchaQuestion) el.captchaQuestion.textContent = dict[lang].reviewCaptchaLabel(captchaA, captchaB);
-    if(el.captchaAnswer)   el.captchaAnswer.value = '';
-  }
 
   // ---- Render main screen strings ----
   function renderMain(){
@@ -2411,23 +2201,174 @@ body.modal-open{ overflow:hidden; }
     document.querySelectorAll('.lang-switch button').forEach(b=>{
       b.classList.toggle('active', b.dataset.lang === lang);
     });
-    if(el.reviewHumanLabel) el.reviewHumanLabel.textContent = d.reviewHumanLabel;
-    if(el.reviewHumanCheck) el.reviewHumanCheck.checked = false;
-    generateCaptcha();
     if(el.donateTitle) el.donateTitle.textContent = d.donateTitle;
     if(el.donateSub)   el.donateSub.textContent   = d.donateSub;
     if(el.donateBtn)   el.donateBtn.textContent   = d.donateBtn;
     renderFaq();
-    renderReviewStrings();
   }
 
+  // ---- Firebase Auth ----
+  const firebaseConfig = {
+    apiKey:"AIzaSyBL--Cf68JvuQmzsu1u8xcTS5Euzp0JfLQ",
+    authDomain:"veda--vpn.firebaseapp.com",
+    projectId:"veda--vpn",
+    storageBucket:"veda--vpn.firebasestorage.app",
+    messagingSenderId:"669348180612",
+    appId:"1:669348180612:web:74d641cc60c17a6a9048d1",
+    measurementId:"G-R3124S7M07"
+  };
+  try{
+    if(typeof firebase !== 'undefined'){
+      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      firebase.auth().onAuthStateChanged(user=>{
+        // Firebase restores a persisted session asynchronously; if we're
+        // still sitting on the auth screen when it resolves, let the user in.
+        if(user && el.authScreen && el.authScreen.style.display !== 'none' && lang){
+          showMain();
+        }
+      });
+    }
+  }catch(e){ console.error('VedaVPN Firebase init failed:', e); }
+
+  let authMode = 'login'; // 'login' | 'register'
+
+  function renderAuthStrings(){
+    const d = dict[lang];
+    if(el.authTabTgLabel)    el.authTabTgLabel.textContent    = d.authTabTg;
+    if(el.authTabEmailLabel) el.authTabEmailLabel.textContent = d.authTabEmail;
+    if(el.authTgHintText)    el.authTgHintText.textContent    = d.authTgHint;
+    if(el.authModeLoginBtn)    el.authModeLoginBtn.textContent    = d.authModeLogin;
+    if(el.authModeRegisterBtn) el.authModeRegisterBtn.textContent = d.authModeRegister;
+    if(el.authEmailInput)    el.authEmailInput.placeholder    = d.authEmailPlaceholder;
+    if(el.authPasswordInput) el.authPasswordInput.placeholder = d.authPasswordPlaceholder;
+    if(el.authSubmitBtn) el.authSubmitBtn.textContent = authMode==='login' ? d.authSubmitLogin : d.authSubmitRegister;
+    renderTelegramWidget();
+  }
+
+  // ---- Auth tabs: Telegram / Email ----
+  document.querySelectorAll('.auth-tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.auth-tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      el.authPanelTg.style.display    = tab==='tg'    ? 'block' : 'none';
+      el.authPanelEmail.style.display = tab==='email' ? 'block' : 'none';
+      if(tab==='tg') renderTelegramWidget();
+    });
+  });
+
+  // ---- Auth mode: Login / Register ----
+  document.querySelectorAll('.auth-mode-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.auth-mode-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      authMode = btn.dataset.mode;
+      el.authSubmitBtn.textContent = authMode==='login' ? dict[lang].authSubmitLogin : dict[lang].authSubmitRegister;
+      el.authStatus.textContent = ''; el.authStatus.className = 'auth-status';
+    });
+  });
+
+  // ---- Telegram Login Widget ----
+  let _tgWidgetRendered = false;
+  function renderTelegramWidget(){
+    if(!el.telegramLoginContainer || _tgWidgetRendered) return;
+    _tgWidgetRendered = true;
+    const script = document.createElement('script');
+    script.src = 'https://telegram.org/js/telegram-widget.js?22';
+    script.setAttribute('data-telegram-login', 'VedaVPNAuth_bot');
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-radius', '50');
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+    script.setAttribute('data-request-access', 'write');
+    script.async = true;
+    el.telegramLoginContainer.appendChild(script);
+  }
+
+  window.onTelegramAuth = function(tgUser){
+    try{ localStorage.setItem('vedavpn_tg_user', JSON.stringify(tgUser)); }catch(e){}
+    haptic(15);
+    confettiBurst();
+    showMain();
+  };
+
+  // ---- Email login / register ----
+  function setAuthStatus(text, cls){
+    if(!el.authStatus) return;
+    el.authStatus.textContent = text;
+    el.authStatus.className = 'auth-status' + (cls ? ' '+cls : '');
+  }
+
+  function mapAuthError(code, d){
+    switch(code){
+      case 'auth/invalid-email': return d.authErrInvalidEmail;
+      case 'auth/weak-password': return d.authErrWeakPassword;
+      case 'auth/email-already-in-use': return d.authErrEmailInUse;
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+      case 'auth/invalid-login-credentials': return d.authErrWrongPassword;
+      case 'auth/user-not-found': return d.authErrUserNotFound;
+      default: return d.authErrGeneric;
+    }
+  }
+
+  el.authSubmitBtn && el.authSubmitBtn.addEventListener('click', async ()=>{
+    const d = dict[lang];
+    const email = (el.authEmailInput.value||'').trim();
+    const password = el.authPasswordInput.value||'';
+    if(!email || !password){ setAuthStatus(d.authErrEmpty, 'err'); return; }
+    if(typeof firebase === 'undefined'){ setAuthStatus(d.authErrGeneric, 'err'); return; }
+    el.authSubmitBtn.disabled = true;
+    setAuthStatus(d.authSending, '');
+    try{
+      if(authMode==='login'){
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+      }else{
+        await firebase.auth().createUserWithEmailAndPassword(email, password);
+      }
+      haptic(15);
+      confettiBurst();
+      showMain();
+    }catch(e){
+      console.error('VedaVPN auth error:', e && e.code, e && e.message);
+      setAuthStatus(mapAuthError(e && e.code, d), 'err');
+    }finally{
+      el.authSubmitBtn.disabled = false;
+    }
+  });
+
+  el.authPasswordInput && el.authPasswordInput.addEventListener('keydown', e=>{
+    if(e.key === 'Enter') el.authSubmitBtn.click();
+  });
+
+  // ---- Logout ----
+  el.logoutBtn && el.logoutBtn.addEventListener('click', ()=>{
+    try{ if(typeof firebase !== 'undefined') firebase.auth().signOut(); }catch(e){}
+    localStorage.removeItem('vedavpn_tg_user');
+    showAuthScreen();
+  });
+
   function showMain(){
+    el.authScreen.style.display = 'none';
     el.langScreen.style.display = 'none';
     el.vpnScreen.style.display  = 'none';
     el.mainScreen.style.display = 'flex';
     renderMain();
     requestAnimationFrame(()=> el.mainScreen.classList.add('is-ready'));
     window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+  }
+  function showAuthScreen(){
+    el.langScreen.style.display = 'none';
+    el.mainScreen.style.display = 'none';
+    el.vpnScreen.style.display  = 'none';
+    el.authScreen.style.display = 'flex';
+    renderAuthStrings();
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+  }
+  function isAuthenticated(){
+    return !!(window.firebase && firebase.auth().currentUser) || !!localStorage.getItem('vedavpn_tg_user');
+  }
+  function showAuthOrMain(){
+    if(isAuthenticated()){ showMain(); } else { showAuthScreen(); }
   }
   function showVpnScreen(){
     el.mainScreen.style.display = 'none';
@@ -2440,7 +2381,7 @@ body.modal-open{ overflow:hidden; }
     b.addEventListener('click',()=>{
       lang = b.dataset.lang;
       localStorage.setItem('vedavpn_lang', lang);
-      showMain();
+      showAuthOrMain();
     });
   });
   document.querySelectorAll('.lang-switch button').forEach(b=>{
@@ -2554,7 +2495,7 @@ body.modal-open{ overflow:hidden; }
     }, 2000);
   });
 
-  if(lang){ showMain(); }
+  if(lang){ showAuthOrMain(); }
 
   // ---- Light/Dark theme ----
   (function initTheme(){
@@ -2579,6 +2520,7 @@ body.modal-open{ overflow:hidden; }
       applyTheme(next);
       localStorage.setItem(THEME_KEY, next);
     }
+    document.getElementById('themeToggleAuth').addEventListener('click', toggleTheme);
     document.getElementById('themeToggleLang').addEventListener('click', toggleTheme);
     document.getElementById('themeToggleMain').addEventListener('click', toggleTheme);
   })();
@@ -2655,270 +2597,6 @@ body.modal-open{ overflow:hidden; }
     }catch(e){ renderValue(null); }
   })();
 
-  // ---- Reviews (Firebase Firestore) ----
-  (function reviewsModule(){
-    const firebaseConfig = {
-      apiKey:"AIzaSyBL--Cf68JvuQmzsu1u8xcTS5Euzp0JfLQ",
-      authDomain:"veda--vpn.firebaseapp.com",
-      projectId:"veda--vpn",
-      storageBucket:"veda--vpn.firebasestorage.app",
-      messagingSenderId:"669348180612",
-      appId:"1:669348180612:web:74d641cc60c17a6a9048d1",
-      measurementId:"G-R3124S7M07"
-    };
-    let reviewsCol = null;
-    try{
-      if(typeof firebase !== 'undefined'){
-        if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        reviewsCol = firebase.firestore().collection('reviews');
-      }
-    }catch(e){ reviewsCol = null; }
-
-    function updateStarButtons(){
-      el.reviewStarsPicker.querySelectorAll('.star-btn').forEach(btn=>{
-        btn.classList.toggle('active', parseInt(btn.dataset.star,10) <= selectedStars);
-      });
-    }
-    el.reviewStarsPicker.querySelectorAll('.star-btn').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        selectedStars = parseInt(btn.dataset.star,10);
-        updateStarButtons();
-        el.reviewStarsLabel.textContent = dict[lang].reviewStarsHint(selectedStars);
-      });
-    });
-
-    async function fetchReviews(){
-      if(!reviewsCol){ reviewsCache=reviewsCache||[]; renderReviewsSummary(); renderReviewsList(); return; }
-      try{
-        const snapshot = await reviewsCol.orderBy('createTime','desc').limit(500).get();
-        reviewsCache = snapshot.docs.map(doc=>{
-          const data = doc.data();
-          return {
-            _ref: doc.ref,
-            text: data.text,
-            rating: data.rating,
-            createTime: data.createTime&&data.createTime.toDate
-              ? data.createTime.toDate().toISOString() : new Date().toISOString()
-          };
-        });
-      }catch(e){ reviewsCache=reviewsCache||[]; }
-      renderReviewsSummary(); renderReviewsList();
-      autoDeleteSpam();
-    }
-
-    // Auto-delete spam reviews from Firestore silently
-    async function autoDeleteSpam(){
-      if(!reviewsCol || !reviewsCache || reviewsCache.length === 0) return;
-      const spamItems = reviewsCache.filter(r => r._ref && r.text && isSpammyText(r.text));
-      if(spamItems.length === 0) return;
-      try{
-        // Firestore batch max = 500 ops — split if needed
-        const chunks = [];
-        for(let i = 0; i < spamItems.length; i += 490) chunks.push(spamItems.slice(i, i+490));
-        for(const chunk of chunks){
-          const batch = firebase.firestore().batch();
-          chunk.forEach(r => batch.delete(r._ref));
-          await batch.commit();
-        }
-        // Remove deleted items from local cache & re-render
-        const spamRefs = new Set(spamItems.map(r => r._ref.id));
-        reviewsCache = reviewsCache.filter(r => !spamRefs.has(r._ref && r._ref.id));
-        renderReviewsSummary(); renderReviewsList();
-      }catch(e){ /* silent — spam stays visible but harmless */ }
-    }
-
-    const REVIEW_COOLDOWN_MS = 24*60*60*1000; // increased to 24h
-    const LAST_REVIEW_KEY    = 'vedavpn_last_review_ts';
-    const SENT_HASHES_KEY    = 'vedavpn_sent_hashes';
-    const URL_PATTERN = /https?:\/\/|www\.|t\.me\//i;
-    const PAGE_LOAD_TS = Date.now();
-    const MIN_READ_TIME_MS = 20000; // must spend 20s on page before submitting
-
-    // Anti-bot: relocate the submit button to a random spot inside its zone.
-    // Naive bots that click at a fixed saved coordinate will miss it; real
-    // users just see the button wherever it lands and click it normally.
-    function shuffleSubmitBtnPosition(){
-      const zone = el.reviewSubmitZone, btn = el.reviewSubmitBtn;
-      if(!zone || !btn) return;
-      const zoneW = zone.clientWidth, zoneH = zone.clientHeight;
-      const btnW = btn.offsetWidth || 140, btnH = btn.offsetHeight || 40;
-      const maxLeft = Math.max(0, zoneW - btnW);
-      const maxTop  = Math.max(0, zoneH - btnH);
-      btn.style.left = Math.round(Math.random() * maxLeft) + 'px';
-      btn.style.top  = Math.round(Math.random() * maxTop) + 'px';
-    }
-    // Initial placement (after layout/fonts settle) and on viewport resize.
-    setTimeout(shuffleSubmitBtnPosition, 300);
-    window.addEventListener('resize', shuffleSubmitBtnPosition);
-
-    // Known spam keyword blocklist (lowercase)
-    const SPAM_KEYWORDS = [
-      'сосите','рейдит','groozen','grozeen','grozeen','писюн','хуй','пизд',
-      'сука','блять','ублюдок','залупа','мудак','пидор','педик','шлюха',
-      'проститутка','курва','жопа','сиськи','порно','лох','uzе1z','uze1z',
-      'риви а4','rivi a4','залупа','ёбан','ебан','нахуй','пошел нахуй',
-    ];
-
-    // Simple non-crypto hash — good enough for duplicate detection
-    function hashText(str){
-      let h=0x811c9dc5;
-      for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h*0x01000193)>>>0; }
-      return h.toString(36);
-    }
-
-    // Similarity ratio between two strings (0‒1)
-    function similarity(a, b){
-      a=a.toLowerCase(); b=b.toLowerCase();
-      if(a===b) return 1;
-      const longer=a.length>b.length?a:b;
-      const shorter=a.length>b.length?b:a;
-      if(longer.length===0) return 1;
-      // Count matching chars with sliding window
-      let matches=0;
-      for(let i=0;i<=longer.length-shorter.length;i++){
-        let m=0;
-        for(let j=0;j<shorter.length;j++) if(longer[i+j]===shorter[j]) m++;
-        if(m>matches) matches=m;
-      }
-      return matches/longer.length;
-    }
-
-    function isSpammyText(text){
-      if(text.length < 10) return true;
-
-      const lower = text.toLowerCase();
-
-      // Keyword blocklist
-      if(SPAM_KEYWORDS.some(kw => lower.includes(kw))) return true;
-
-      // ALL CAPS check — if >70% of letters are uppercase → spam
-      const letters = text.replace(/[^a-zA-Zа-яА-ЯёЁ]/g,'');
-      if(letters.length >= 6){
-        const upperCount = (text.match(/[A-ZА-ЯЁ]/g)||[]).length;
-        if(upperCount / letters.length > 0.70) return true;
-      }
-
-      // @ mention spam — short text with a mention → almost certainly spam
-      if(/@\S+/.test(text) && text.length < 120) return true;
-
-      // Repeated word/phrase detection — same word appearing > 4 times
-      const words = lower.split(/\s+/).filter(Boolean);
-      if(words.length >= 2){
-        const freq={};
-        for(const w of words) freq[w]=(freq[w]||0)+1;
-        if(Math.max(...Object.values(freq)) > 4) return true;
-      }
-
-      // Most common single character ratio
-      const mostCommonCharRatio = (()=>{
-        const counts={};
-        for(const ch of text) counts[ch]=(counts[ch]||0)+1;
-        return Math.max(...Object.values(counts))/text.length;
-      })();
-      if(mostCommonCharRatio>0.6&&text.length>6) return true;
-      if(URL_PATTERN.test(text)) return true;
-      return false;
-    }
-
-    // Returns true if this text is a duplicate or near-duplicate of any cached review
-    function isDuplicateReview(text){
-      const norm = text.trim().toLowerCase();
-      // 1. Check against already-sent hashes stored locally
-      const sentRaw = localStorage.getItem(SENT_HASHES_KEY)||'[]';
-      let sent; try{ sent=JSON.parse(sentRaw); }catch(e){ sent=[]; }
-      if(sent.includes(hashText(norm))) return true;
-      // 2. Check against currently loaded reviews
-      if(!reviewsCache) return false;
-      for(const r of reviewsCache){
-        if(!r.text) continue;
-        const sim = similarity(norm, r.text.trim().toLowerCase());
-        if(sim>=0.85) return true;   // 85%+ similar → duplicate
-      }
-      return false;
-    }
-
-    function markTextAsSent(text){
-      const norm = text.trim().toLowerCase();
-      const sentRaw = localStorage.getItem(SENT_HASHES_KEY)||'[]';
-      let sent; try{ sent=JSON.parse(sentRaw); }catch(e){ sent=[]; }
-      sent.push(hashText(norm));
-      if(sent.length>50) sent=sent.slice(-50);  // keep last 50 hashes max
-      localStorage.setItem(SENT_HASHES_KEY, JSON.stringify(sent));
-    }
-
-    el.reviewSubmitBtn.addEventListener('click', async ()=>{
-      const d = dict[lang];
-      const text = el.reviewText.value.trim();
-      if(el.reviewWebsite.value.trim()!==''){
-        el.reviewText.value=''; el.reviewWebsite.value='';
-        selectedStars=0; updateStarButtons();
-        el.reviewStarsLabel.textContent=d.reviewStarsHint(0);
-        el.reviewStatus.textContent=d.reviewOk; el.reviewStatus.className='review-status ok';
-        setTimeout(()=>{ el.reviewStatus.textContent=''; el.reviewStatus.className='review-status'; },4000);
-        return;
-      }
-      if(!text||selectedStars<1){
-        el.reviewStatus.textContent=d.reviewErrEmpty; el.reviewStatus.className='review-status err'; return;
-      }
-      // Math CAPTCHA check
-      const captchaVal = parseInt(el.captchaAnswer ? el.captchaAnswer.value : '', 10);
-      if(isNaN(captchaVal) || captchaVal !== captchaA + captchaB){
-        el.reviewStatus.textContent=d.reviewErrCaptcha; el.reviewStatus.className='review-status err';
-        generateCaptcha(); return;
-      }
-      // Human checkbox
-      if(!el.reviewHumanCheck || !el.reviewHumanCheck.checked){
-        el.reviewStatus.textContent=d.reviewErrNotHuman; el.reviewStatus.className='review-status err'; return;
-      }
-      // Minimum time on page (anti-bot)
-      if(Date.now() - PAGE_LOAD_TS < MIN_READ_TIME_MS){
-        el.reviewStatus.textContent=d.reviewErrTooFast; el.reviewStatus.className='review-status err'; return;
-      }
-      if(isSpammyText(text)){
-        el.reviewStatus.textContent=d.reviewErrSpam; el.reviewStatus.className='review-status err'; return;
-      }
-      if(isDuplicateReview(text)){
-        el.reviewStatus.textContent=d.reviewErrDuplicate; el.reviewStatus.className='review-status err'; return;
-      }
-      const lastTs = parseInt(localStorage.getItem(LAST_REVIEW_KEY)||'0',10);
-      const msLeft = REVIEW_COOLDOWN_MS-(Date.now()-lastTs);
-      if(msLeft>0){
-        el.reviewStatus.textContent=d.reviewErrCooldown(Math.ceil(msLeft/(60*60*1000)));
-        el.reviewStatus.className='review-status err'; return;
-      }
-      if(!reviewsCol){
-        el.reviewStatus.textContent=d.reviewErrFail; el.reviewStatus.className='review-status err'; return;
-      }
-      el.reviewSubmitBtn.disabled=true;
-      el.reviewStatus.textContent=d.reviewSending; el.reviewStatus.className='review-status';
-      try{
-        await reviewsCol.add({
-          text:text.slice(0,500), rating:selectedStars,
-          createTime:firebase.firestore.FieldValue.serverTimestamp()
-        });
-        localStorage.setItem(LAST_REVIEW_KEY, String(Date.now()));
-        markTextAsSent(text);
-        el.reviewText.value=''; selectedStars=0; updateStarButtons();
-        el.reviewStarsLabel.textContent=dict[lang].reviewStarsHint(0);
-        if(el.reviewHumanCheck) el.reviewHumanCheck.checked=false;
-        generateCaptcha();
-        el.reviewStatus.textContent=d.reviewOk; el.reviewStatus.className='review-status ok';
-        shuffleSubmitBtnPosition();
-        confettiBurst();
-        haptic(15);
-        await fetchReviews();
-      }catch(e){
-        console.error('VedaVPN review submit failed:', e && e.code, e && e.message, e);
-        el.reviewStatus.textContent=d.reviewErrFail; el.reviewStatus.className='review-status err';
-      }finally{
-        el.reviewSubmitBtn.disabled=false;
-        setTimeout(()=>{ el.reviewStatus.textContent=''; el.reviewStatus.className='review-status'; },4000);
-      }
-    });
-
-    fetchReviews();
-  })();
-
   // ---- PWA install prompt ----
   // ---- Haptic feedback helper (Android Chrome; no-op elsewhere) ----
   function haptic(ms){
@@ -2937,7 +2615,7 @@ body.modal-open{ overflow:hidden; }
     });
   })();
 
-  // ---- Confetti burst (used to celebrate a successfully published review) ----
+  // ---- Confetti burst (celebration effect) ----
   function confettiBurst(){
     if(!el.confettiLayer) return;
     const colors = ['#39FF9E','#6EA8FE','#B98CFF','#FF5C77','#FFD166'];
@@ -2978,13 +2656,6 @@ body.modal-open{ overflow:hidden; }
         }, 4000);
       }
     });
-
-    // Reviews modal close
-    el.reviewsModalClose && el.reviewsModalClose.addEventListener('click', closeReviewsModal);
-    el.reviewsModalBackdrop && el.reviewsModalBackdrop.addEventListener('click', e=>{
-      if(e.target === el.reviewsModalBackdrop) closeReviewsModal();
-    });
-    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReviewsModal(); });
 
     el.pwaInstallBtn && el.pwaInstallBtn.addEventListener('click', async ()=>{
       if(!deferredPrompt) return;
