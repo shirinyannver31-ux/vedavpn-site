@@ -3039,10 +3039,25 @@ setTimeout(function(){
   var frames = document.querySelectorAll('iframe');
   var out = 'Գտնված iframe-ներ (' + frames.length + '):\n\n';
   frames.forEach(function(f, i){
-    out += (i+1) + ') id="' + f.id + '" title="' + f.title + '" class="' + f.className + '" src="' + (f.src||'').slice(0,60) + '"\n\n';
+    var parent = f.parentElement;
+    out += (i+1) + ') id="' + f.id + '" title="' + f.title + '" class="' + f.className + '" src="' + (f.src||'').slice(0,70) + '"\n';
+    out += '   style="' + (f.getAttribute('style')||'') + '"\n';
+    out += '   parent: <' + (parent?parent.tagName:'') + '> id="' + (parent?parent.id:'') + '" class="' + (parent?parent.className:'') + '"\n\n';
   });
+  out += '--- Tawk-ի հետ կապված elements (id/class-ում tawk) ---\n\n';
+  var all = document.querySelectorAll('*');
+  var found = 0;
+  all.forEach(function(el){
+    var id = el.id || '';
+    var cls = (typeof el.className === 'string') ? el.className : '';
+    if(/tawk/i.test(id) || /tawk/i.test(cls)){
+      found++;
+      out += '<' + el.tagName + '> id="' + id + '" class="' + cls + '"\n';
+    }
+  });
+  if(found === 0) out += '(ոչինչ չգտնվեց)\n';
   box.textContent = out;
-}, 4000);
+}, 8000);
 </script>
 </body>
 </html>
