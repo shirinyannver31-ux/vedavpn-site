@@ -2996,6 +2996,18 @@ body::after{
      3) Փոխարինիր ներքևի PROPERTY_ID և WIDGET_ID արժեքները
         քո սեփական ID-երով (widget code-ից)
      ============================================================ -->
+<!-- CSS-ով հարկադրաբար բարձրացնում ենք Tawk-ի պատիճը, քանի որ
+     customStyle.visibility-ը Next-Gen widget-ի մոտ անտեսվում է JS-ից -->
+<style>
+iframe[title="chat widget"]{
+  bottom: 100px !important;
+}
+@media (max-width: 640px){
+  iframe[title="chat widget"]{
+    bottom: 90px !important;
+  }
+}
+</style>
 <script type="text/javascript">
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 
