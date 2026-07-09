@@ -3030,5 +3030,19 @@ Tawk_API.customStyle = {
 })();
 </script>
 
+<!-- ԺԱՄԱՆԱԿԱՎՈՐ DEBUG — ցույց է տալիս Tawk-ի iframe-ի իրական id/class/title-ը
+     Սքրինշոթ արա և ուղարկիր ինձ, հետո ես կասեմ` ջնջես -->
+<div id="veda-debug-box" style="position:fixed;top:0;left:0;right:0;z-index:999999;background:#000;color:#0f0;font:11px monospace;padding:8px;max-height:40vh;overflow:auto;white-space:pre-wrap;"></div>
+<script>
+setTimeout(function(){
+  var box = document.getElementById('veda-debug-box');
+  var frames = document.querySelectorAll('iframe');
+  var out = 'Գտնված iframe-ներ (' + frames.length + '):\n\n';
+  frames.forEach(function(f, i){
+    out += (i+1) + ') id="' + f.id + '" title="' + f.title + '" class="' + f.className + '" src="' + (f.src||'').slice(0,60) + '"\n\n';
+  });
+  box.textContent = out;
+}, 4000);
+</script>
 </body>
 </html>
