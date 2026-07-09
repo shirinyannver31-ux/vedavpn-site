@@ -25,6 +25,9 @@
 <meta name="apple-mobile-web-app-title" content="VedaVPN">
 <link rel="apple-touch-icon" href="veda-logo.png">
 
+<!-- reCAPTCHA v2 (explicit render — needed because there are 2 widgets on the page) -->
+<script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaApiLoad&render=explicit" async defer></script>
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -297,6 +300,7 @@ body::after{
   border-color:var(--signal-dim);
   box-shadow:0 0 0 3px rgba(var(--signal-rgb),.1);
 }
+.auth-recaptcha-zone{ display:flex; justify-content:center; margin-top:14px; transform:scale(.92); transform-origin:center; }
 .auth-submit-zone{ margin-top:6px; }
 .auth-submit-btn{
   width:100%;
@@ -1189,6 +1193,49 @@ body::after{
 }
 
 /* ============================================================
+   REVIEWS
+   ============================================================ */
+.reviews-section{ margin-top:30px; }
+.reviews-heading{
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; margin:0 0 12px;
+}
+.reviews-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.review-card{
+  background:var(--glass);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  box-shadow:var(--shadow-sm);
+}
+.review-card-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.review-card-name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; }
+.review-card-stars{ color:var(--signal); font-size:12px; letter-spacing:1px; white-space:nowrap; }
+.review-card-text{ font-size:13px; color:var(--muted); line-height:1.55; margin:0; word-break:break-word; }
+.review-card-date{ font-size:10.5px; color:var(--muted); opacity:.7; margin-top:6px; }
+.reviews-empty{ font-size:13px; color:var(--muted); text-align:center; padding:10px 0; }
+
+.review-form{ padding:18px 16px; margin-top:4px; }
+.review-stars{ display:flex; gap:6px; justify-content:center; margin-bottom:12px; }
+.review-star{
+  background:none; border:none; cursor:pointer; padding:2px;
+  font-size:24px; line-height:1; color:var(--line);
+  transition:color .15s, transform .1s;
+}
+.review-star.active{ color:var(--signal); }
+.review-star:active{ transform:scale(.88); }
+.review-textarea{
+  width:100%; resize:vertical; min-height:76px;
+  background:var(--glass-light);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);
+  color:var(--text); font-family:'Inter',sans-serif; font-size:13.5px;
+  padding:12px 14px; margin-top:8px;
+}
+.review-textarea:focus{ outline:none; border-color:var(--signal); }
+
+/* ============================================================
    FOOTER
    ============================================================ */
 .site-footer{
@@ -1496,6 +1543,9 @@ body::after{
         </div>
         <input type="email" id="authEmailInput" class="auth-input" autocomplete="email" inputmode="email">
         <input type="password" id="authPasswordInput" class="auth-input" autocomplete="current-password">
+        <div class="auth-recaptcha-zone" id="authRecaptchaZone">
+          <div id="authRecaptcha"></div>
+        </div>
         <div class="auth-submit-zone">
           <button type="button" class="auth-submit-btn" id="authSubmitBtn"></button>
         </div>
@@ -1618,6 +1668,32 @@ body::after{
     <div class="faq-section">
       <p class="faq-heading" id="faqHeading"></p>
       <div id="faqList"></div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="reviews-section">
+      <p class="reviews-heading" id="reviewsHeading"></p>
+
+      <div id="reviewsList" class="reviews-list"></div>
+
+      <div class="review-form glass">
+        <div class="review-stars" id="reviewStars">
+          <button type="button" class="review-star" data-val="1">★</button>
+          <button type="button" class="review-star" data-val="2">★</button>
+          <button type="button" class="review-star" data-val="3">★</button>
+          <button type="button" class="review-star" data-val="4">★</button>
+          <button type="button" class="review-star" data-val="5">★</button>
+        </div>
+        <input type="text" id="reviewNameInput" class="auth-input" maxlength="40">
+        <textarea id="reviewTextInput" class="review-textarea" maxlength="400"></textarea>
+        <div class="auth-recaptcha-zone" id="reviewRecaptchaZone">
+          <div id="reviewRecaptcha"></div>
+        </div>
+        <div class="auth-submit-zone">
+          <button type="button" class="auth-submit-btn" id="reviewSubmitBtn"></button>
+        </div>
+        <span class="auth-status" id="reviewStatus"></span>
+      </div>
     </div>
 
     <!-- Donate -->
@@ -1766,7 +1842,31 @@ body::after{
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '3.0.0'; // Feature: authentication (Telegram + Email/Password), scroll-to-top, haptic feedback
+  const SITE_VERSION = '3.1.0'; // Feature: reCAPTCHA v2 on email login/register
+  const CAPTCHA_VERIFY_URL = 'https://nvershirinyan1.pythonanywhere.com/verify-captcha';
+  const REVIEWS_LIST_URL   = 'https://nvershirinyan1.pythonanywhere.com/reviews/list';
+  const REVIEWS_SUBMIT_URL = 'https://nvershirinyan1.pythonanywhere.com/reviews/submit';
+  const RECAPTCHA_SITE_KEY = '6Ld9QUstAAAAAHV5K3rzmggqpznvgvqaUrb--uyD';
+
+  let authRecaptchaWidgetId = null;
+  let reviewRecaptchaWidgetId = null;
+  window.onRecaptchaApiLoad = function(){
+    if(typeof grecaptcha === 'undefined') return;
+    if(document.getElementById('authRecaptcha')){
+      authRecaptchaWidgetId = grecaptcha.render('authRecaptcha', {
+        sitekey: RECAPTCHA_SITE_KEY,
+        callback: (t)=> window.onRecaptchaSuccess(t),
+        'expired-callback': ()=> window.onRecaptchaExpired()
+      });
+    }
+    if(document.getElementById('reviewRecaptcha')){
+      reviewRecaptchaWidgetId = grecaptcha.render('reviewRecaptcha', {
+        sitekey: RECAPTCHA_SITE_KEY,
+        callback: (t)=> window.onReviewRecaptchaSuccess(t),
+        'expired-callback': ()=> window.onReviewRecaptchaExpired()
+      });
+    }
+  };
 
   // Site went live on 05.07.2026, 00:00 UTC — used to compute the uptime badge.
   const LAUNCH_TS_UTC = Date.UTC(2026, 6, 5, 0, 0, 0); // month is 0-indexed: 6 = July
@@ -1862,6 +1962,16 @@ body::after{
       runtimeLabel:(days,hours)=>`${days} ${ruDayWord(days)} ${hours} ч. в сети`,
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Частые вопросы',
+      reviewsHeading:'💬 Отзывы',
+      reviewNamePlaceholder:'Ваше имя',
+      reviewTextPlaceholder:'Расскажите, как вам сервис...',
+      reviewSubmitBtn:'Оставить отзыв',
+      reviewSending:'Отправка...',
+      reviewErrEmpty:'Заполните имя и текст отзыва',
+      reviewErrCaptcha:'Подтвердите, что вы не робот',
+      reviewErrGeneric:'Не удалось отправить отзыв. Попробуйте снова.',
+      reviewSuccess:'Спасибо! Ваш отзыв опубликован.',
+      reviewsEmpty:'Пока нет отзывов. Будьте первым!',
       faq:[
         {q:'Ссылка одна на всех?', a:'Да, сейчас все пользователи используют одну общую VPN ссылку. Индивидуальные ссылки появятся позже.'},
         {q:'Нужно ли платить?', a:'На данный момент VPN бесплатный. Следите за новостями в канале — там появятся все обновления.'},
@@ -1883,6 +1993,7 @@ body::after{
       authSubmitRegister:'Зарегистрироваться',
       authSending:'Проверка...',
       authErrEmpty:'Заполните email и пароль',
+      authErrCaptcha:'Подтвердите, что вы не робот',
       authErrInvalidEmail:'Неверный формат email',
       authErrWeakPassword:'Пароль должен быть не менее 6 символов',
       authErrEmailInUse:'Этот email уже зарегистрирован',
@@ -1920,6 +2031,16 @@ body::after{
       runtimeLabel:(days,hours)=>`${days} օր ${hours} ժամ ցանցում`,
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Հաճախակի հարցեր',
+      reviewsHeading:'💬 Կարծիքներ',
+      reviewNamePlaceholder:'Անուն',
+      reviewTextPlaceholder:'Պատմիր, ինչպես ես գնահատում ծառայությունը...',
+      reviewSubmitBtn:'Թողնել կարծիք',
+      reviewSending:'Ուղարկվում է...',
+      reviewErrEmpty:'Լրացրու անունը և կարծիքի տեքստը',
+      reviewErrCaptcha:'Հաստատիր, որ ռոբոտ չես',
+      reviewErrGeneric:'Չհաջողվեց ուղարկել կարծիքը։ Փորձիր նորից։',
+      reviewSuccess:'Շնորհակալություն։ Քո կարծիքը հրապարակվեց։',
+      reviewsEmpty:'Դեռ կարծիքներ չկան։ Եղիր առաջինը!',
       faq:[
         {q:'Հղումը մեկն ա բոլորի համար?', a:'Այո, հիմա բոլոր user-երն օգտագործում են նույն ընդհանուր VPN հղումը։ Անհատական հղումները կհայտնվեն ավելի ուշ։'},
         {q:'Պե՞տք է վճարել', a:'Այս պահին VPN-ը անվճար է։ Հետևիր ալիքի նորություններին, այնտեղ կերևան բոլոր փոփոխությունները։'},
@@ -1941,6 +2062,7 @@ body::after{
       authSubmitRegister:'Գրանցվել',
       authSending:'Ստուգվում է...',
       authErrEmpty:'Լրացրու email և գաղտնաբառը',
+      authErrCaptcha:'Հաստատիր, որ ռոբոտ չես',
       authErrInvalidEmail:'Սխալ email ձևաչափ',
       authErrWeakPassword:'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ',
       authErrEmailInUse:'Այս email-ն արդեն գրանցված է',
@@ -1978,6 +2100,16 @@ body::after{
       runtimeLabel:(days,hours)=>`${days}d ${hours}h online`,
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Frequently asked questions',
+      reviewsHeading:'💬 Reviews',
+      reviewNamePlaceholder:'Your name',
+      reviewTextPlaceholder:'Tell us what you think of the service...',
+      reviewSubmitBtn:'Leave a review',
+      reviewSending:'Sending...',
+      reviewErrEmpty:'Fill in your name and review text',
+      reviewErrCaptcha:'Please confirm you are not a robot',
+      reviewErrGeneric:'Could not submit review. Please try again.',
+      reviewSuccess:'Thanks! Your review is now published.',
+      reviewsEmpty:'No reviews yet. Be the first!',
       faq:[
         {q:'Is the link the same for everyone?', a:'Yes, right now all users share the same VPN link. Individual links will be added later.'},
         {q:'Do I need to pay?', a:'The VPN is currently free. Follow the channel for any updates.'},
@@ -1999,6 +2131,7 @@ body::after{
       authSubmitRegister:'Sign up',
       authSending:'Checking...',
       authErrEmpty:'Fill in email and password',
+      authErrCaptcha:'Please confirm you are not a robot',
       authErrInvalidEmail:'Invalid email format',
       authErrWeakPassword:'Password must be at least 6 characters',
       authErrEmailInUse:'This email is already registered',
@@ -2066,6 +2199,14 @@ body::after{
     tipForum:          document.getElementById('tipForum'),
     faqHeading:        document.getElementById('faqHeading'),
     faqList:           document.getElementById('faqList'),
+    reviewsHeading:    document.getElementById('reviewsHeading'),
+    reviewsList:       document.getElementById('reviewsList'),
+    reviewStars:       document.getElementById('reviewStars'),
+    reviewNameInput:   document.getElementById('reviewNameInput'),
+    reviewTextInput:   document.getElementById('reviewTextInput'),
+    reviewRecaptchaZone: document.getElementById('reviewRecaptchaZone'),
+    reviewSubmitBtn:   document.getElementById('reviewSubmitBtn'),
+    reviewStatus:      document.getElementById('reviewStatus'),
     scrollTopBtn:      document.getElementById('scrollTopBtn'),
     confettiLayer:     document.getElementById('confettiLayer'),
     footerChannel:     document.getElementById('footerChannel'),
@@ -2093,6 +2234,7 @@ body::after{
     authPanelEmail:    document.getElementById('authPanelEmail'),
     authTgHintText:    document.getElementById('authTgHintText'),
     telegramLoginContainer: document.getElementById('telegramLoginContainer'),
+    authRecaptchaZone: document.getElementById('authRecaptchaZone'),
     authModeLoginBtn:    document.getElementById('authModeLoginBtn'),
     authModeRegisterBtn: document.getElementById('authModeRegisterBtn'),
     authEmailInput:    document.getElementById('authEmailInput'),
@@ -2153,6 +2295,138 @@ body::after{
   }
 
 
+  // ---- Reviews ----
+  let reviewRating = 5;
+  let reviewsLoaded = false;
+  let reviewCaptchaToken = null;
+  window.onReviewRecaptchaSuccess = function(token){ reviewCaptchaToken = token; };
+  window.onReviewRecaptchaExpired = function(){ reviewCaptchaToken = null; };
+
+  function renderStarPicker(){
+    if(!el.reviewStars) return;
+    el.reviewStars.querySelectorAll('.review-star').forEach(btn=>{
+      const val = parseInt(btn.dataset.val, 10);
+      btn.classList.toggle('active', val <= reviewRating);
+      btn.onclick = ()=>{ reviewRating = val; renderStarPicker(); haptic(6); };
+    });
+  }
+  renderStarPicker();
+
+  function setReviewStatus(text, cls){
+    if(!el.reviewStatus) return;
+    el.reviewStatus.textContent = text;
+    el.reviewStatus.className = 'auth-status' + (cls ? ' '+cls : '');
+  }
+
+  function renderReviewStrings(){
+    const d = dict[lang];
+    if(el.reviewsHeading)   el.reviewsHeading.textContent = d.reviewsHeading;
+    if(el.reviewNameInput)  el.reviewNameInput.placeholder = d.reviewNamePlaceholder;
+    if(el.reviewTextInput)  el.reviewTextInput.placeholder = d.reviewTextPlaceholder;
+    if(el.reviewSubmitBtn)  el.reviewSubmitBtn.textContent = d.reviewSubmitBtn;
+    if(!reviewsLoaded){ reviewsLoaded = true; fetchReviews(); }
+    else renderReviewsList(_lastReviews);
+  }
+
+  let _lastReviews = [];
+  function renderReviewsList(list){
+    _lastReviews = list || [];
+    if(!el.reviewsList) return;
+    el.reviewsList.innerHTML = '';
+    if(!_lastReviews.length){
+      const empty = document.createElement('p');
+      empty.className = 'reviews-empty';
+      empty.textContent = dict[lang].reviewsEmpty;
+      el.reviewsList.appendChild(empty);
+      return;
+    }
+    _lastReviews.forEach(r=>{
+      const card = document.createElement('div');
+      card.className = 'review-card';
+
+      const top = document.createElement('div');
+      top.className = 'review-card-top';
+
+      const name = document.createElement('span');
+      name.className = 'review-card-name';
+      name.textContent = r.name || '—';
+
+      const stars = document.createElement('span');
+      stars.className = 'review-card-stars';
+      const rating = Math.max(1, Math.min(5, parseInt(r.rating,10) || 5));
+      stars.textContent = '★'.repeat(rating) + '☆'.repeat(5-rating);
+
+      top.appendChild(name);
+      top.appendChild(stars);
+
+      const text = document.createElement('p');
+      text.className = 'review-card-text';
+      text.textContent = r.text || '';
+
+      card.appendChild(top);
+      card.appendChild(text);
+
+      if(r.created_at){
+        const date = document.createElement('div');
+        date.className = 'review-card-date';
+        try{ date.textContent = new Date(r.created_at).toLocaleDateString(lang==='hy'?'hy-AM':lang==='ru'?'ru-RU':'en-US'); }
+        catch(e){ date.textContent = ''; }
+        card.appendChild(date);
+      }
+
+      el.reviewsList.appendChild(card);
+    });
+  }
+
+  async function fetchReviews(){
+    try{
+      const res = await fetch(`${REVIEWS_LIST_URL}?t=${Date.now()}`);
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      renderReviewsList(Array.isArray(data) ? data : (data.reviews || []));
+    }catch(e){
+      renderReviewsList([]);
+    }
+  }
+
+  el.reviewSubmitBtn && el.reviewSubmitBtn.addEventListener('click', async ()=>{
+    const d = dict[lang];
+    const name = (el.reviewNameInput.value||'').trim();
+    const text = (el.reviewTextInput.value||'').trim();
+    if(!name || !text){ setReviewStatus(d.reviewErrEmpty, 'err'); return; }
+    if(!reviewCaptchaToken){ setReviewStatus(d.reviewErrCaptcha, 'err'); return; }
+    el.reviewSubmitBtn.disabled = true;
+    setReviewStatus(d.reviewSending, '');
+    try{
+      const res = await fetch(REVIEWS_SUBMIT_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, text, rating: reviewRating, token: reviewCaptchaToken })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.success){
+        setReviewStatus(data && data.error==='captcha_failed' ? d.reviewErrCaptcha : d.reviewErrGeneric, 'err');
+        return;
+      }
+      haptic(15);
+      confettiBurst();
+      setReviewStatus(d.reviewSuccess, 'ok');
+      el.reviewNameInput.value = '';
+      el.reviewTextInput.value = '';
+      reviewRating = 5; renderStarPicker();
+      fetchReviews();
+    }catch(e){
+      console.error('VedaVPN review submit error:', e);
+      setReviewStatus(d.reviewErrGeneric, 'err');
+    }finally{
+      el.reviewSubmitBtn.disabled = false;
+      if(typeof grecaptcha !== 'undefined' && reviewRecaptchaWidgetId !== null){
+        try{ grecaptcha.reset(reviewRecaptchaWidgetId); }catch(e){}
+      }
+      reviewCaptchaToken = null;
+    }
+  });
+
   // ---- Render main screen strings ----
   function renderMain(){
     const d = dict[lang];
@@ -2205,6 +2479,7 @@ body::after{
     if(el.donateSub)   el.donateSub.textContent   = d.donateSub;
     if(el.donateBtn)   el.donateBtn.textContent   = d.donateBtn;
     renderFaq();
+    renderReviewStrings();
   }
 
   // ---- Firebase Auth ----
@@ -2311,15 +2586,44 @@ body::after{
     }
   }
 
+  // ---- reCAPTCHA v2 ----
+  let recaptchaToken = null;
+  window.onRecaptchaSuccess = function(token){ recaptchaToken = token; };
+  window.onRecaptchaExpired = function(){ recaptchaToken = null; };
+
+  async function verifyCaptchaOnServer(token){
+    try{
+      const res = await fetch(CAPTCHA_VERIFY_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ token })
+      });
+      if(!res.ok) return false;
+      const data = await res.json();
+      return !!(data && data.success);
+    }catch(e){
+      console.error('VedaVPN captcha verify error:', e);
+      return false;
+    }
+  }
+
   el.authSubmitBtn && el.authSubmitBtn.addEventListener('click', async ()=>{
     const d = dict[lang];
     const email = (el.authEmailInput.value||'').trim();
     const password = el.authPasswordInput.value||'';
     if(!email || !password){ setAuthStatus(d.authErrEmpty, 'err'); return; }
     if(typeof firebase === 'undefined'){ setAuthStatus(d.authErrGeneric, 'err'); return; }
+    if(!recaptchaToken){ setAuthStatus(d.authErrCaptcha, 'err'); return; }
     el.authSubmitBtn.disabled = true;
     setAuthStatus(d.authSending, '');
     try{
+      const captchaOk = await verifyCaptchaOnServer(recaptchaToken);
+      if(!captchaOk){
+        setAuthStatus(d.authErrCaptcha, 'err');
+        if(typeof grecaptcha !== 'undefined' && authRecaptchaWidgetId !== null) grecaptcha.reset(authRecaptchaWidgetId);
+        recaptchaToken = null;
+        return;
+      }
       if(authMode==='login'){
         await firebase.auth().signInWithEmailAndPassword(email, password);
       }else{
@@ -2333,6 +2637,8 @@ body::after{
       setAuthStatus(mapAuthError(e && e.code, d), 'err');
     }finally{
       el.authSubmitBtn.disabled = false;
+      if(typeof grecaptcha !== 'undefined' && authRecaptchaWidgetId !== null) grecaptcha.reset(authRecaptchaWidgetId);
+      recaptchaToken = null;
     }
   });
 
@@ -2681,5 +2987,5 @@ body::after{
 
 })();
 </script>
-<script src="https://replit-cdn.com/replit-pill/replit-pill.global.js" data-repl-id="5d2d9683-4fbe-4f6b-852f-76dc8a637fb5"></script></body>
+</body>
 </html>
