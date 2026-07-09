@@ -3000,11 +3000,11 @@ body::after{
      customStyle.visibility-ը Next-Gen widget-ի մոտ անտեսվում է JS-ից -->
 <style>
 iframe[title="chat widget"]{
-  bottom: 100px !important;
+  bottom: 180px !important;
 }
 @media (max-width: 640px){
   iframe[title="chat widget"]{
-    bottom: 90px !important;
+    bottom: 160px !important;
   }
 }
 </style>
@@ -3012,11 +3012,11 @@ iframe[title="chat widget"]{
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 
 // Բարձրացնում ենք չաթի պատիճը, որ չծածկվի float-links կոճակներով
-// և PWA install banner-ով (ներքևում) — desktop-ում 100px, mobile-ում 90px վերև
+// և PWA install banner-ով (ներքևում) — desktop-ում 180px, mobile-ում 160px վերև
 Tawk_API.customStyle = {
   visibility: {
-    desktop: { position: 'br', xOffset: 16, yOffset: 100 },
-    mobile:  { position: 'br', xOffset: 12, yOffset: 90  }
+    desktop: { position: 'br', xOffset: 16, yOffset: 180 },
+    mobile:  { position: 'br', xOffset: 12, yOffset: 160  }
   }
 };
 
@@ -3030,34 +3030,5 @@ Tawk_API.customStyle = {
 })();
 </script>
 
-<!-- ԺԱՄԱՆԱԿԱՎՈՐ DEBUG — ցույց է տալիս Tawk-ի iframe-ի իրական id/class/title-ը
-     Սքրինշոթ արա և ուղարկիր ինձ, հետո ես կասեմ` ջնջես -->
-<div id="veda-debug-box" style="position:fixed;top:0;left:0;right:0;z-index:999999;background:#000;color:#0f0;font:11px monospace;padding:8px;max-height:40vh;overflow:auto;white-space:pre-wrap;"></div>
-<script>
-setTimeout(function(){
-  var box = document.getElementById('veda-debug-box');
-  var frames = document.querySelectorAll('iframe');
-  var out = 'Գտնված iframe-ներ (' + frames.length + '):\n\n';
-  frames.forEach(function(f, i){
-    var parent = f.parentElement;
-    out += (i+1) + ') id="' + f.id + '" title="' + f.title + '" class="' + f.className + '" src="' + (f.src||'').slice(0,70) + '"\n';
-    out += '   style="' + (f.getAttribute('style')||'') + '"\n';
-    out += '   parent: <' + (parent?parent.tagName:'') + '> id="' + (parent?parent.id:'') + '" class="' + (parent?parent.className:'') + '"\n\n';
-  });
-  out += '--- Tawk-ի հետ կապված elements (id/class-ում tawk) ---\n\n';
-  var all = document.querySelectorAll('*');
-  var found = 0;
-  all.forEach(function(el){
-    var id = el.id || '';
-    var cls = (typeof el.className === 'string') ? el.className : '';
-    if(/tawk/i.test(id) || /tawk/i.test(cls)){
-      found++;
-      out += '<' + el.tagName + '> id="' + id + '" class="' + cls + '"\n';
-    }
-  });
-  if(found === 0) out += '(ոչինչ չգտնվեց)\n';
-  box.textContent = out;
-}, 8000);
-</script>
 </body>
 </html>
