@@ -475,14 +475,13 @@ body::after{
 #mainScreen.is-ready .hero-title   { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .06s  both; }
 #mainScreen.is-ready .hero-sub     { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .12s  both; }
 #mainScreen.is-ready .vpn-status-card  { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .16s  both; }
-#mainScreen.is-ready .stats        { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .20s  both; }
-#mainScreen.is-ready .features     { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .26s  both; }
+#mainScreen.is-ready .visitors-panel { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .20s  both; }
 #mainScreen.is-ready .cta-btn      { animation:fadeUp .55s cubic-bezier(.22,1,.36,1) .32s both; }
 #mainScreen.is-ready .share-bar    { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .38s  both; }
 @media (prefers-reduced-motion:reduce){
   #mainScreen.is-ready .eyebrow,#mainScreen.is-ready .hero-title,
   #mainScreen.is-ready .hero-sub,#mainScreen.is-ready .vpn-status-card,
-  #mainScreen.is-ready .stats,#mainScreen.is-ready .features,
+  #mainScreen.is-ready .visitors-panel,
   #mainScreen.is-ready .cta-btn,#mainScreen.is-ready .share-bar{ animation:none; }
 }
 
@@ -735,40 +734,71 @@ body::after{
 }
 
 /* ============================================================
-   FEATURE CARDS
+   LIVE VISITORS PANEL
    ============================================================ */
-.features{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin-bottom:28px;
-}
-.feature{
+.visitors-panel{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
   background: var(--glass);
   backdrop-filter: var(--blur-sm);
   -webkit-backdrop-filter: var(--blur-sm);
   border: 1px solid var(--glass-border);
   border-radius:var(--radius-md);
-  padding:16px 8px;
+  padding:26px 16px 22px;
+  margin-bottom:28px;
   text-align:center;
   box-shadow: var(--shadow-sm);
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  overflow:hidden;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
-.feature:hover{
-  transform:translateY(-3px);
-  border-color: rgba(var(--signal-rgb),.25);
-  box-shadow: var(--shadow-md), 0 0 20px rgba(var(--signal-rgb),.12);
+.visitors-panel:hover{
+  transform:translateY(-2px);
+  box-shadow: var(--shadow-md), var(--glow-xs);
 }
-.feature .ico{
-  font-size:20px;
-  margin-bottom:7px;
-  display:block;
-  filter: drop-shadow(0 0 6px rgba(var(--signal-rgb),.4));
+.visitors-panel::before{
+  content:'';
+  position:absolute; top:0; left:16%; right:16%;
+  height:2px;
+  background:linear-gradient(90deg, transparent, var(--signal), transparent);
+  opacity:.6;
 }
-.feature .label{
-  font-size:10.5px;
+.vp-icon-wrap{
+  position:relative;
+  width:42px; height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--signal);
+  margin-bottom:6px;
+}
+.vp-icon{
+  width:26px; height:26px;
+  filter: drop-shadow(0 0 8px rgba(var(--signal-rgb),.5));
+}
+.vp-live-dot{
+  position:absolute;
+  top:1px; right:1px;
+  width:9px; height:9px;
+  border-radius:50%;
+  background:var(--signal);
+  box-shadow:0 0 8px rgba(var(--signal-rgb),.85);
+  animation: vscBlink 2s ease infinite;
+}
+.vp-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:38px;
+  line-height:1;
+  color:var(--signal);
+  text-shadow: 0 0 22px rgba(var(--signal-rgb),.45);
+}
+.vp-label{
+  font-size:12px;
   color:var(--muted);
-  line-height:1.35;
+  letter-spacing:.02em;
 }
 
 /* ============================================================
@@ -1653,18 +1683,14 @@ body::after{
       <span id="uptimeBadgeText"></span>
     </div>
 
-    <!-- Stats -->
-    <div class="stats">
-      <div class="stat"><div class="num" id="stat1Num">—</div><div class="label" id="stat1"></div></div>
-      <div class="stat"><div class="num" id="stat2Num">15</div><div class="label" id="stat2"></div></div>
-      <div class="stat"><div class="num" id="stat3Num">99.9%</div><div class="label" id="stat3"></div></div>
-    </div>
-
-    <!-- Feature cards -->
-    <div class="features">
-      <div class="feature"><div class="ico">🔒</div><div class="label" id="feat1"></div></div>
-      <div class="feature"><div class="ico">⚡</div><div class="label" id="feat2"></div></div>
-      <div class="feature"><div class="ico">🌍</div><div class="label" id="feat3"></div></div>
+    <!-- Live visitors panel -->
+    <div class="visitors-panel">
+      <div class="vp-icon-wrap">
+        <svg class="vp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="vp-live-dot"></span>
+      </div>
+      <div class="vp-num" id="stat1Num">—</div>
+      <div class="vp-label" id="stat1"></div>
     </div>
 
     <!-- CTA -->
@@ -2170,14 +2196,7 @@ body::after{
     heroTitle:         document.getElementById('heroTitle'),
     heroSub:           document.getElementById('heroSub'),
     stat1:             document.getElementById('stat1'),
-    stat2:             document.getElementById('stat2'),
-    stat3:             document.getElementById('stat3'),
     stat1Num:          document.getElementById('stat1Num'),
-    stat2Num:          document.getElementById('stat2Num'),
-    stat3Num:          document.getElementById('stat3Num'),
-    feat1:             document.getElementById('feat1'),
-    feat2:             document.getElementById('feat2'),
-    feat3:             document.getElementById('feat3'),
     ctaBtn:            document.getElementById('ctaBtn'),
     shareBtn:          document.getElementById('shareBtn'),
     shareBtnText:      document.getElementById('shareBtnText'),
@@ -2452,11 +2471,6 @@ body::after{
     el.heroTitle.textContent      = d.heroTitle;
     el.heroSub.textContent        = d.heroSub;
     el.stat1.textContent          = d.stat1;
-    el.stat2.textContent          = d.stat2;
-    el.stat3.textContent          = d.stat3;
-    el.feat1.textContent          = d.feat1;
-    el.feat2.textContent          = d.feat2;
-    el.feat3.textContent          = d.feat3;
     el.ctaBtn.textContent         = d.cta;
     el.shareBtnText.textContent   = d.share;
     el.shareTgText.textContent    = d.shareTg;
