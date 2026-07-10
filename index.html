@@ -1703,6 +1703,7 @@ body::after{
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -2072,7 +2073,7 @@ body::after{
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '3.4.1'; // Feature: donate section moved up near CTA for visibility
+  const SITE_VERSION = '3.4.2'; // Fix: visitor counter moved from CountAPI to Firestore (RU accessibility + total/daily consistency)
   const CAPTCHA_VERIFY_URL = 'https://nvershirinyan1.pythonanywhere.com/verify-captcha';
   const REVIEWS_LIST_URL   = 'https://nvershirinyan1.pythonanywhere.com/reviews/list';
   const REVIEWS_SUBMIT_URL = 'https://nvershirinyan1.pythonanywhere.com/reviews/submit';
@@ -3095,15 +3096,92 @@ body::after{
     });
   })();
 
-  // ---- Live visitor counter (unique per device, CountAPI) ----
-  (async function trackRealVisit(){
-    const statEl = document.getElementById('stat1Num');
-    const VISITED_KEY  = 'vedavpn_visitor_id';
-    const COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
-    const COUNTER_KEY  = 'vedavpn_lol_unique_visitors_2026';
+  // ---- Live visitor counter (unique per device, Firestore-backed) ----
+  // Replaces the old countapi.mileshilliard.com counter, which is unreachable
+  // from some regions (e.g. Russia) without a foreign VPN. Firestore runs on
+  // Google's own domains, which are already used for Firebase Auth above and
+  // are reachable. This also fixes the "+N today" badge not being part of the
+  // total: the daily counter now only increments once per NEW unique visitor
+  // (same as the total), instead of once per page load, so both numbers refer
+  // to the same thing and the daily figure is a real subset of the total.
+  const VedaStats = (function(){
+    const VISITED_KEY = 'vedavpn_visitor_id';
+    let dbPromise = null;
+
+    function getDb(){
+      if(!dbPromise){
+        dbPromise = new Promise((resolve) => {
+          try{
+            if(typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length){
+              resolve(null); return;
+            }
+            resolve(firebase.firestore());
+          }catch(e){ resolve(null); }
+        });
+      }
+      return dbPromise;
+    }
+
+    function todayKey(offset=0){
+      const d = new Date();
+      d.setDate(d.getDate() - offset);
+      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
+    // Runs once per page load. Returns { total, todayNew, isNewVisitor }.
+    async function recordVisit(){
+      const db = await getDb();
+      if(!db) return null;
+      let visitorId = localStorage.getItem(VISITED_KEY);
+      const isNewVisitor = !visitorId;
+      if(isNewVisitor){
+        visitorId = (crypto&&crypto.randomUUID) ? crypto.randomUUID()
+          : 'v-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+        localStorage.setItem(VISITED_KEY, visitorId);
+      }
+      const totalRef = db.collection('site_stats').doc('visitors');
+      const dailyRef  = db.collection('site_stats').doc('visitors')
+                           .collection('daily').doc(todayKey(0));
+      try{
+        if(isNewVisitor){
+          const inc = firebase.firestore.FieldValue.increment(1);
+          const batch = db.batch();
+          batch.set(totalRef, { total: inc }, { merge: true });
+          batch.set(dailyRef,  { count: inc }, { merge: true });
+          await batch.commit();
+        }
+        const totalSnap = await totalRef.get();
+        const dailySnap = await dailyRef.get();
+        const total = totalSnap.exists ? parseInt(totalSnap.data().total, 10) : null;
+        const todayNew = dailySnap.exists ? parseInt(dailySnap.data().count, 10) : 0;
+        return { total, todayNew, isNewVisitor };
+      }catch(e){ return null; }
+    }
+
+    async function getDailyRange(days){
+      const db = await getDb();
+      if(!db) return null;
+      try{
+        const refs = [];
+        for(let i = days-1; i >= 0; i--){
+          refs.push(db.collection('site_stats').doc('visitors').collection('daily').doc(todayKey(i)));
+        }
+        const snaps = await Promise.all(refs.map(r => r.get()));
+        return snaps.map(s => s.exists ? Math.max(0, parseInt(s.data().count, 10) || 0) : 0);
+      }catch(e){ return null; }
+    }
+
+    return { recordVisit, getDailyRange };
+  })();
+
+  (async function initVisitorStats(){
+    const statEl  = document.getElementById('stat1Num');
+    const wrap    = document.getElementById('vpGrowth');
+    const numEl   = document.getElementById('vpGrowthNum');
+    const svg     = document.getElementById('vpSpark');
 
     function animateNum(el, target){
-      const start = 0;
       const duration = 1200;
       const startTime = performance.now();
       function step(now){
@@ -3116,110 +3194,35 @@ body::after{
       requestAnimationFrame(step);
     }
 
-    function renderValue(value){
-      if(typeof value === 'number' && !isNaN(value)){
-        animateNum(statEl, value);
-      } else {
-        statEl.textContent = '—';
+    const result = await VedaStats.recordVisit();
+    if(result && typeof result.total === 'number' && !isNaN(result.total)){
+      animateNum(statEl, result.total);
+    } else if(statEl){
+      statEl.textContent = '—';
+    }
+    if(result && result.todayNew > 0 && wrap && numEl){
+      numEl.textContent = '+' + result.todayNew.toLocaleString('en-US');
+      wrap.hidden = false;
+    }
+
+    // ---- 7-day mini sparkline (read-only) ----
+    if(svg){
+      const values = await VedaStats.getDailyRange(7);
+      if(values && values.some(v => v > 0)){
+        const w = 140, h = 32, pad = 2;
+        const max = Math.max(1, ...values);
+        const stepX = w / (values.length - 1);
+        const pts = values.map((v,i) => {
+          const x = i * stepX;
+          const y = h - pad - (v / max) * (h - pad*2);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(' ');
+        const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+        line.setAttribute('class','vp-spark-line');
+        line.setAttribute('points', pts);
+        svg.appendChild(line);
       }
     }
-
-    async function fetchWithTimeout(url, timeoutMs=8000){
-      const controller = new AbortController();
-      const timer = setTimeout(()=> controller.abort(), timeoutMs);
-      try{ return await fetch(url,{signal:controller.signal}); }
-      finally{ clearTimeout(timer); }
-    }
-
-    try{
-      let visitorId = localStorage.getItem(VISITED_KEY);
-      const isNewVisitor = !visitorId;
-      if(isNewVisitor){
-        visitorId = (crypto&&crypto.randomUUID) ? crypto.randomUUID()
-          : 'v-'+Date.now()+'-'+Math.random().toString(36).slice(2);
-        localStorage.setItem(VISITED_KEY, visitorId);
-      }
-      const res = isNewVisitor
-        ? await fetchWithTimeout(`${COUNTER_BASE}/hit/${COUNTER_KEY}`)
-        : await fetchWithTimeout(`${COUNTER_BASE}/get/${COUNTER_KEY}`);
-      if(!res.ok) throw new Error('bad');
-      const data = await res.json();
-      const value = (data&&data.value!=null) ? parseInt(data.value,10) : null;
-      renderValue(value);
-    }catch(e){ renderValue(null); }
-  })();
-
-  // ---- Daily growth badge ("+N today") — a fresh CountAPI key per calendar day ----
-  (async function trackDailyGrowth(){
-    const COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
-    function dayKey(offset){
-      const d = new Date();
-      d.setDate(d.getDate() - offset);
-      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
-      return `vedavpn_lol_daily_${y}-${m}-${day}`;
-    }
-    async function fetchWithTimeout(url, timeoutMs=8000){
-      const controller = new AbortController();
-      const timer = setTimeout(()=> controller.abort(), timeoutMs);
-      try{ return await fetch(url,{signal:controller.signal}); }
-      finally{ clearTimeout(timer); }
-    }
-    const wrap = document.getElementById('vpGrowth');
-    const numEl = document.getElementById('vpGrowthNum');
-    if(!wrap || !numEl) return;
-    try{
-      const res = await fetchWithTimeout(`${COUNTER_BASE}/hit/${dayKey(0)}`);
-      if(!res.ok) throw new Error('bad');
-      const data = await res.json();
-      const value = (data&&data.value!=null) ? parseInt(data.value,10) : null;
-      if(typeof value === 'number' && !isNaN(value) && value > 0){
-        numEl.textContent = '+' + value.toLocaleString('en-US');
-        wrap.hidden = false;
-      }
-    }catch(e){ /* keep badge hidden on failure */ }
-  })();
-
-  // ---- 7-day mini sparkline — reads (without incrementing) the last 7 daily keys ----
-  (async function loadVisitorSparkline(){
-    const svg = document.getElementById('vpSpark');
-    if(!svg) return;
-    const COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
-    function dayKey(offset){
-      const d = new Date();
-      d.setDate(d.getDate() - offset);
-      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
-      return `vedavpn_lol_daily_${y}-${m}-${day}`;
-    }
-    async function fetchWithTimeout(url, timeoutMs=6000){
-      const controller = new AbortController();
-      const timer = setTimeout(()=> controller.abort(), timeoutMs);
-      try{ return await fetch(url,{signal:controller.signal}); }
-      finally{ clearTimeout(timer); }
-    }
-    const days = 7;
-    const values = [];
-    for(let i = days-1; i >= 0; i--){
-      try{
-        const r = await fetchWithTimeout(`${COUNTER_BASE}/get/${dayKey(i)}`);
-        if(r.ok){
-          const j = await r.json();
-          values.push(j && j.value != null ? Math.max(0, parseInt(j.value,10)) : 0);
-        } else values.push(0);
-      }catch(e){ values.push(0); }
-    }
-    if(!values.some(v => v > 0)) return; // nothing to draw yet — leave svg empty
-    const w = 140, h = 32, pad = 2;
-    const max = Math.max(1, ...values);
-    const stepX = w / (values.length - 1);
-    const pts = values.map((v,i) => {
-      const x = i * stepX;
-      const y = h - pad - (v / max) * (h - pad*2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-    const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    line.setAttribute('class','vp-spark-line');
-    line.setAttribute('points', pts);
-    svg.appendChild(line);
   })();
 
   // ---- Average review rating ----

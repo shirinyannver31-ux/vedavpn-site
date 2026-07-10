@@ -1,5 +1,5 @@
-// VedaVPN Service Worker — v3.4.1
-const CACHE_NAME = 'vedavpn-v3-4-1';
+// VedaVPN Service Worker — v3.4.2
+const CACHE_NAME = 'vedavpn-v3-4-2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -41,7 +41,7 @@ self.addEventListener('fetch', e => {
 
   const url = new URL(e.request.url);
 
-  // Skip: Firebase, CountAPI, Gist, CDN fonts — always fetch fresh
+  // Skip: Firebase, Gist, CDN fonts — always fetch fresh
   const skipHosts = [
     'firestore.googleapis.com',
     'firebase.googleapis.com',
@@ -49,7 +49,6 @@ self.addEventListener('fetch', e => {
     'securetoken.googleapis.com',
     'gstatic.com',
     'googleapis.com',
-    'countapi.mileshilliard.com',
     'gist.githubusercontent.com',
     'cdnjs.cloudflare.com',
     'fonts.googleapis.com',
