@@ -474,14 +474,14 @@ body::after{
 #mainScreen.is-ready .eyebrow      { animation:fadeUp .5s cubic-bezier(.22,1,.36,1)       both; }
 #mainScreen.is-ready .hero-title   { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .06s  both; }
 #mainScreen.is-ready .hero-sub     { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .12s  both; }
-#mainScreen.is-ready .route-trace  { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .16s  both; }
+#mainScreen.is-ready .vpn-status-card  { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .16s  both; }
 #mainScreen.is-ready .stats        { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .20s  both; }
 #mainScreen.is-ready .features     { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .26s  both; }
 #mainScreen.is-ready .cta-btn      { animation:fadeUp .55s cubic-bezier(.22,1,.36,1) .32s both; }
 #mainScreen.is-ready .share-bar    { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .38s  both; }
 @media (prefers-reduced-motion:reduce){
   #mainScreen.is-ready .eyebrow,#mainScreen.is-ready .hero-title,
-  #mainScreen.is-ready .hero-sub,#mainScreen.is-ready .route-trace,
+  #mainScreen.is-ready .hero-sub,#mainScreen.is-ready .vpn-status-card,
   #mainScreen.is-ready .stats,#mainScreen.is-ready .features,
   #mainScreen.is-ready .cta-btn,#mainScreen.is-ready .share-bar{ animation:none; }
 }
@@ -571,112 +571,115 @@ body::after{
 /* ============================================================
    ROUTE TRACE — encrypted tunnel diagram
    ============================================================ */
-.route-trace{
+/* ============================================================
+   VPN STATUS CARD — radar-ring badge + connection path
+   ============================================================ */
+.vpn-status-card{
   display:flex;
   align-items:center;
+  gap:16px;
   margin:0 0 22px;
-  padding:16px 14px;
-  background: var(--glass);
+  padding:18px;
+  background: linear-gradient(135deg, rgba(var(--signal-rgb),.10), var(--glass) 55%);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border:1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.04);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.05);
 }
-.route-node{
+
+.vsc-ring-wrap{
+  position:relative;
   flex-shrink:0;
-  width:40px; height:40px;
-  border-radius:12px;
+  width:72px; height:72px;
   display:flex; align-items:center; justify-content:center;
-  background: rgba(255,255,255,.04);
-  border:1px solid var(--glass-border);
-  color:var(--muted);
 }
-.route-node svg{ width:18px; height:18px; }
-
-.route-node.lock{
-  position:relative;
-  color:#052010;
-  background: var(--signal);
-  border-color: transparent;
-  box-shadow: var(--glow-sm);
-}
-:root[data-theme="light"] .route-node.lock{ color:#fff; }
-
-.route-node.lock::after{
-  content:'';
-  position:absolute; inset:-5px;
-  border-radius:16px;
-  border:1.5px solid rgba(var(--signal-rgb),.4);
-  animation:lockPulse 2.4s ease-out infinite;
-}
-@keyframes lockPulse{
-  0%  { transform:scale(.82); opacity:.9; }
-  100%{ transform:scale(1.5); opacity:0; }
-}
-@media (prefers-reduced-motion:reduce){ .route-node.lock::after{ animation:none; display:none; } }
-
-.route-track{
-  flex:1;
-  height:2px;
-  margin:0 8px;
-  position:relative;
-  background-image:linear-gradient(90deg, var(--line) 0 5px, transparent 5px 10px);
-  background-size:10px 2px;
-  background-repeat:repeat-x;
-}
-.route-track::before{
-  content:'';
+.vsc-ring{
   position:absolute;
-  top:50%; left:0;
-  width:7px; height:7px;
-  margin-top:-3.5px;
   border-radius:50%;
-  background:var(--signal);
-  box-shadow:0 0 8px rgba(var(--signal-rgb),.9);
-  animation:packetMove 2.6s linear infinite;
-  opacity:0;
+  border:1.5px dashed rgba(var(--signal-rgb),.35);
 }
-.route-track.rt-2::before{ animation-delay:1.3s; }
-@keyframes packetMove{
-  0%  { left:0;               opacity:0; }
-  8%  { opacity:1; }
-  88% { opacity:1; }
-  100%{ left:calc(100% - 7px); opacity:0; }
+.vsc-ring-outer{
+  inset:0;
+  animation: vscSpin 18s linear infinite;
 }
-@media (prefers-reduced-motion:reduce){ .route-track::before{ animation:none; display:none; } }
+.vsc-ring-mid{
+  inset:9px;
+  border-style:solid;
+  border-color: rgba(var(--signal-rgb),.18);
+}
+@keyframes vscSpin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce){ .vsc-ring-outer{ animation:none; } }
 
-/* Server status row inside route-trace */
-.route-status{
+.vsc-badge{
+  position:relative;
+  width:44px; height:44px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.5), transparent 45%), var(--signal);
+  color:#052010;
+  box-shadow: var(--glow-sm), 0 6px 16px rgba(var(--signal-rgb),.35);
+}
+:root[data-theme="light"] .vsc-badge{ color:#fff; }
+.vsc-badge svg{ width:20px; height:20px; }
+
+.vsc-body{
+  flex:1;
+  min-width:0;
   display:flex;
   flex-direction:column;
+  gap:10px;
+}
+
+.vsc-status-chip{
+  display:inline-flex;
   align-items:center;
-  gap:3px;
-  flex-shrink:0;
-  margin-left:10px;
+  gap:6px;
+  align-self:flex-start;
+  padding:5px 10px;
+  border-radius:999px;
+  background: rgba(var(--signal-rgb),.10);
+  border:1px solid rgba(var(--signal-rgb),.28);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  font-weight:600;
+  color:var(--signal);
+  letter-spacing:.04em;
 }
-.route-status-dots{
-  display:flex; gap:4px;
-}
-.route-status-dot{
+.vsc-pulse-dot{
   width:6px; height:6px;
   border-radius:50%;
   background:var(--signal);
   box-shadow:0 0 6px rgba(var(--signal-rgb),.8);
+  animation: vscBlink 2s ease infinite;
 }
-.route-status-dot.dim{ opacity:.3; animation:none !important; }
-.route-status-dot:nth-child(1){ animation:dotBlink 2s ease infinite; }
-.route-status-dot:nth-child(2){ animation:dotBlink 2s ease .4s infinite; }
-.route-status-dot:nth-child(3){ animation:dotBlink 2s ease .8s infinite; }
-@keyframes dotBlink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
-@media (prefers-reduced-motion:reduce){ .route-status-dot{ animation:none; } }
+@keyframes vscBlink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+@media (prefers-reduced-motion:reduce){ .vsc-pulse-dot{ animation:none; } }
 
-.route-status-label{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:9.5px;
-  color:var(--signal);
+.vsc-path{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.vsc-path-item{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:var(--muted);
   white-space:nowrap;
-  letter-spacing:.05em;
+}
+.vsc-path-item svg{
+  width:15px; height:15px;
+  flex-shrink:0;
+  color: var(--signal);
+}
+.vsc-path-arrow{
+  width:14px; height:14px;
+  flex-shrink:0;
+  color: var(--muted);
+  opacity:.6;
 }
 
 /* ============================================================
@@ -1616,26 +1619,31 @@ body::after{
     <h2 class="hero-title" id="heroTitle"></h2>
     <p class="hero-sub" id="heroSub"></p>
 
-    <!-- Route trace diagram -->
-    <div class="route-trace" aria-hidden="true">
-      <div class="route-node device">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
-      </div>
-      <div class="route-track rt-1"></div>
-      <div class="route-node lock">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      </div>
-      <div class="route-track rt-2"></div>
-      <div class="route-node server">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
-      </div>
-      <div class="route-status">
-        <div class="route-status-dots">
-          <div class="route-status-dot"></div>
-          <div class="route-status-dot"></div>
-          <div class="route-status-dot"></div>
+    <!-- VPN status card (radar-ring badge + connection path) -->
+    <div class="vpn-status-card" aria-hidden="true">
+      <div class="vsc-ring-wrap">
+        <div class="vsc-ring vsc-ring-outer"></div>
+        <div class="vsc-ring vsc-ring-mid"></div>
+        <div class="vsc-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.4v5.3c0 4.7-3.2 8-7.5 9.3-4.3-1.3-7.5-4.6-7.5-9.3V5.9L12 2.5z"/><path d="M8.7 12.2l2.2 2.2 4.4-4.6"/></svg>
         </div>
-        <div class="route-status-label" id="serverStatusLabel">15 online</div>
+      </div>
+      <div class="vsc-body">
+        <div class="vsc-status-chip">
+          <span class="vsc-pulse-dot"></span>
+          <span id="serverStatusLabel">15 online</span>
+        </div>
+        <div class="vsc-path">
+          <span class="vsc-path-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
+            Это устройство
+          </span>
+          <svg class="vsc-path-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span class="vsc-path-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
+            VPN сервер
+          </span>
+        </div>
       </div>
     </div>
 
@@ -1852,7 +1860,7 @@ body::after{
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '3.1.4'; // Feature: header row flex-wrap fix, Tawk chat removed
+  const SITE_VERSION = '3.2.0'; // Feature: VPN status card fully redesigned — radar-ring badge + connection path
   const CAPTCHA_VERIFY_URL = 'https://nvershirinyan1.pythonanywhere.com/verify-captcha';
   const REVIEWS_LIST_URL   = 'https://nvershirinyan1.pythonanywhere.com/reviews/list';
   const REVIEWS_SUBMIT_URL = 'https://nvershirinyan1.pythonanywhere.com/reviews/submit';
