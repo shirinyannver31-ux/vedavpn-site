@@ -491,11 +491,21 @@ body::after{
   display:flex;
   align-items:center;
   justify-content:space-between;
+  flex-wrap:wrap;
+  row-gap:10px;
   margin-bottom:28px;
 }
 .top-row .brand{ font-size:20px; }
 .top-row-left{
   display:flex; align-items:center; gap:10px;
+}
+.top-row-right{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+}
+@media (max-width:360px){
+  .top-row-right{ gap:6px; }
+  .lang-switch button{ padding:7px 7px; }
+  .palette-switch{ gap:6px; }
 }
 
 .logo-mark-sm{
@@ -1580,7 +1590,7 @@ body::after{
         <div class="logo-mark-sm"><img src="veda-logo.png" alt="VedaVPN"></div>
         <h1 class="brand">Veda<span>VPN</span></h1>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
+      <div class="top-row-right">
         <div class="lang-switch">
           <button data-lang="ru">RU</button>
           <button data-lang="hy">HY</button>
@@ -2985,48 +2995,6 @@ body::after{
     }
   })();
 
-})();
-</script>
-
-<!-- ============================================================
-     Tawk.to Live Chat Widget
-     ------------------------------------------------------------
-     1) Գրանցվիր անվճար՝ https://www.tawk.to/
-     2) Administration → Channels → Chat Widget
-     3) Փոխարինիր ներքևի PROPERTY_ID և WIDGET_ID արժեքները
-        քո սեփական ID-երով (widget code-ից)
-     ============================================================ -->
-<!-- CSS-ով հարկադրաբար բարձրացնում ենք Tawk-ի պատիճը, քանի որ
-     customStyle.visibility-ը Next-Gen widget-ի մոտ անտեսվում է JS-ից -->
-<style>
-iframe[title="chat widget"]{
-  bottom: 180px !important;
-}
-@media (max-width: 640px){
-  iframe[title="chat widget"]{
-    bottom: 160px !important;
-  }
-}
-</style>
-<script type="text/javascript">
-var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-
-// Բարձրացնում ենք չաթի պատիճը, որ չծածկվի float-links կոճակներով
-// և PWA install banner-ով (ներքևում) — desktop-ում 180px, mobile-ում 160px վերև
-Tawk_API.customStyle = {
-  visibility: {
-    desktop: { position: 'br', xOffset: 16, yOffset: 180 },
-    mobile:  { position: 'br', xOffset: 12, yOffset: 160  }
-  }
-};
-
-(function(){
-  var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-  s1.async = true;
-  s1.src = 'https://embed.tawk.to/6a4fb6184eda0c1d47f76993/1jt3lukln';
-  s1.charset = 'UTF-8';
-  s1.setAttribute('crossorigin', '*');
-  s0.parentNode.insertBefore(s1, s0);
 })();
 </script>
 
