@@ -1,5 +1,5 @@
 // VedaVPN Service Worker — v3.4.2
-const CACHE_NAME = 'vedavpn-v3-4-2';
+const CACHE_NAME = 'vedavpn-v3-4-3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
