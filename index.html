@@ -572,70 +572,101 @@ body::after{
    ROUTE TRACE — encrypted tunnel diagram
    ============================================================ */
 /* ============================================================
-   VPN STATUS CARD — radar-ring badge + connection path
+   VPN STATUS CARD v2 — shield hero + benefit copy
    ============================================================ */
 .vpn-status-card{
   display:flex;
   align-items:center;
-  gap:16px;
+  gap:18px;
   margin:0 0 22px;
-  padding:18px;
-  background: linear-gradient(135deg, rgba(var(--signal-rgb),.10), var(--glass) 55%);
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+  background: linear-gradient(150deg, rgba(var(--signal-rgb),.14), var(--glass) 60%);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border:1px solid var(--glass-border);
-  border-radius: 24px;
-  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.05);
+  border-radius: 26px;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.vpn-status-card::after{
+  content:'';
+  position:absolute;
+  top:-40%; right:-20%;
+  width:180px; height:180px;
+  background: radial-gradient(circle, rgba(var(--signal-rgb),.16), transparent 70%);
+  pointer-events:none;
 }
 
-.vsc-ring-wrap{
+.vsc-shield-wrap{
   position:relative;
   flex-shrink:0;
-  width:72px; height:72px;
+  width:60px; height:60px;
   display:flex; align-items:center; justify-content:center;
 }
-.vsc-ring{
-  position:absolute;
+.vsc-glow{
+  position:absolute; inset:-10px;
   border-radius:50%;
-  border:1.5px dashed rgba(var(--signal-rgb),.35);
+  background: radial-gradient(circle, rgba(var(--signal-rgb),.35), transparent 70%);
+  filter:blur(4px);
+  animation: vscGlowPulse 2.6s ease-in-out infinite;
 }
-.vsc-ring-outer{
-  inset:0;
-  animation: vscSpin 18s linear infinite;
-}
-.vsc-ring-mid{
-  inset:9px;
-  border-style:solid;
-  border-color: rgba(var(--signal-rgb),.18);
-}
-@keyframes vscSpin{ to{ transform:rotate(360deg); } }
-@media (prefers-reduced-motion:reduce){ .vsc-ring-outer{ animation:none; } }
+@keyframes vscGlowPulse{ 0%,100%{ opacity:.6; transform:scale(.94); } 50%{ opacity:1; transform:scale(1.06); } }
+@media (prefers-reduced-motion:reduce){ .vsc-glow{ animation:none; } }
 
-.vsc-badge{
+.vsc-shield{
   position:relative;
-  width:44px; height:44px;
+  width:56px; height:56px;
+  border-radius:18px;
+  display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(circle at 34% 26%, rgba(255,255,255,.55), transparent 45%), var(--signal);
+  color:#052010;
+  box-shadow: var(--glow-sm), 0 8px 20px rgba(var(--signal-rgb),.4);
+}
+:root[data-theme="light"] .vsc-shield{ color:#fff; }
+.vsc-shield svg{ width:26px; height:26px; }
+
+.vsc-check-badge{
+  position:absolute;
+  right:-4px; bottom:-4px;
+  width:22px; height:22px;
   border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.5), transparent 45%), var(--signal);
-  color:#052010;
-  box-shadow: var(--glow-sm), 0 6px 16px rgba(var(--signal-rgb),.35);
+  background: var(--bg);
+  border:2px solid var(--signal);
+  color:var(--signal);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
-:root[data-theme="light"] .vsc-badge{ color:#fff; }
-.vsc-badge svg{ width:20px; height:20px; }
+.vsc-check-badge svg{ width:11px; height:11px; }
 
 .vsc-body{
   flex:1;
   min-width:0;
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:5px;
+  position:relative; z-index:1;
 }
 
-.vsc-status-chip{
+.vsc-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:18px;
+  color:var(--text);
+  letter-spacing:-.01em;
+}
+.vsc-sub{
+  font-size:12.5px;
+  color:var(--muted);
+}
+
+.vsc-meta-row{
+  margin-top:6px;
+}
+.vsc-meta-chip{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  align-self:flex-start;
   padding:5px 10px;
   border-radius:999px;
   background: rgba(var(--signal-rgb),.10);
@@ -655,32 +686,6 @@ body::after{
 }
 @keyframes vscBlink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
 @media (prefers-reduced-motion:reduce){ .vsc-pulse-dot{ animation:none; } }
-
-.vsc-path{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.vsc-path-item{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-  color:var(--muted);
-  white-space:nowrap;
-}
-.vsc-path-item svg{
-  width:15px; height:15px;
-  flex-shrink:0;
-  color: var(--signal);
-}
-.vsc-path-arrow{
-  width:14px; height:14px;
-  flex-shrink:0;
-  color: var(--muted);
-  opacity:.6;
-}
 
 /* ============================================================
    STATS ROW
@@ -1619,29 +1624,24 @@ body::after{
     <h2 class="hero-title" id="heroTitle"></h2>
     <p class="hero-sub" id="heroSub"></p>
 
-    <!-- VPN status card (radar-ring badge + connection path) -->
+    <!-- VPN status card v2 — shield hero + benefit copy -->
     <div class="vpn-status-card" aria-hidden="true">
-      <div class="vsc-ring-wrap">
-        <div class="vsc-ring vsc-ring-outer"></div>
-        <div class="vsc-ring vsc-ring-mid"></div>
-        <div class="vsc-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.4v5.3c0 4.7-3.2 8-7.5 9.3-4.3-1.3-7.5-4.6-7.5-9.3V5.9L12 2.5z"/><path d="M8.7 12.2l2.2 2.2 4.4-4.6"/></svg>
+      <div class="vsc-shield-wrap">
+        <div class="vsc-glow"></div>
+        <div class="vsc-shield">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l7.5 3.4v5.3c0 4.7-3.2 8-7.5 9.3-4.3-1.3-7.5-4.6-7.5-9.3V5.9L12 2.5z"/></svg>
+        </div>
+        <div class="vsc-check-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"/></svg>
         </div>
       </div>
       <div class="vsc-body">
-        <div class="vsc-status-chip">
-          <span class="vsc-pulse-dot"></span>
-          <span id="serverStatusLabel">15 online</span>
-        </div>
-        <div class="vsc-path">
-          <span class="vsc-path-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
-            Это устройство
-          </span>
-          <svg class="vsc-path-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          <span class="vsc-path-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
-            VPN сервер
+        <div class="vsc-title">VPN активен</div>
+        <div class="vsc-sub">Трафик зашифрован, IP скрыт</div>
+        <div class="vsc-meta-row">
+          <span class="vsc-meta-chip">
+            <span class="vsc-pulse-dot"></span>
+            <span id="serverStatusLabel">15 online</span>
           </span>
         </div>
       </div>
@@ -1860,7 +1860,7 @@ body::after{
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '3.2.0'; // Feature: VPN status card fully redesigned — radar-ring badge + connection path
+  const SITE_VERSION = '3.2.1'; // Feature: VPN status card v2 — shield hero + benefit copy
   const CAPTCHA_VERIFY_URL = 'https://nvershirinyan1.pythonanywhere.com/verify-captcha';
   const REVIEWS_LIST_URL   = 'https://nvershirinyan1.pythonanywhere.com/reviews/list';
   const REVIEWS_SUBMIT_URL = 'https://nvershirinyan1.pythonanywhere.com/reviews/submit';
