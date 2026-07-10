@@ -476,13 +476,13 @@ body::after{
 #mainScreen.is-ready .hero-sub     { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .12s  both; }
 #mainScreen.is-ready .vpn-status-card  { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .16s  both; }
 #mainScreen.is-ready .visitors-panel { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .20s  both; }
-#mainScreen.is-ready .cta-btn      { animation:fadeUp .55s cubic-bezier(.22,1,.36,1) .32s both; }
+#mainScreen.is-ready .cta-wrap     { animation:fadeUp .55s cubic-bezier(.22,1,.36,1) .32s both; }
 #mainScreen.is-ready .share-bar    { animation:fadeUp .5s cubic-bezier(.22,1,.36,1) .38s  both; }
 @media (prefers-reduced-motion:reduce){
   #mainScreen.is-ready .eyebrow,#mainScreen.is-ready .hero-title,
   #mainScreen.is-ready .hero-sub,#mainScreen.is-ready .vpn-status-card,
   #mainScreen.is-ready .visitors-panel,
-  #mainScreen.is-ready .cta-btn,#mainScreen.is-ready .share-bar{ animation:none; }
+  #mainScreen.is-ready .cta-wrap,#mainScreen.is-ready .share-bar{ animation:none; }
 }
 
 /* ---------- Top navigation row ---------- */
@@ -927,8 +927,24 @@ body::after{
 /* ============================================================
    CTA BUTTON — main hero button
    ============================================================ */
+.cta-wrap{
+  position:relative;
+  margin-bottom:12px;
+}
+.cta-glow{
+  position:absolute;
+  inset:-16px;
+  border-radius:inherit;
+  background: radial-gradient(ellipse at center, rgba(var(--signal-rgb),.5), transparent 72%);
+  filter: blur(16px);
+  animation: vscGlowPulse 2.6s ease-in-out infinite;
+  pointer-events:none;
+  z-index:0;
+}
+@media (prefers-reduced-motion:reduce){ .cta-glow{ animation:none; } }
 .cta-btn{
   position:relative;
+  z-index:1;
   width:100%;
   border:none;
   border-radius: var(--radius-pill);
@@ -948,12 +964,18 @@ body::after{
     inset 0 1px 0 rgba(255,255,255,.3);
   transition: transform .12s ease, box-shadow .18s ease;
   overflow:hidden;
-  margin-bottom:12px;
 }
 /* color-mix fallback for older browsers */
 @supports not (color: color-mix(in srgb, red, blue)) {
   .cta-btn{ background: var(--btn-grad); }
 }
+.cta-icon{
+  width:21px; height:21px;
+  flex-shrink:0;
+  animation: ctaIconPulse 2.6s ease-in-out infinite;
+}
+@keyframes ctaIconPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.14) rotate(-4deg); } }
+@media (prefers-reduced-motion:reduce){ .cta-icon{ animation:none; } }
 .cta-btn::before{
   content:'';
   position:absolute;
@@ -965,13 +987,18 @@ body::after{
 .cta-btn::after{
   content:'';
   position:absolute; inset:0;
-  background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 50%, transparent 65%);
-  background-size:240% 100%;
-  background-position:130% 0;
-  transition:background-position .6s ease;
+  background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,.32) 50%, transparent 65%);
+  background-size:220% 100%;
+  background-position:160% 0;
   pointer-events:none;
+  animation: ctaShimmer 3.2s ease-in-out infinite;
 }
-.cta-btn:hover::after{ background-position:-30% 0; }
+@keyframes ctaShimmer{
+  0%{ background-position:160% 0; }
+  55%{ background-position:-60% 0; }
+  100%{ background-position:-60% 0; }
+}
+@media (prefers-reduced-motion:reduce){ .cta-btn::after{ animation:none; } }
 .cta-btn:hover{
   transform:translateY(-2px);
   box-shadow:
@@ -988,6 +1015,8 @@ body::after{
     0 2px 8px rgba(0,0,0,.35),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
+@keyframes ctaPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.055); } 100%{ transform:scale(1); } }
+.cta-btn.cta-pop{ animation: ctaPop .32s ease; }
 
 /* ============================================================
    SHARE BAR
@@ -1845,7 +1874,13 @@ body::after{
     </div>
 
     <!-- CTA -->
-    <button class="cta-btn" id="ctaBtn"></button>
+    <div class="cta-wrap">
+      <span class="cta-glow" aria-hidden="true"></span>
+      <button class="cta-btn" id="ctaBtn">
+        <svg class="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2.2"/><path d="M8 11V7a4 4 0 0 1 7.75-1.5"/></svg>
+        <span id="ctaBtnText"></span>
+      </button>
+    </div>
 
     <!-- Share bar -->
     <div class="share-bar">
@@ -1857,6 +1892,23 @@ body::after{
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>
         <span id="shareTgText"></span>
       </a>
+    </div>
+
+    <!-- Donate -->
+    <div class="donate-section">
+      <div class="donate-card">
+        <div class="donate-icon">💜</div>
+        <p class="donate-title" id="donateTitle"></p>
+        <p class="donate-sub" id="donateSub"></p>
+        <a class="donate-btn" id="donateBtn" href="https://dalink.to/vedavpn_official" target="_blank" rel="noopener"></a>
+        <div class="donate-methods">
+          <span class="donate-method-tag">Мир</span>
+          <span class="donate-method-tag">Mastercard</span>
+          <span class="donate-method-tag">Visa</span>
+          <span class="donate-method-tag">СБП</span>
+          <span class="donate-method-tag">USDT</span>
+        </div>
+      </div>
     </div>
 
     <!-- Reviews -->
@@ -1889,23 +1941,6 @@ body::after{
     <div class="faq-section">
       <p class="faq-heading" id="faqHeading"></p>
       <div id="faqList"></div>
-    </div>
-
-    <!-- Donate -->
-    <div class="donate-section">
-      <div class="donate-card">
-        <div class="donate-icon">💜</div>
-        <p class="donate-title" id="donateTitle"></p>
-        <p class="donate-sub" id="donateSub"></p>
-        <a class="donate-btn" id="donateBtn" href="https://dalink.to/vedavpn_official" target="_blank" rel="noopener"></a>
-        <div class="donate-methods">
-          <span class="donate-method-tag">Мир</span>
-          <span class="donate-method-tag">Mastercard</span>
-          <span class="donate-method-tag">Visa</span>
-          <span class="donate-method-tag">СБП</span>
-          <span class="donate-method-tag">USDT</span>
-        </div>
-      </div>
     </div>
 
     <footer class="site-footer">
@@ -2037,7 +2072,7 @@ body::after{
   //   MAJOR = big redesign / architectural overhaul
   //   MINOR = new feature / section
   //   PATCH = small fix / polish
-  const SITE_VERSION = '3.3.0'; // Feature: live visitors panel — growth badge, 7-day sparkline, avg rating
+  const SITE_VERSION = '3.4.1'; // Feature: donate section moved up near CTA for visibility
   const CAPTCHA_VERIFY_URL = 'https://nvershirinyan1.pythonanywhere.com/verify-captcha';
   const REVIEWS_LIST_URL   = 'https://nvershirinyan1.pythonanywhere.com/reviews/list';
   const REVIEWS_SUBMIT_URL = 'https://nvershirinyan1.pythonanywhere.com/reviews/submit';
@@ -2138,7 +2173,7 @@ body::after{
       vpToday:'сегодня',
       vpLast7Days:'посетителей за 7 дней',
       vpRating:'рейтинг сервиса',
-      cta:'🔓 Получить VPN',
+      cta:'Получить VPN',
       share:'Поделиться', shareTg:'Telegram',
       back:'← Назад',
       revealTitle:'Ваша VPN ссылка',
@@ -2211,7 +2246,7 @@ body::after{
       vpToday:'այսօր',
       vpLast7Days:'այցելու վերջին 7 օրում',
       vpRating:'ծառայության գնահատական',
-      cta:'🔓 Ստանալ VPN',
+      cta:'Ստանալ VPN',
       share:'Կիսվել', shareTg:'Telegram',
       back:'← Հետ',
       revealTitle:'Ձեր VPN հղումը',
@@ -2284,7 +2319,7 @@ body::after{
       vpToday:'today',
       vpLast7Days:'visitors in the last 7 days',
       vpRating:'service rating',
-      cta:'🔓 Get VPN',
+      cta:'Get VPN',
       share:'Share', shareTg:'Telegram',
       back:'← Back',
       revealTitle:'Your VPN link',
@@ -2365,6 +2400,7 @@ body::after{
     vpSparkLabel:      document.getElementById('vpSparkLabel'),
     vpRatingLabel:     document.getElementById('vpRatingLabel'),
     ctaBtn:            document.getElementById('ctaBtn'),
+    ctaBtnText:        document.getElementById('ctaBtnText'),
     shareBtn:          document.getElementById('shareBtn'),
     shareBtnText:      document.getElementById('shareBtnText'),
     shareTgBtn:        document.getElementById('shareTgBtn'),
@@ -2642,7 +2678,7 @@ body::after{
     el.vpGrowthLabel.textContent  = d.vpToday;
     el.vpSparkLabel.textContent   = d.vpLast7Days;
     el.vpRatingLabel.textContent  = d.vpRating;
-    el.ctaBtn.textContent         = d.cta;
+    el.ctaBtnText.textContent     = d.cta;
     el.shareBtnText.textContent   = d.share;
     el.shareTgText.textContent    = d.shareTg;
     el.backBtnText.textContent    = d.back;
@@ -2901,7 +2937,14 @@ body::after{
     });
   });
 
-  el.ctaBtn.addEventListener('click', ()=>{ haptic(10); showVpnScreen(); });
+  el.ctaBtn.addEventListener('click', ()=>{
+    haptic(14);
+    el.ctaBtn.classList.remove('cta-pop');
+    void el.ctaBtn.offsetWidth; // restart animation if clicked repeatedly
+    el.ctaBtn.classList.add('cta-pop');
+    confettiBurst();
+    setTimeout(()=> showVpnScreen(), 220);
+  });
   el.backBtn.addEventListener('click', showMain);
 
   // Keep the uptime badge (days + hours) live without needing a page reload.
