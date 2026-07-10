@@ -1918,7 +1918,7 @@ body::after{
 
       <div id="reviewsList" class="reviews-list"></div>
 
-      <div class="review-form glass">
+      <div class="review-form glass" id="reviewForm">
         <div class="review-stars" id="reviewStars">
           <button type="button" class="review-star" data-val="1">★</button>
           <button type="button" class="review-star" data-val="2">★</button>
@@ -1926,7 +1926,6 @@ body::after{
           <button type="button" class="review-star" data-val="4">★</button>
           <button type="button" class="review-star" data-val="5">★</button>
         </div>
-        <input type="text" id="reviewNameInput" class="auth-input" maxlength="40">
         <textarea id="reviewTextInput" class="review-textarea" maxlength="400"></textarea>
         <div class="auth-recaptcha-zone" id="reviewRecaptchaZone">
           <div id="reviewRecaptcha"></div>
@@ -1936,6 +1935,7 @@ body::after{
         </div>
         <span class="auth-status" id="reviewStatus"></span>
       </div>
+      <p class="reviews-empty" id="reviewLoginNotice" style="display:none;"></p>
     </div>
 
     <!-- FAQ -->
@@ -2198,15 +2198,15 @@ body::after{
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Частые вопросы',
       reviewsHeading:'💬 Отзывы',
-      reviewNamePlaceholder:'Ваше имя',
       reviewTextPlaceholder:'Расскажите, как вам сервис...',
       reviewSubmitBtn:'Оставить отзыв',
       reviewSending:'Отправка...',
-      reviewErrEmpty:'Заполните имя и текст отзыва',
+      reviewErrEmpty:'Напишите текст отзыва',
       reviewErrCaptcha:'Подтвердите, что вы не робот',
       reviewErrGeneric:'Не удалось отправить отзыв. Попробуйте снова.',
       reviewSuccess:'Спасибо! Ваш отзыв опубликован.',
       reviewsEmpty:'Пока нет отзывов. Будьте первым!',
+      reviewLoginRequired:'Чтобы оставить отзыв, войдите в аккаунт',
       faq:[
         {q:'Ссылка одна на всех?', a:'Да, сейчас все пользователи используют одну общую VPN ссылку. Индивидуальные ссылки появятся позже.'},
         {q:'Нужно ли платить?', a:'На данный момент VPN бесплатный. Следите за новостями в канале — там появятся все обновления.'},
@@ -2271,15 +2271,15 @@ body::after{
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Հաճախակի հարցեր',
       reviewsHeading:'💬 Կարծիքներ',
-      reviewNamePlaceholder:'Անուն',
       reviewTextPlaceholder:'Պատմիր, ինչպես ես գնահատում ծառայությունը...',
       reviewSubmitBtn:'Թողնել կարծիք',
       reviewSending:'Ուղարկվում է...',
-      reviewErrEmpty:'Լրացրու անունը և կարծիքի տեքստը',
+      reviewErrEmpty:'Գրիր կարծիքի տեքստը',
       reviewErrCaptcha:'Հաստատիր, որ ռոբոտ չես',
       reviewErrGeneric:'Չհաջողվեց ուղարկել կարծիքը։ Փորձիր նորից։',
       reviewSuccess:'Շնորհակալություն։ Քո կարծիքը հրապարակվեց։',
       reviewsEmpty:'Դեռ կարծիքներ չկան։ Եղիր առաջինը!',
+      reviewLoginRequired:'Կարծիք գրելու համար մուտք գործեք',
       faq:[
         {q:'Հղումը մեկն ա բոլորի համար?', a:'Այո, հիմա բոլոր user-երն օգտագործում են նույն ընդհանուր VPN հղումը։ Անհատական հղումները կհայտնվեն ավելի ուշ։'},
         {q:'Պե՞տք է վճարել', a:'Այս պահին VPN-ը անվճար է։ Հետևիր ալիքի նորություններին, այնտեղ կերևան բոլոր փոփոխությունները։'},
@@ -2344,15 +2344,15 @@ body::after{
       langPrompt:'Выберите язык / Ընտրեք լեզուն / Choose language',
       faqHeading:'❓ Frequently asked questions',
       reviewsHeading:'💬 Reviews',
-      reviewNamePlaceholder:'Your name',
       reviewTextPlaceholder:'Tell us what you think of the service...',
       reviewSubmitBtn:'Leave a review',
       reviewSending:'Sending...',
-      reviewErrEmpty:'Fill in your name and review text',
+      reviewErrEmpty:'Please write your review text',
       reviewErrCaptcha:'Please confirm you are not a robot',
       reviewErrGeneric:'Could not submit review. Please try again.',
       reviewSuccess:'Thanks! Your review is now published.',
       reviewsEmpty:'No reviews yet. Be the first!',
+      reviewLoginRequired:'Please log in to leave a review',
       faq:[
         {q:'Is the link the same for everyone?', a:'Yes, right now all users share the same VPN link. Individual links will be added later.'},
         {q:'Do I need to pay?', a:'The VPN is currently free. Follow the channel for any updates.'},
@@ -2442,8 +2442,9 @@ body::after{
     faqList:           document.getElementById('faqList'),
     reviewsHeading:    document.getElementById('reviewsHeading'),
     reviewsList:       document.getElementById('reviewsList'),
+    reviewForm:        document.getElementById('reviewForm'),
+    reviewLoginNotice: document.getElementById('reviewLoginNotice'),
     reviewStars:       document.getElementById('reviewStars'),
-    reviewNameInput:   document.getElementById('reviewNameInput'),
     reviewTextInput:   document.getElementById('reviewTextInput'),
     reviewRecaptchaZone: document.getElementById('reviewRecaptchaZone'),
     reviewSubmitBtn:   document.getElementById('reviewSubmitBtn'),
@@ -2562,11 +2563,39 @@ body::after{
   function renderReviewStrings(){
     const d = dict[lang];
     if(el.reviewsHeading)   el.reviewsHeading.textContent = d.reviewsHeading;
-    if(el.reviewNameInput)  el.reviewNameInput.placeholder = d.reviewNamePlaceholder;
     if(el.reviewTextInput)  el.reviewTextInput.placeholder = d.reviewTextPlaceholder;
     if(el.reviewSubmitBtn)  el.reviewSubmitBtn.textContent = d.reviewSubmitBtn;
+    if(el.reviewLoginNotice) el.reviewLoginNotice.textContent = d.reviewLoginRequired;
     if(!reviewsLoaded){ reviewsLoaded = true; fetchReviews(); }
     else renderReviewsList(_lastReviews);
+    updateReviewFormVisibility();
+  }
+
+  // Returns the display name of the currently logged-in user, or null if no
+  // one is logged in. Checks Firebase Auth first (Google / Email logins),
+  // then falls back to the Telegram login stored in localStorage.
+  function getCurrentUserName(){
+    try{
+      if(window.firebase && firebase.auth().currentUser){
+        const u = firebase.auth().currentUser;
+        return u.displayName || u.email || null;
+      }
+    }catch(e){}
+    try{
+      const tg = JSON.parse(localStorage.getItem('vedavpn_tg_user') || 'null');
+      if(tg){
+        return [tg.first_name, tg.last_name].filter(Boolean).join(' ') || tg.username || null;
+      }
+    }catch(e){}
+    return null;
+  }
+
+  // Shows the review form only for logged-in users; otherwise shows a
+  // "please log in" message instead, so guests can't submit reviews at all.
+  function updateReviewFormVisibility(){
+    const loggedIn = !!getCurrentUserName();
+    if(el.reviewForm)        el.reviewForm.style.display = loggedIn ? '' : 'none';
+    if(el.reviewLoginNotice) el.reviewLoginNotice.style.display = loggedIn ? 'none' : '';
   }
 
   let _lastReviews = [];
@@ -2632,9 +2661,10 @@ body::after{
 
   el.reviewSubmitBtn && el.reviewSubmitBtn.addEventListener('click', async ()=>{
     const d = dict[lang];
-    const name = (el.reviewNameInput.value||'').trim();
+    const name = getCurrentUserName();
     const text = (el.reviewTextInput.value||'').trim();
-    if(!name || !text){ setReviewStatus(d.reviewErrEmpty, 'err'); return; }
+    if(!name){ setReviewStatus(d.reviewLoginRequired, 'err'); updateReviewFormVisibility(); return; }
+    if(!text){ setReviewStatus(d.reviewErrEmpty, 'err'); return; }
     if(!reviewCaptchaToken){ setReviewStatus(d.reviewErrCaptcha, 'err'); return; }
     el.reviewSubmitBtn.disabled = true;
     setReviewStatus(d.reviewSending, '');
@@ -2652,7 +2682,6 @@ body::after{
       haptic(15);
       confettiBurst();
       setReviewStatus(d.reviewSuccess, 'ok');
-      el.reviewNameInput.value = '';
       el.reviewTextInput.value = '';
       reviewRating = 5; renderStarPicker();
       fetchReviews();
@@ -2741,6 +2770,7 @@ body::after{
         if(user && el.authScreen && el.authScreen.style.display !== 'none' && lang){
           showMain();
         }
+        updateReviewFormVisibility();
       });
     }
   }catch(e){ console.error('VedaVPN Firebase init failed:', e); }
@@ -2804,6 +2834,7 @@ body::after{
     haptic(15);
     confettiBurst();
     showMain();
+    updateReviewFormVisibility();
   };
 
   // ---- Email login / register ----
@@ -2891,6 +2922,7 @@ body::after{
     try{ if(typeof firebase !== 'undefined') firebase.auth().signOut(); }catch(e){}
     localStorage.removeItem('vedavpn_tg_user');
     showAuthScreen();
+    updateReviewFormVisibility();
   });
 
   function showMain(){
