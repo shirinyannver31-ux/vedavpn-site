@@ -738,67 +738,190 @@ body::after{
    ============================================================ */
 .visitors-panel{
   position:relative;
+  overflow:hidden;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
-  background: var(--glass);
-  backdrop-filter: var(--blur-sm);
-  -webkit-backdrop-filter: var(--blur-sm);
-  border: 1px solid var(--glass-border);
-  border-radius:var(--radius-md);
-  padding:26px 16px 22px;
+  background: linear-gradient(150deg, rgba(var(--signal-rgb),.14), var(--glass) 60%);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border:1px solid var(--glass-border);
+  border-radius:26px;
+  padding:24px 20px 22px;
   margin-bottom:28px;
   text-align:center;
-  box-shadow: var(--shadow-sm);
-  overflow:hidden;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.06);
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .visitors-panel:hover{
   transform:translateY(-2px);
-  box-shadow: var(--shadow-md), var(--glow-xs);
+  box-shadow: var(--shadow-md), var(--glow-xs), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.visitors-panel::after{
+  content:'';
+  position:absolute;
+  top:-42%; right:-18%;
+  width:190px; height:190px;
+  background: radial-gradient(circle, rgba(var(--signal-rgb),.18), transparent 70%);
+  pointer-events:none;
 }
 .visitors-panel::before{
   content:'';
-  position:absolute; top:0; left:16%; right:16%;
-  height:2px;
-  background:linear-gradient(90deg, transparent, var(--signal), transparent);
-  opacity:.6;
+  position:absolute;
+  bottom:-48%; left:-16%;
+  width:170px; height:170px;
+  background: radial-gradient(circle, rgba(var(--accent-rgb),.13), transparent 70%);
+  pointer-events:none;
 }
+.vp-live-chip{
+  position:relative; z-index:1;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:999px;
+  background: rgba(var(--signal-rgb),.10);
+  border:1px solid rgba(var(--signal-rgb),.28);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  font-weight:600;
+  color:var(--signal);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+.vp-pulse-dot{
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--signal);
+  box-shadow:0 0 6px rgba(var(--signal-rgb),.8);
+  animation: vscBlink 2s ease infinite;
+}
+@media (prefers-reduced-motion:reduce){ .vp-pulse-dot{ animation:none; } }
 .vp-icon-wrap{
   position:relative;
-  width:42px; height:42px;
+  z-index:1;
+  width:56px; height:56px;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:var(--signal);
-  margin-bottom:6px;
+  margin-bottom:14px;
 }
-.vp-icon{
-  width:26px; height:26px;
-  filter: drop-shadow(0 0 8px rgba(var(--signal-rgb),.5));
-}
-.vp-live-dot{
-  position:absolute;
-  top:1px; right:1px;
-  width:9px; height:9px;
+.vp-icon-glow{
+  position:absolute; inset:-10px;
   border-radius:50%;
-  background:var(--signal);
-  box-shadow:0 0 8px rgba(var(--signal-rgb),.85);
-  animation: vscBlink 2s ease infinite;
+  background: radial-gradient(circle, rgba(var(--signal-rgb),.35), transparent 70%);
+  filter:blur(4px);
+  animation: vscGlowPulse 2.6s ease-in-out infinite;
 }
+@media (prefers-reduced-motion:reduce){ .vp-icon-glow{ animation:none; } }
+.vp-icon-badge{
+  position:relative;
+  width:52px; height:52px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: radial-gradient(circle at 34% 26%, rgba(255,255,255,.55), transparent 45%), var(--signal);
+  color:#052010;
+  box-shadow: var(--glow-sm), 0 8px 20px rgba(var(--signal-rgb),.4);
+}
+:root[data-theme="light"] .vp-icon-badge{ color:#fff; }
+.vp-icon-badge svg{ width:26px; height:26px; }
 .vp-num{
+  position:relative; z-index:1;
   font-family:'Space Grotesk',sans-serif;
   font-weight:700;
-  font-size:38px;
+  font-size:42px;
   line-height:1;
   color:var(--signal);
-  text-shadow: 0 0 22px rgba(var(--signal-rgb),.45);
+  text-shadow: 0 0 24px rgba(var(--signal-rgb),.45);
+  margin-bottom:6px;
 }
 .vp-label{
-  font-size:12px;
+  position:relative; z-index:1;
+  font-size:13px;
   color:var(--muted);
   letter-spacing:.02em;
+}
+.vp-label-row{
+  position:relative; z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.vp-growth{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:2px 9px;
+  border-radius:999px;
+  background: rgba(var(--signal-rgb),.12);
+  color:var(--signal);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  font-weight:600;
+}
+.vp-growth-arrow{ width:9px; height:9px; }
+.vp-divider{
+  position:relative; z-index:1;
+  width:78%;
+  height:1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+  margin:16px 0;
+}
+.vp-spark-row{
+  position:relative; z-index:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  width:100%;
+}
+.vp-spark{
+  width:100%;
+  max-width:200px;
+  height:30px;
+  display:block;
+}
+.vp-spark-line{
+  fill:none;
+  stroke:var(--signal);
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter: drop-shadow(0 0 4px rgba(var(--signal-rgb),.5));
+}
+.vp-spark-label{
+  font-size:9.5px;
+  color:var(--muted);
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+.vp-rating-row{
+  position:relative; z-index:1;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.vp-rating-stars{
+  color:#FFB020;
+  font-size:14px;
+  letter-spacing:1px;
+}
+.vp-rating-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:14px;
+  color:var(--text);
+}
+.vp-rating-label{
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.03em;
 }
 
 /* ============================================================
@@ -1685,12 +1808,40 @@ body::after{
 
     <!-- Live visitors panel -->
     <div class="visitors-panel">
+      <div class="vp-live-chip">
+        <span class="vp-pulse-dot"></span>
+        <span id="vpLiveLabel"></span>
+      </div>
       <div class="vp-icon-wrap">
-        <svg class="vp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span class="vp-live-dot"></span>
+        <div class="vp-icon-glow"></div>
+        <div class="vp-icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
       </div>
       <div class="vp-num" id="stat1Num">—</div>
-      <div class="vp-label" id="stat1"></div>
+      <div class="vp-label-row">
+        <span class="vp-label" id="stat1"></span>
+        <span class="vp-growth" id="vpGrowth" hidden>
+          <svg class="vp-growth-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <span id="vpGrowthNum"></span>
+          <span id="vpGrowthLabel"></span>
+        </span>
+      </div>
+
+      <div class="vp-divider"></div>
+
+      <div class="vp-spark-row">
+        <svg id="vpSpark" class="vp-spark" viewBox="0 0 140 32" preserveAspectRatio="none"></svg>
+        <span class="vp-spark-label" id="vpSparkLabel"></span>
+      </div>
+
+      <div class="vp-divider"></div>
+
+      <div class="vp-rating-row">
+        <span class="vp-rating-stars" id="vpRatingStars">☆☆☆☆☆</span>
+        <span class="vp-rating-num" id="vpRatingNum">—</span>
+        <span class="vp-rating-label" id="vpRatingLabel"></span>
+      </div>
     </div>
 
     <!-- CTA -->
@@ -1982,7 +2133,11 @@ body::after{
       heroTitle:'Быстрый и безопасный VPN',
       heroSub:'Нажми кнопку ниже, чтобы получить свою ссылку и подключиться за минуту.',
       feat1:'Без логов', feat2:'Высокая скорость', feat3:'Серверы по миру',
-      stat1:'посетителей', stat2:'серверов', stat3:'аптайм',
+      stat1:'посетителей',
+      vpLive:'в реальном времени',
+      vpToday:'сегодня',
+      vpLast7Days:'посетителей за 7 дней',
+      vpRating:'рейтинг сервиса',
       cta:'🔓 Получить VPN',
       share:'Поделиться', shareTg:'Telegram',
       back:'← Назад',
@@ -2051,7 +2206,11 @@ body::after{
       heroTitle:'Արագ և անվտանգ VPN',
       heroSub:'Սեղմիր ներքևի կոճակը՝ քո հղումը ստանալու և րոպեների ընթացքում միանալու համար։',
       feat1:'Առանց logs', feat2:'Բարձր արագություն', feat3:'Սերվերներ աշխարհով',
-      stat1:'այցելու', stat2:'սերվեր', stat3:'uptime',
+      stat1:'այցելու',
+      vpLive:'իրական ժամանակում',
+      vpToday:'այսօր',
+      vpLast7Days:'այցելու վերջին 7 օրում',
+      vpRating:'ծառայության գնահատական',
       cta:'🔓 Ստանալ VPN',
       share:'Կիսվել', shareTg:'Telegram',
       back:'← Հետ',
@@ -2120,7 +2279,11 @@ body::after{
       heroTitle:'Fast and secure VPN',
       heroSub:'Tap the button below to get your link and connect within a minute.',
       feat1:'No logs', feat2:'High speed', feat3:'Servers worldwide',
-      stat1:'visitors', stat2:'servers', stat3:'uptime',
+      stat1:'visitors',
+      vpLive:'live right now',
+      vpToday:'today',
+      vpLast7Days:'visitors in the last 7 days',
+      vpRating:'service rating',
       cta:'🔓 Get VPN',
       share:'Share', shareTg:'Telegram',
       back:'← Back',
@@ -2197,6 +2360,10 @@ body::after{
     heroSub:           document.getElementById('heroSub'),
     stat1:             document.getElementById('stat1'),
     stat1Num:          document.getElementById('stat1Num'),
+    vpLiveLabel:       document.getElementById('vpLiveLabel'),
+    vpGrowthLabel:     document.getElementById('vpGrowthLabel'),
+    vpSparkLabel:      document.getElementById('vpSparkLabel'),
+    vpRatingLabel:     document.getElementById('vpRatingLabel'),
     ctaBtn:            document.getElementById('ctaBtn'),
     shareBtn:          document.getElementById('shareBtn'),
     shareBtnText:      document.getElementById('shareBtnText'),
@@ -2471,6 +2638,10 @@ body::after{
     el.heroTitle.textContent      = d.heroTitle;
     el.heroSub.textContent        = d.heroSub;
     el.stat1.textContent          = d.stat1;
+    el.vpLiveLabel.textContent    = d.vpLive;
+    el.vpGrowthLabel.textContent  = d.vpToday;
+    el.vpSparkLabel.textContent   = d.vpLast7Days;
+    el.vpRatingLabel.textContent  = d.vpRating;
     el.ctaBtn.textContent         = d.cta;
     el.shareBtnText.textContent   = d.share;
     el.shareTgText.textContent    = d.shareTg;
@@ -2933,6 +3104,98 @@ body::after{
       const value = (data&&data.value!=null) ? parseInt(data.value,10) : null;
       renderValue(value);
     }catch(e){ renderValue(null); }
+  })();
+
+  // ---- Daily growth badge ("+N today") — a fresh CountAPI key per calendar day ----
+  (async function trackDailyGrowth(){
+    const COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
+    function dayKey(offset){
+      const d = new Date();
+      d.setDate(d.getDate() - offset);
+      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+      return `vedavpn_lol_daily_${y}-${m}-${day}`;
+    }
+    async function fetchWithTimeout(url, timeoutMs=8000){
+      const controller = new AbortController();
+      const timer = setTimeout(()=> controller.abort(), timeoutMs);
+      try{ return await fetch(url,{signal:controller.signal}); }
+      finally{ clearTimeout(timer); }
+    }
+    const wrap = document.getElementById('vpGrowth');
+    const numEl = document.getElementById('vpGrowthNum');
+    if(!wrap || !numEl) return;
+    try{
+      const res = await fetchWithTimeout(`${COUNTER_BASE}/hit/${dayKey(0)}`);
+      if(!res.ok) throw new Error('bad');
+      const data = await res.json();
+      const value = (data&&data.value!=null) ? parseInt(data.value,10) : null;
+      if(typeof value === 'number' && !isNaN(value) && value > 0){
+        numEl.textContent = '+' + value.toLocaleString('en-US');
+        wrap.hidden = false;
+      }
+    }catch(e){ /* keep badge hidden on failure */ }
+  })();
+
+  // ---- 7-day mini sparkline — reads (without incrementing) the last 7 daily keys ----
+  (async function loadVisitorSparkline(){
+    const svg = document.getElementById('vpSpark');
+    if(!svg) return;
+    const COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
+    function dayKey(offset){
+      const d = new Date();
+      d.setDate(d.getDate() - offset);
+      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+      return `vedavpn_lol_daily_${y}-${m}-${day}`;
+    }
+    async function fetchWithTimeout(url, timeoutMs=6000){
+      const controller = new AbortController();
+      const timer = setTimeout(()=> controller.abort(), timeoutMs);
+      try{ return await fetch(url,{signal:controller.signal}); }
+      finally{ clearTimeout(timer); }
+    }
+    const days = 7;
+    const values = [];
+    for(let i = days-1; i >= 0; i--){
+      try{
+        const r = await fetchWithTimeout(`${COUNTER_BASE}/get/${dayKey(i)}`);
+        if(r.ok){
+          const j = await r.json();
+          values.push(j && j.value != null ? Math.max(0, parseInt(j.value,10)) : 0);
+        } else values.push(0);
+      }catch(e){ values.push(0); }
+    }
+    if(!values.some(v => v > 0)) return; // nothing to draw yet — leave svg empty
+    const w = 140, h = 32, pad = 2;
+    const max = Math.max(1, ...values);
+    const stepX = w / (values.length - 1);
+    const pts = values.map((v,i) => {
+      const x = i * stepX;
+      const y = h - pad - (v / max) * (h - pad*2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    line.setAttribute('class','vp-spark-line');
+    line.setAttribute('points', pts);
+    svg.appendChild(line);
+  })();
+
+  // ---- Average review rating ----
+  (async function loadAvgRating(){
+    const numEl = document.getElementById('vpRatingNum');
+    const starsEl = document.getElementById('vpRatingStars');
+    if(!numEl || !starsEl) return;
+    try{
+      const res = await fetch(`${REVIEWS_LIST_URL}?t=${Date.now()}`);
+      if(!res.ok) throw new Error('bad');
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data.reviews || []);
+      if(!list.length) return;
+      const sum = list.reduce((s,r) => s + Math.max(1, Math.min(5, parseInt(r.rating,10) || 5)), 0);
+      const avg = sum / list.length;
+      numEl.textContent = avg.toFixed(1);
+      const rounded = Math.round(avg);
+      starsEl.textContent = '★'.repeat(rounded) + '☆'.repeat(5-rounded);
+    }catch(e){ /* keep placeholder on failure */ }
   })();
 
   // ---- PWA install prompt ----
